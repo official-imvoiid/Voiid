@@ -6,7 +6,7 @@
 
 **A Developer & Cyber-Security Student's Digital Space**
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge)](https://official-imvoiid.github.io/Voiid/)
+[![Live Demo](https://img.shields.io/badge/View-Repository-blue?style=for-the-badge&logo=github)](https://official-imvoiid.github.io/Voiid/tree/main/Code)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 *"BE THE BEGINNING OF THE CHANGE"*
