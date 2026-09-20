@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // Brand Icons
@@ -23,11 +23,51 @@ import {
   faRobot,
   faMusic,
   faGraduationCap,
-  faHandshake,
 } from "@fortawesome/free-solid-svg-icons";
+import MascotScene from "./MascotScene";
+import { useWasted } from "./Wasted";
+import Teamwork from "./Teamwork";
+import Scientist from "./Scientist";
+import ProfilePlayer from "./ProfilePlayer";
 import "./WebSite.css";
 
 const Portfolio = () => {
+  const wasted = useWasted();
+
+  // Cursor-driven 3D tilt + a specular highlight that tracks the pointer.
+  // Kept deliberately shallow (9deg) so it reads as depth, not a gimmick.
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    if (!window.matchMedia("(hover: hover)").matches) return undefined;
+
+    const cards = Array.from(document.querySelectorAll(".cards-container .card"));
+
+    const onMove = (e) => {
+      const el = e.currentTarget;
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      el.style.setProperty("--mx", `${(px * 100).toFixed(1)}%`);
+      el.style.setProperty("--my", `${(py * 100).toFixed(1)}%`);
+      el.style.setProperty("--tilt-y", `${((px - 0.5) * 9).toFixed(2)}deg`);
+      el.style.setProperty("--tilt-x", `${((0.5 - py) * 9).toFixed(2)}deg`);
+    };
+    const onLeave = (e) => {
+      const el = e.currentTarget;
+      el.style.setProperty("--tilt-x", "0deg");
+      el.style.setProperty("--tilt-y", "0deg");
+    };
+
+    cards.forEach((c) => {
+      c.addEventListener("mousemove", onMove);
+      c.addEventListener("mouseleave", onLeave);
+    });
+    return () => cards.forEach((c) => {
+      c.removeEventListener("mousemove", onMove);
+      c.removeEventListener("mouseleave", onLeave);
+    });
+  }, []);
+
   return (
     <div className="portfolio">
       {/* ===== HEADER SECTION ===== */}
@@ -37,7 +77,7 @@ const Portfolio = () => {
           <Link to="/work" className="nav-link">Work</Link>
           <Link to="/about" className="nav-link">About</Link>
           <Link to="/expertise" className="nav-link">Expertise</Link>
-          <Link to="/contact" className="get-in-touch">Get in Touch</Link>
+          <a href="/cv/Voiid-CV.pdf" download className="get-in-touch">Download CV</a>
         </nav>
       </header>
 
@@ -52,16 +92,19 @@ const Portfolio = () => {
             Hey, I'm Voiid <span role="img" aria-label="waving hand">👋</span>
           </h2>
           <p className="card-subtitle">A Developer & Cyber-Security Student</p>
+          <ProfilePlayer />
         </div>
 
         {/* ----- Quick Access Cards ----- */}
         <div className="card resume-card">
+          <img className="card-corner-icon" src="/images/icon-skillset.png" alt="" />
           <span className="card-subtitle">Learn more about me</span>
-          <h2 className="card-title">See skill-set</h2>
+          <h2 className="card-title">Skill-set</h2>
           <a href="/skills" className="card-link">View <span>→</span></a>
         </div>
 
         <div className="card achievement-card">
+          <img className="card-corner-icon" src="/images/icon-develop.png" alt="" />
           <span className="card-subtitle">Game</span>
           <h2 className="card-title">
             Play & Learn <FontAwesomeIcon icon={faGraduationCap} />
@@ -73,6 +116,7 @@ const Portfolio = () => {
         <div className="card research-card">
           <span className="card-subtitle">My Papers</span>
           <h2 className="card-title">Research <FontAwesomeIcon icon={faFlask} /></h2>
+          <Scientist />
           <a href="#" className="card-link">View <span>→</span></a>
         </div>
 
@@ -84,7 +128,7 @@ const Portfolio = () => {
 
         {/* ----- Call to Action Card ----- */}
         <div className="card card-large card-cta collaborate-card">
-          <FontAwesomeIcon icon={faHandshake} className="collaborate-icon" />
+          <Teamwork />
           <h2 className="card-title">Collaborate together!</h2>
           <p className="card-subtitle">
             Let's create something amazing and build the future of tech together
@@ -162,12 +206,19 @@ const Portfolio = () => {
         <Link to="/GamesPlayed">
           <div className="card gaming-card">
             <FontAwesomeIcon icon={faGamepad} className="card-title" />
+            {wasted.button}
+            {wasted.overlay}
           </div>
         </Link>
 
         <Link to="/MusicList">
           <div className="card music-card">
-            <FontAwesomeIcon icon={faMusic} className="card-title" />
+            {/* the icon is a FontAwesome <svg>, which will not take a CSS
+                transform - so the mascot shoves this wrapper instead */}
+            <span className="music-note">
+              <FontAwesomeIcon icon={faMusic} className="card-title" />
+            </span>
+            <MascotScene size={124} />
           </div>
         </Link>
       </div>
