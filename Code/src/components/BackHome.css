@@ -1,0 +1,58 @@
+/* ==========================================================================
+   BackHome - the one back button, used on every page.
+
+   This is the music page's pill, unchanged: white, a green fill sitting at
+   35% that slides across on hover, Pacifico text. No glow, no lift, no
+   pulse - it was right as it was.
+   ========================================================================== */
+
+.bh {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.96);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(2px);
+  color: #000;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.4s ease;
+}
+
+/* the green fill */
+.bh-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 35%;
+  height: 100%;
+  border-radius: 9999px;
+  background: rgba(0, 255, 170, 0.93);
+  transition: all 0.4s ease;
+}
+.bh:hover .bh-fill,
+.bh:focus-visible .bh-fill { width: 100%; }
+
+.bh-text {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  /* the original forced Pacifico past the page fonts - keep that */
+  font-family: Pacifico, cursive !important;
+  font-weight: 500;
+  font-size: 0.85rem;
+  font-feature-settings: "liga" 0;
+}
+
+.bh:focus-visible { outline: 2px solid rgba(0, 255, 170, 0.9); outline-offset: 3px; }
+
+/* the smaller size the skills page was already using on narrow screens */
+@media (max-width: 640px) {
+  .bh { padding: 0.35rem 0.85rem; }
+  .bh-text { font-size: 0.75rem; }
+}

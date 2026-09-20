@@ -23,12 +23,20 @@ import "./Wasted.css";
  * never trips the browser's autoplay block.
  */
 const DURATION_MS = 4600;
+const DISMISS_LOCK_MS = 1800;   // ignore stray clicks right after it fires
 const RESET_MS = 2500;           // clicks lapse if they are not reasonably close
 
 const TAUNTS = [
   "curiosity killed the dev 💀",
   "here lies your curiosity 💀",
   "death by third click 💀",
+  "you had one job. it was not this 💀",
+  "clicked into the void 💀",
+  "the button won 💀",
+  "some buttons bite back 💀",
+  "side effects may include this 💀",
+  "works as intended 💀",
+  "skill issue 💀",
 ];
 
 // Cracks radiating from the impact point, drawn in a 100x100 space so the
@@ -50,6 +58,8 @@ export const useWasted = ({ sound = "/audio/fahhhhh.mp3" } = {}) => {
   const [count, setCount] = useState(0);
   const [taunt, setTaunt] = useState(TAUNTS[0]);
   const clicks = useRef(0);
+  const firing = useRef(false);   // synchronous guard - `active` lags a render
+  const firedAt = useRef(0);
   const lapse = useRef(null);
   const timer = useRef(null);
   const audio = useRef(null);
@@ -69,7 +79,10 @@ export const useWasted = ({ sound = "/audio/fahhhhh.mp3" } = {}) => {
       // the button lives inside a <Link>, so the navigation has to be stopped
       e.preventDefault();
       e.stopPropagation();
-      if (active) return;
+      // `active` only updates on the next render, so mashing the button could
+      // slip several clicks past this check and fire the whole thing twice.
+      // The ref flips immediately.
+      if (active || firing.current) return;
 
       // A state updater has to be pure - React may run it twice (it does, in
       // StrictMode), so firing the audio and overlay from inside one made the
@@ -88,6 +101,8 @@ export const useWasted = ({ sound = "/audio/fahhhhh.mp3" } = {}) => {
       }
 
       clicks.current = 0;
+      firing.current = true;
+      firedAt.current = Date.now();
       setCount(0);
       setTaunt(TAUNTS[Math.floor(Math.random() * TAUNTS.length)]);
       setActive(true);
@@ -100,7 +115,10 @@ export const useWasted = ({ sound = "/audio/fahhhhh.mp3" } = {}) => {
       }
 
       clearTimeout(timer.current);
-      timer.current = setTimeout(() => setActive(false), DURATION_MS);
+      timer.current = setTimeout(() => {
+        firing.current = false;
+        setActive(false);
+      }, DURATION_MS);
     },
     [active]
   );
@@ -108,8 +126,12 @@ export const useWasted = ({ sound = "/audio/fahhhhh.mp3" } = {}) => {
   const dismiss = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
+    // A 4th rapid press lands on the overlay, which covers the card - without
+    // this it would dismiss the thing it just triggered.
+    if (Date.now() - firedAt.current < DISMISS_LOCK_MS) return;
     clearTimeout(timer.current);
     audio.current?.pause();
+    firing.current = false;
     setActive(false);
   }, []);
 

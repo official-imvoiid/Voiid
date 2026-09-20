@@ -16,13 +16,13 @@
   overflow: hidden;
   pointer-events: none;
   /* pushed back so the copy stays the thing you read */
-  filter: blur(1.5px);
-  opacity: 0.26;
+  filter: blur(1.1px);
+  opacity: 0.4;
   transition: opacity 0.5s ease, filter 0.5s ease;
 }
 .tm-net[data-awake="true"] {
-  opacity: 0.44;
-  filter: blur(1px);
+  opacity: 0.56;
+  filter: blur(0.8px);
 }
 
 .tm-art { display: block; width: 100%; height: 100%; }
@@ -40,7 +40,7 @@
   100% { opacity: 1; transform: scale(1); }
 }
 
-.tm-link { opacity: 0.34; }
+.tm-link { opacity: 0.42; }
 
 /* ---- glowing packets, person to person ----------------------------------- */
 /* Idle they crawl; a cursor moving over the card speeds them up and brightens
@@ -157,10 +157,10 @@
   pointer-events: none;
   background: linear-gradient(
     100deg,
-    rgba(26, 22, 74, 0.97) 0%,
-    rgba(26, 22, 74, 0.93) 48%,
-    rgba(30, 25, 84, 0.66) 76%,
-    rgba(34, 28, 96, 0.22) 100%
+    rgba(30, 26, 92, 0.88) 0%,
+    rgba(32, 28, 98, 0.76) 48%,
+    rgba(36, 31, 108, 0.42) 76%,
+    rgba(40, 34, 118, 0.10) 100%
   );
 }
 
@@ -197,18 +197,212 @@
 /* A heavy black shadow under amber turns it muddy, so the shadows are light
    and the type carries its own brightness instead. */
 .collaborate-card .tm-msg {
-  color: #FFE7B0;
+  color: #7CF2D0;
   text-shadow: 0 1px 3px rgba(10, 8, 30, 0.75);
 }
 .collaborate-card .card-title {
-  color: #FFC53D;
-  text-shadow: 0 1px 4px rgba(10, 8, 30, 0.8);
+  /* no text-shadow here: with background-clip:text the glyphs are transparent,
+     so a text-shadow renders a dark solid copy behind them and muddies the
+     gradient. A drop-shadow filter follows the painted pixels instead. */
+  text-shadow: none;
+  filter: drop-shadow(0 2px 6px rgba(10, 8, 30, 0.85));
 }
 .collaborate-card .card-subtitle {
-  color: #DCDCF0;
+  color: #C3CBEB;
   text-shadow: 0 1px 3px rgba(10, 8, 30, 0.8);
 }
-.collaborate-card .card-link { color: #FFC53D; }
+.collaborate-card .card-link { color: #7CF2D0; }
 /* the mesh picks up the same warm tone so it belongs to the palette */
-.tm-net .tm-people { fill: #C9C6F0; }
-.tm-net .tm-link   { stroke: #B9B5E8; }
+.tm-net .tm-people { fill: #FFFFFF; }
+.tm-net .tm-link   { stroke: #EFEBFF; }
+
+
+/* the slogan keeps a slow shimmer so the block never reads as static */
+@keyframes tm-shimmer {
+  0%, 100% { text-shadow: 0 1px 3px rgba(10, 8, 30, 0.8); }
+  50%      { text-shadow: 0 1px 3px rgba(10, 8, 30, 0.8),
+                          0 0 14px rgba(255, 232, 150, 0.5); }
+}
+
+
+@keyframes tm-title-breathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+.collaborate-card .card-title {
+  animation: tm-settle 0.62s cubic-bezier(.2,.8,.3,1) backwards,
+             tm-title-breathe 4.2s ease-in-out 1.6s infinite;
+  filter: drop-shadow(0 2px 6px rgba(10, 8, 30, 0.85));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collaborate-card .tm-msg,
+  .collaborate-card .card-title { animation: none; }
+}
+
+
+/* ==========================================================================
+   Collaborate copy - continuously animated, not a one-shot entrance.
+   The title is background-clip:text, so the only way to animate its colour
+   is to slide the gradient behind the glyphs.
+   ========================================================================== */
+@keyframes tm-gold-sweep {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.cards-container .card.collaborate-card .card-title {
+  animation: tm-settle 0.62s cubic-bezier(.2, .8, .3, 1) backwards,
+             tm-gold-sweep 7s linear 0.7s infinite;
+  filter: drop-shadow(0 2px 6px rgba(10, 8, 30, 0.85));
+}
+
+/* the slogan words keep a slow rolling wave */
+@keyframes tm-word-wave {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.cards-container .card.collaborate-card .tm-word {
+  animation: tm-settle 0.5s cubic-bezier(.2, .8, .3, 1) backwards,
+             tm-word-wave 2.8s ease-in-out infinite;
+  animation-delay: calc(0.75s + var(--i) * 0.06s),
+                   calc(1.4s + var(--i) * 0.09s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards-container .card.collaborate-card .card-title,
+  .cards-container .card.collaborate-card .tm-word { animation: none; }
+}
+
+
+/* ==========================================================================
+   Collaborate copy - final palette and motion.
+
+   Amber on indigo kept reading muddy no matter how it was tuned, so the
+   headline is white (highest contrast available here) with a cool mint accent
+   above it and calm lavender body copy underneath. One warm colour fighting a
+   violet card was the problem; this is all one temperature.
+   ========================================================================== */
+.cards-container .card.collaborate-card .tm-msg {
+  color: #7CF2D0;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 3px rgba(8, 10, 30, 0.85);
+  animation: none;
+}
+
+/* a light passes across the headline - visible, but it never moves the text */
+@keyframes tm-light-sweep {
+  0%   { background-position: 130% 50%; }
+  100% { background-position: -30% 50%; }
+}
+.cards-container .card.collaborate-card .card-title {
+  animation: tm-settle 0.62s cubic-bezier(.2, .8, .3, 1) backwards,
+             tm-light-sweep 5.5s ease-in-out 1s infinite;
+  filter: drop-shadow(0 2px 8px rgba(8, 10, 30, 0.9));
+}
+
+/* the accent line breathes gently instead of each word jittering */
+@keyframes tm-accent-pulse {
+  0%, 100% { opacity: 0.82; text-shadow: 0 1px 3px rgba(8, 10, 30, 0.85); }
+  50%      { opacity: 1;    text-shadow: 0 1px 3px rgba(8, 10, 30, 0.85),
+                                         0 0 18px rgba(124, 242, 208, 0.45); }
+}
+.cards-container .card.collaborate-card .tm-word {
+  animation: tm-settle 0.5s cubic-bezier(.2, .8, .3, 1) backwards;
+  animation-delay: calc(0.7s + var(--i) * 0.05s);
+}
+.cards-container .card.collaborate-card .tm-msg {
+  animation: tm-accent-pulse 3.6s ease-in-out 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards-container .card.collaborate-card .card-title,
+  .cards-container .card.collaborate-card .tm-msg,
+  .cards-container .card.collaborate-card .tm-word { animation: none; }
+}
+
+
+/* ==========================================================================
+   Collaborate copy - professional reveal.
+
+   Built to the standard pattern rather than by eye:
+   - masked reveal, so nothing ever travels outside the text's final footprint.
+     Sliding whole elements around (what this used to do) is what makes an
+     entrance look amateur - the copy lands in a different place than it
+     started, so the eye has to re-find it.
+   - stagger by granularity: words 40-70ms, lines 60-100ms.
+   - ease-out, each reveal under ~650ms.
+   - one restrained continuous accent, nothing that competes with reading.
+   ========================================================================== */
+
+/* -- words slide inside their own clipped box ------------------------------ */
+.cards-container .card.collaborate-card .tm-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  margin-right: 0.3em;
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+.cards-container .card.collaborate-card .tm-word-i {
+  display: inline-block;
+  animation: tm-word-mask 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(0.18s + var(--i) * 0.05s);   /* 50ms, word granularity */
+}
+@keyframes tm-word-mask {
+  from { transform: translateY(108%); }
+  to   { transform: translateY(0); }
+}
+
+/* -- headline and body wipe open; the type itself never moves -------------- */
+@keyframes tm-wipe {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 -12% 0); }   /* -12% keeps descenders clear */
+}
+
+.cards-container .card.collaborate-card .card-title {
+  animation: tm-wipe 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both,
+             tm-sheen 6.5s ease-in-out 1.6s infinite;
+  filter: drop-shadow(0 2px 8px rgba(8, 10, 30, 0.9));
+  transform: none;
+}
+
+.cards-container .card.collaborate-card .card-subtitle {
+  animation: tm-wipe 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.58s both;
+  opacity: 1;
+  transform: none;
+}
+
+.cards-container .card.collaborate-card .card-link {
+  animation: tm-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.74s both;
+}
+@keyframes tm-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* -- the single continuous accent: a slow light across the headline -------- */
+@keyframes tm-sheen {
+  0%, 18%  { background-position: 128% 50%; }
+  62%, 100% { background-position: -28% 50%; }
+}
+
+/* the mint line stays still and simply reads - no pulse competing with it */
+.cards-container .card.collaborate-card .tm-msg {
+  animation: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards-container .card.collaborate-card .tm-word-i,
+  .cards-container .card.collaborate-card .card-title,
+  .cards-container .card.collaborate-card .card-subtitle,
+  .cards-container .card.collaborate-card .card-link {
+    animation: none;
+    clip-path: none;
+    transform: none;
+    opacity: 1;
+  }
+}

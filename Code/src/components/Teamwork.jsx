@@ -135,7 +135,7 @@ const Teamwork = ({ message = "Great things are never built alone." }) => {
       <p className="tm-msg" aria-label={message}>
         {message.split(" ").map((word, i) => (
           <span key={`${word}-${i}`} className="tm-word" style={{ "--i": i }}>
-            {word}
+            <span className="tm-word-i">{word}</span>
           </span>
         ))}
       </p>
