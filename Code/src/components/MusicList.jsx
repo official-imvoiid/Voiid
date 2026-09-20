@@ -51,15 +51,15 @@ const MusicList = () => {
         alignItems: "center",
         marginBottom: "30px",
       }}>
-        <h1 style={{ 
-          color: "#f39c12", 
+        <h1 style={{
+          color: "#f39c12",
           fontSize: "2.5rem",
           fontWeight: "700",
           margin: "0"
         }}>
           My Music Gene 🎵
         </h1>
-        
+
         <Link to="/" style={{
           position: "relative",
           display: "inline-block",
@@ -119,7 +119,7 @@ const MusicList = () => {
           padding: "10px",
           backgroundColor: "rgba(30, 30, 30, 0.7)",
           borderRadius: "14px",
-          borderLeft: "5px solid #f39c12", 
+          borderLeft: "5px solid #f39c12",
           maxWidth: "1000px",
           display: "flex",
           justifyContent: "center",
@@ -151,7 +151,7 @@ const MusicList = () => {
           }}>
             {genre}
           </h2>
-          
+
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
@@ -183,18 +183,18 @@ const MusicList = () => {
                   />
                 </div>
                 <div style={{ padding: "16px" }}>
-                  <h3 style={{ 
-                    margin: "0 0 8px 0", 
+                  <h3 style={{
+                    margin: "0 0 8px 0",
                     color: "#fff",
-                    fontSize: "18px", 
-                    fontWeight: "600" 
+                    fontSize: "18px",
+                    fontWeight: "600"
                   }}>
                     {song.song}
                   </h3>
-                  <p style={{ 
-                    margin: "0", 
+                  <p style={{
+                    margin: "0",
                     color: "#aaa",
-                    fontSize: "14px" 
+                    fontSize: "14px"
                   }}>
                     {song.artist}
                   </p>
@@ -206,11 +206,11 @@ const MusicList = () => {
       ))}
 
       {/* Footer Quote */}
-      <div style={{ 
-        textAlign: "center", 
-        marginTop: "30px", 
-        color: "#888", 
-        fontSize: "20px" 
+      <div style={{
+        textAlign: "center",
+        marginTop: "30px",
+        color: "#888",
+        fontSize: "20px"
       }}>
         <p>Music speaks what words fear to say</p>
       </div>

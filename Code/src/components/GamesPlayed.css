@@ -1,0 +1,165 @@
+/* ==========================================================================
+   Games I've Conquered - full-bleed grid, per-game glow, outbound links
+   ========================================================================== */
+
+.gp-page {
+  --gp-bg: #141416;
+  --gp-card: #1D1D21;
+  --gp-accent: #f39c12;
+  --gp-dim: #9a9aa4;
+
+  min-height: 100vh;
+  width: 100%;
+  background: var(--gp-bg);
+  color: #f2f2f4;
+  font-family: "Montserrat", Arial, sans-serif;
+  padding: clamp(18px, 4vw, 44px) clamp(14px, 5vw, 56px) 64px;
+  box-sizing: border-box;
+}
+
+.gp-shell { max-width: 1500px; margin: 0 auto; }
+
+.gp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.gp-title {
+  margin: 0;
+  color: var(--gp-accent);
+  font-size: clamp(1.7rem, 4.2vw, 2.6rem);
+  font-weight: 700;
+}
+
+.gp-intro {
+  margin: 0 auto clamp(26px, 4vw, 40px);
+  max-width: 900px;
+  text-align: center;
+  color: #c9c9d1;
+  font-size: clamp(.92rem, 1.7vw, 1.08rem);
+  line-height: 1.6;
+}
+
+/* ---- back button: the original pill, with a glow and lift added on top.
+       Colour, shape and the sliding green fill all stay inline in the JSX. ---- */
+.gp-back {
+  animation: gp-glow 2.8s ease-in-out infinite;
+  will-change: transform, box-shadow;
+}
+.gp-back:hover  { transform: translateY(-2px) scale(1.03); }
+.gp-back:active { transform: translateY(0) scale(0.99); }
+
+@keyframes gp-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(0,255,170,.28), 0 0 14px rgba(0,255,170,.13); }
+  50%      { box-shadow: 0 0 13px rgba(0,255,170,.6), 0 0 32px rgba(0,255,170,.26); }
+}
+
+/* ---- dynamic grid: tracks the screen ratio, never leaves a dead column ---- */
+.gp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(160px, 19vw, 260px), 1fr));
+  gap: clamp(14px, 1.7vw, 26px);
+}
+
+.gp-card {
+  --glow: var(--gp-accent);
+  position: relative;
+  display: block;
+  background: var(--gp-card);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .32s cubic-bezier(.2,.7,.3,1), box-shadow .32s ease,
+              border-color .32s ease;
+}
+.gp-card:hover,
+.gp-card:focus-visible {
+  transform: translateY(-8px);
+  border-color: color-mix(in srgb, var(--glow) 65%, transparent);
+  box-shadow: 0 18px 38px rgba(0,0,0,.55),
+              0 0 22px color-mix(in srgb, var(--glow) 40%, transparent);
+  outline: none;
+}
+
+.gp-art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #0d0d0f;
+}
+.gp-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .5s ease, filter .35s ease;
+}
+.gp-card:hover .gp-art img { transform: scale(1.07); filter: brightness(.7); }
+
+/* theme chip, tinted with the game's own glow colour */
+.gp-theme {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: .64rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(0,0,0,.62);
+  border: 1px solid color-mix(in srgb, var(--glow) 60%, transparent);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* "visit site" affordance slides up on hover */
+.gp-visit {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 2;
+  padding: 10px 12px;
+  text-align: center;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #0d0d0f;
+  background: var(--glow);
+  transform: translateY(105%);
+  transition: transform .32s cubic-bezier(.2,.8,.3,1);
+}
+.gp-card:hover .gp-visit,
+.gp-card:focus-visible .gp-visit { transform: translateY(0); }
+
+.gp-name {
+  margin: 0;
+  padding: 12px 12px 14px;
+  text-align: center;
+  font-size: clamp(.86rem, 1.5vw, 1.02rem);
+  font-weight: 600;
+  color: #fff;
+}
+
+.gp-foot {
+  text-align: center;
+  margin-top: 36px;
+  color: #7c7c86;
+  font-style: italic;
+  font-size: clamp(.92rem, 1.7vw, 1.08rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gp-back { animation: none; }
+  .gp-back:hover { transform: none; }
+  .gp-card, .gp-card:hover { transform: none; }
+  .gp-art img, .gp-card:hover .gp-art img { transform: none; }
+  .gp-visit { transition: none; }
+}

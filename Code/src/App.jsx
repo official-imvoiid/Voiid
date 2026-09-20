@@ -11,6 +11,7 @@ import Expertise from "./components/Expertise";
 import About from "./components/About";
 import Work from "./components/Work";
 import Contact from "./components/contact";
+import MascotDemo from "./components/MascotDemo";
 import OfflineNotification from "./components/OfflineCheck";
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/work" element={<Work />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/mascot" element={<MascotDemo />} />
         </Routes>
       </div>
     </Router>

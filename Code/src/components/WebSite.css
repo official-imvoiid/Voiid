@@ -1,6 +1,7 @@
 /* Reset and Base */
 @import url('https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -289,7 +290,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('/public/images/Research.jpg') no-repeat center center/cover;
+  background: url('/images/Research.jpg') no-repeat center center/cover;
   filter: blur(10px);
   z-index: -1;
   opacity: 1;
@@ -619,12 +620,12 @@ a {
 
 /* Project Card */
 .project-card {
-  background: linear-gradient(135deg, #27272A, #3F3F46);
+  background: linear-gradient(135deg, #27272A, #43434C);
 }
 
 /* Blog Card */
 .blog-card {
-  background: linear-gradient(135deg, #27272A, #4B5563);
+  background: linear-gradient(135deg, #27272A, #43434C);
 }
 
 /* Gaming Card */
@@ -766,16 +767,15 @@ a {
 
 .social-icon:hover {
   transform: scale(1.2) rotate(5deg);
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
 }
 
-.instagram:hover { color: #e1306c; text-shadow: 0 0 15px #e1306c, 0 0 25px #e1306c; }
-.linkedin:hover { color: #0077b5; text-shadow: 0 0 15px #0077b5, 0 0 25px #0077b5; }
-.pinterest:hover { color: #bd081c; text-shadow: 0 0 15px #bd081c, 0 0 25px #bd081c; }
-.github:hover { color: yellow; text-shadow: 0 0 15px yellow, 0 0 25px yellow; }
-.reddit:hover { color: #ff4500; text-shadow: 0 0 15px #ff4500, 0 0 25px #ff4500; }
-.civitai:hover { color: #facc15; text-shadow: 0 0 15px #facc15, 0 0 25px #facc15; }
-.youtube:hover { color: #ff0000; text-shadow: 0 0 15px #ff0000, 0 0 25px #ff0000; }
+.instagram:hover { color: #e1306c; }
+.linkedin:hover { color: #0077b5; }
+.pinterest:hover { color: #bd081c; }
+.github:hover { color: yellow; }
+.reddit:hover { color: #ff4500; }
+.civitai:hover { color: #facc15; }
+.youtube:hover { color: #ff0000; }
 
 @keyframes fadeInUp {
   from {
@@ -908,4 +908,402 @@ a {
   .logo {
     padding-left: 3px;
   }
+}
+
+/* ==========================================================================
+   Entertainment cards - cinematic treatment
+   A slow light sweep, a floating icon, and (on Game) a drifting starfield.
+   The Music card also hosts the walking mascot, which needs the card to clip.
+   ========================================================================== */
+
+.gaming-card,
+.music-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* slow diagonal light sweep across the card */
+.gaming-card::before,
+.music-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.17) 50%,
+    transparent 58%
+  );
+  animation: card-sheen 6.5s ease-in-out infinite;
+}
+@keyframes card-sheen {
+  0%, 60% { transform: translateX(-75%); }
+  100%    { transform: translateX(75%); }
+}
+
+/* the icon drifts instead of sitting dead centre */
+.gaming-card .card-title,
+.music-card .card-title {
+  position: relative;
+  z-index: 3;
+  animation: card-float 4.4s ease-in-out infinite;
+}
+@keyframes card-float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-10px) rotate(3deg); }
+}
+
+/* Game: a faint starfield that breathes */
+.gaming-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 18% 28%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(2px 2px at 71% 19%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(2px 2px at 44% 68%, rgba(255, 255, 255, 0.60), transparent),
+    radial-gradient(2px 2px at 86% 61%, rgba(255, 255, 255, 0.50), transparent),
+    radial-gradient(2px 2px at 29% 86%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(2px 2px at 62% 91%, rgba(255, 255, 255, 0.40), transparent);
+  animation: star-twinkle 3.6s ease-in-out infinite alternate;
+}
+@keyframes star-twinkle {
+  from { opacity: 0.32; transform: translateY(2px); }
+  to   { opacity: 1;    transform: translateY(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gaming-card::before,
+  .music-card::before,
+  .gaming-card::after,
+  .gaming-card .card-title,
+  .music-card .card-title { animation: none; }
+}
+
+
+/* ==========================================================================
+   Cursor-driven depth
+   A shallow tilt plus a specular highlight that follows the pointer. The
+   entertainment cards keep their own ::after (starfield), so the highlight
+   is scoped away from them.
+   ========================================================================== */
+
+.cards-container { perspective: 1400px; }
+
+.card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  isolation: isolate;
+}
+
+/* wins over the plain .card:hover lift defined earlier */
+.cards-container .card:hover {
+  transform: rotateX(var(--tilt-x, 0deg))
+             rotateY(var(--tilt-y, 0deg))
+             translateY(calc(-6px * 1.1))
+             scale(1.015);
+}
+
+.cards-container .card:not(.gaming-card):not(.music-card):not(.research-card)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.10),
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cards-container .card:not(.gaming-card):not(.music-card):not(.research-card):hover::after { opacity: 1; }
+
+
+/* ==========================================================================
+   Music card - the note flies rather than just bobbing, and sits centred
+   ========================================================================== */
+
+/* ==========================================================================
+   Social icons - a live glow and a staggered drift, not just on hover
+   ========================================================================== */
+
+/* tight radii - a wide blur reads as a smudge around the icon rather than
+   a glow on it */
+
+
+.social-icon {
+  animation: social-float 3.6s ease-in-out infinite,
+             social-pulse 2.9s ease-in-out infinite;
+}
+.social-icon:nth-child(2) { animation-delay: 0.16s, 0.10s; }
+.social-icon:nth-child(3) { animation-delay: 0.32s, 0.21s; }
+.social-icon:nth-child(4) { animation-delay: 0.48s, 0.33s; }
+.social-icon:nth-child(5) { animation-delay: 0.64s, 0.44s; }
+.social-icon:nth-child(6) { animation-delay: 0.80s, 0.55s; }
+.social-icon:nth-child(7) { animation-delay: 0.96s, 0.66s; }
+
+/* hover hands over to the per-brand colour glow, which is far stronger than
+   the idle white pulse - the brand rules further up supply the colour */
+.social-icon:hover {
+  animation: none;
+  transform: scale(1.25) rotate(5deg);
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards-container .card:hover { transform: none; }
+  .cards-container .card::after { display: none; }
+  .social-icon { animation: none; }
+}
+
+/* wrapper the mascot pushes aside - the FontAwesome svg itself ignores
+   CSS transforms, so the shove has to be applied to a normal element */
+.music-note {
+  display: inline-flex;
+  position: relative;
+  z-index: 3;
+  will-change: transform;
+}
+
+/* ==========================================================================
+   GitHub card - a soft glow on the mark only. No ring round the card, no
+   pulse; just enough to light the yellow up on hover.
+   ========================================================================== */
+.github-card svg,
+.github-card .card-title {
+  transition: filter 0.35s ease, transform 0.4s cubic-bezier(.2, .8, .3, 1);
+}
+.github-card:hover svg,
+.github-card:hover .card-title {
+  filter: drop-shadow(0 0 3px rgba(249, 168, 37, 0.3));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .github-card:hover svg,
+  .github-card:hover .card-title { transform: none; }
+}
+
+
+/* ==========================================================================
+   Social + GitHub - one modest glow, on hover only. No idle pulse, no
+   dimming of the neighbours, no animation.
+   ========================================================================== */
+.social-icon {
+  animation: none;
+  opacity: 1;
+  transition: transform 0.25s ease, color 0.25s ease, text-shadow 0.25s ease;
+}
+.social-icon:hover {
+  transform: scale(1.18) rotate(4deg);
+  /* no shadow anywhere - the glyph itself brightens, so nothing scatters */
+  text-shadow: none !important;
+  filter: brightness(1.5) saturate(1.6);
+}
+
+.github-card svg,
+.github-card .card-title { transition: transform 0.4s ease; }
+.github-card:hover svg,
+.github-card:hover .card-title { filter: none; animation: none; }
+
+/* ==========================================================================
+   Corner icon - a fixed badge in the card's left corner. No background, no
+   animation; it just sits there.
+   ========================================================================== */
+.card-corner-icon {
+  position: absolute;
+  left: calc(20px * 1.1);
+  bottom: calc(18px * 1.1);
+  width: clamp(54px, 6vw, 74px);
+  height: auto;
+  z-index: 2;
+  background: none;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.95;
+}
+
+/* the View link sits bottom-right and the badge bottom-left, so they never
+   collide - it only needs to stack above, NOT to be re-positioned */
+.resume-card .card-link,
+.achievement-card .card-link { z-index: 3; }
+
+/* the research card hosts the scientist, so it has to clip him */
+.research-card { position: relative; overflow: hidden; }
+
+
+/* ==========================================================================
+   Display type - Cabin Sketch is an outline face, lovely as an accent but
+   hard work in a sentence. Space Grotesk for the logo and the two text-heavy
+   cards; everything else keeps the sketch face.
+   ========================================================================== */
+.logo,
+.footer-logo,
+.about-card .card-title,
+.about-card .card-subtitle,
+.about-card p,
+.about-card p strong,
+.about-card p b,
+.about-card p em,
+.collaborate-card .card-title,
+.collaborate-card .card-subtitle,
+.collaborate-card p {
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif !important;
+}
+
+.logo, .footer-logo { letter-spacing: 0.02em; font-weight: 700; }
+.about-card .card-title,
+.collaborate-card .card-title { font-weight: 700; letter-spacing: -0.015em; }
+.about-card .card-subtitle { font-weight: 600; letter-spacing: 0.16em; }
+.about-card p { font-weight: 400; line-height: 1.68; }
+
+/* ==========================================================================
+   GitHub card - the original scale-and-rotate move, with the glow done as
+   brightness rather than a shadow.
+
+   The mark is a ring with the cat as a transparent hole. A shadow paints
+   BEHIND the glyph, so it shone straight through that hole and lit the cat.
+   brightness/saturate only affect pixels that are actually painted, so the
+   yellow lifts and the hole stays exactly as dark as the card behind it.
+   ========================================================================== */
+.github-card .card-title {
+  transition: transform 0.5s ease, filter 0.4s ease;
+}
+.github-card:hover .card-title {
+  transform: scale(1.2) rotate(5deg);
+  text-shadow: none;
+  filter: brightness(1.28) saturate(1.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .github-card:hover .card-title { transform: scale(1.06); }
+}
+
+
+/* ==========================================================================
+   Research card - the blurred photo washed the heading out. A scrim behind
+   the text, and larger, heavier type on top of it.
+   ========================================================================== */
+.research-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* weighted to the lower half, where the heading sits - the top stays
+     light enough that the photo is still doing something */
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 14, 0.10) 0%,
+    rgba(10, 10, 14, 0.30) 40%,
+    rgba(10, 10, 14, 0.74) 78%,
+    rgba(10, 10, 14, 0.84) 100%
+  );
+}
+
+/* both are ordinary block/inline elements, so lifting them is safe - unlike
+   .card-link, which is absolutely positioned and must not be re-positioned */
+.research-card .card-subtitle,
+.research-card .card-title {
+  position: relative;
+  z-index: 2;
+}
+
+.research-card .card-title {
+  font-size: calc(2.1rem * 1.1);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
+}
+.research-card .card-subtitle {
+  font-size: calc(0.95rem * 1.1);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #E4E4E8;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+
+/* the scrim sits at z-index 0, so the link has to come above it. Only the
+   stacking changes here - .card-link stays absolutely positioned. */
+.research-card .card-link { z-index: 3; }
+
+
+
+
+/* ==========================================================================
+   Nav CTA - the animated rainbow border was doing far too much. A single
+   quiet accent ring, and it only lights up on hover.
+   ========================================================================== */
+.get-in-touch {
+  background-color: #fff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.get-in-touch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 115, 0, 0.3);
+}
+/* the rainbow ring stays, but it sits still until you hover it - the constant
+   spin was what made it shout */
+.get-in-touch::before { animation-play-state: paused !important; }
+.get-in-touch:hover::before { animation-play-state: running !important; }
+
+/* ==========================================================================
+   Wider grid - less dead margin at the sides, so every card gains width
+   ========================================================================== */
+.cards-container {
+  /* 4 columns need < 5*275 + 4*gap of content, or auto-fit adds a fifth and
+     the card-large spans reshuffle. 1400 - 32 = 1368 keeps it at four. */
+  max-width: 1400px;
+  padding: 0 16px;
+  gap: 20px;
+}
+
+/* the scientist works the bottom half of the Research card, so the heading
+   moves up out of his way instead of him being shrunk into nothing */
+.cards-container .card.research-card {
+  justify-content: center;
+}
+
+
+/* ==========================================================================
+   Desktop grid - the column count is pinned rather than left to auto-fit.
+   auto-fit adds a column as soon as the container can hold one, and every
+   card-large spans 2, so a new column reshuffles the whole board. Pinning it
+   lets the container get much wider with no risk of that.
+   ========================================================================== */
+@media (min-width: 1100px) {
+  .cards-container {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 1680px;
+    padding: 0 14px;
+    gap: 20px;
+  }
+}
+
+
+/* ==========================================================================
+   Wider cards need bigger contents, or everything reads small inside them.
+   Scaled to roughly match the original card-to-type ratio, and the side gap
+   comes back so the grid is not flush to the window edge.
+   ========================================================================== */
+@media (min-width: 1100px) {
+  .cards-container { padding: 0 40px; }
+
+  .card-title { font-size: calc(1.72rem * 1.1); }
+  .card-subtitle { font-size: calc(0.95rem * 1.1); }
+  .card-link { font-size: calc(1.02rem * 1.1); }
+
+  .gaming-card .card-title,
+  .music-card .card-title { font-size: calc(5.9rem * 1.1); }
+  .github-card .card-title { font-size: calc(13.6rem * 1.1); }
+  .research-card .card-title { font-size: calc(2.4rem * 1.1); }
+  .collaborate-card .card-title { font-size: calc(2.5rem * 1.1); }
+  .card-corner-icon { width: clamp(62px, 5vw, 86px); }
 }
