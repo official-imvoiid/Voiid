@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import BackHome from "./BackHome";
 import {
   X,
   ZoomIn,
@@ -430,41 +430,6 @@ const Art = () => {
       }}
     >
       <style>{`
-        .back-home-link {
-          position: relative;
-          display: inline-block;
-          padding: 0.4rem 1rem;
-          color: #000 !important;
-          font-weight: 500;
-          text-decoration: none;
-          overflow: hidden;
-          border-radius: 9999px;
-          background: rgba(255, 255, 255, 0.96);
-          backdrop-filter: blur(2px);
-          -webkit-backdrop-filter: blur(6px);
-          font-size: 0.85rem;
-          cursor: pointer;
-          transition: color 0.4s ease;
-        }
-        .back-home-link-bg {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 35%;
-          height: 100%;
-          background: rgba(0, 255, 170, 0.93);
-          border-radius: 9999px;
-          transition: width 0.4s ease;
-          z-index: 0;
-        }
-        .back-home-link:hover .back-home-link-bg {
-          width: 100%;
-        }
-        .back-home-link-text {
-          position: relative;
-          z-index: 1;
-          white-space: nowrap;
-        }
         .gallery-image {
           width: 100%;
           height: 100%;
@@ -566,10 +531,7 @@ const Art = () => {
         >
           AI Canvas 🖌️🎨
         </h1>
-        <Link to="/" className="back-home-link">
-          <span className="back-home-link-bg" />
-          <span className="back-home-link-text">&lt;&lt; Back home</span>
-        </Link>
+        <BackHome />
       </div>
 
       <div className="gallery-container">

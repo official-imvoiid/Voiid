@@ -11,6 +11,9 @@ import Expertise from "./components/Expertise";
 import About from "./components/About";
 import Work from "./components/Work";
 import Contact from "./components/contact";
+import Certifications from "./components/Certifications";
+import Notes from "./components/Notes";
+import Roadmap from "./components/Roadmap";
 import MascotDemo from "./components/MascotDemo";
 import OfflineNotification from "./components/OfflineCheck";
 
@@ -31,6 +34,9 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/work" element={<Work />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/certifications" element={<Certifications />} />
+          <Route path="/notes" element={<Notes />} />
+          <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/mascot" element={<MascotDemo />} />
         </Routes>
       </div>

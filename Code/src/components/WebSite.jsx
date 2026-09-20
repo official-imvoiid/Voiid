@@ -74,9 +74,9 @@ const Portfolio = () => {
       <header className="header container">
         <a href="#" className="logo">VOIID</a>
         <nav className="nav">
-          <Link to="/work" className="nav-link">Work</Link>
-          <Link to="/about" className="nav-link">About</Link>
-          <Link to="/expertise" className="nav-link">Expertise</Link>
+          <Link to="/certifications" className="nav-link">Certifications</Link>
+          <Link to="/notes" className="nav-link">Notes</Link>
+          <Link to="/roadmap" className="nav-link">Roadmap</Link>
           <a href="/cv/Voiid-CV.pdf" download className="get-in-touch">Download CV</a>
         </nav>
       </header>
@@ -99,7 +99,7 @@ const Portfolio = () => {
         <div className="card resume-card">
           <img className="card-corner-icon" src="/images/icon-skillset.png" alt="" />
           <span className="card-subtitle">Learn more about me</span>
-          <h2 className="card-title">Skill-set</h2>
+          <h2 className="card-title">Skill-Set</h2>
           <a href="/skills" className="card-link">View <span>→</span></a>
         </div>
 
@@ -218,7 +218,7 @@ const Portfolio = () => {
             <span className="music-note">
               <FontAwesomeIcon icon={faMusic} className="card-title" />
             </span>
-            <MascotScene size={124} />
+            <MascotScene size={120} />
           </div>
         </Link>
       </div>
@@ -230,14 +230,14 @@ const Portfolio = () => {
           <Link to="/" className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
             Home
           </Link>
-          <Link to="/work" className="footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            Work
+          <Link to="/certifications" className="footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            Certifications
           </Link>
-          <Link to="/about" className="footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            About
+          <Link to="/notes" className="footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            Notes
           </Link>
-          <Link to="/expertise" className="footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            Expertise
+          <Link to="/roadmap" className="footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            Roadmap
           </Link>
         </div>
 

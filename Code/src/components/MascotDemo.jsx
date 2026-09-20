@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import Mascot from "./Mascot";
+import BackHome from "./BackHome";
 
 const STATES = [
   { key: "idle", label: "Idle", hint: "breathing, blinking, hair drift" },
@@ -43,20 +43,7 @@ const MascotDemo = () => {
           }}
         >
           <h1 style={{ margin: 0, fontSize: "1.8rem" }}>Mascot 🎧</h1>
-          <Link
-            to="/"
-            style={{
-              padding: "0.4rem 1rem",
-              borderRadius: "9999px",
-              background: "rgba(255,255,255,0.96)",
-              color: "#000",
-              textDecoration: "none",
-              fontWeight: 500,
-              fontSize: "0.85rem",
-            }}
-          >
-            Back Home
-          </Link>
+          <BackHome />
         </div>
 
         {/* stage */}

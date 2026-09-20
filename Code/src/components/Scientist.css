@@ -6,16 +6,13 @@
 
 .sci {
   position: absolute;
-  bottom: 0;
-  /* Behind the copy, not above it. A bigger scientist and centred text cannot
-     both fit a 372px card without touching, so he passes behind the heading
-     instead of covering it. The scrim sits at 0 and the text at 2. */
-  z-index: 1;
+  bottom: 0;                /* stands on the card floor */
+  z-index: 4;               /* in front of the copy, as asked */
   pointer-events: none;
   line-height: 0;
 }
 .sci[data-side="right"] { right: 6%; }
-.sci[data-side="left"]  { left: 1%; }
+.sci[data-side="left"]  { left: 5%; }
 
 .sci-art { display: block; width: 100%; height: auto; overflow: visible; }
 

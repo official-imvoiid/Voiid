@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import BackHome from "./BackHome";
 import ReCAPTCHA from "react-google-recaptcha"; // Install with npm i react-google-recaptcha
 import emailjs from "emailjs-com"; // Install with npm i emailjs-com
 
@@ -338,6 +339,10 @@ const Contact = () => {
     <>
       <style>{styles.animations}</style>
       <div style={styles.body}>
+        {/* same back pill as every other page, floated clear of the form */}
+        <div style={{ position: "fixed", top: 18, left: 18, zIndex: 50 }}>
+          <BackHome />
+        </div>
         <div style={styles.container}>
           <form style={styles.left} onSubmit={handleSubmit}>
             <div>

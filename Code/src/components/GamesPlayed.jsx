@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import BackHome from "./BackHome";
 import "./GamesPlayed.css";
 
 /**
@@ -29,56 +29,7 @@ const GameList = () => (
     <div className="gp-shell">
       <div className="gp-head">
         <h1 className="gp-title">Games I&rsquo;ve Conquered 🎮🔥</h1>
-        {/* the original pill - white, with the green fill that slides across on
-            hover. The glow and lift are layered on in CSS, nothing replaced. */}
-        <Link
-          to="/"
-          className="gp-back"
-          onClick={() => window.scrollTo({ top: 0 })}
-          style={{
-            position: "relative",
-            display: "inline-block",
-            padding: "0.4rem 1rem",
-            color: "#000",
-            fontWeight: "500",
-            textDecoration: "none",
-            overflow: "hidden",
-            borderRadius: "9999px",
-            background: "rgba(255, 255, 255, 0.96)",
-            backdropFilter: "blur(2px)",
-            WebkitBackdropFilter: "blur(6px)",
-            fontSize: "0.85rem",
-            cursor: "pointer",
-            transition: "color 0.4s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.querySelector(".bg").style.width = "100%";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.querySelector(".bg").style.width = "35%";
-          }}
-        >
-          <span
-            className="bg"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "35%",
-              height: "100%",
-              background: "rgba(0, 255, 170, 0.93)",
-              borderRadius: "9999px",
-              transition: "all 0.4s ease",
-              zIndex: 0,
-            }}
-          />
-          <span
-            style={{ position: "relative", zIndex: 1, whiteSpace: "nowrap" }}
-            dangerouslySetInnerHTML={{
-              __html: `<span style="font-family: Pacifico, cursive !important; font-weight: 500; font-size: 0.85rem;">&lt;&lt; Back home</span>`,
-            }}
-          />
-        </Link>
+        <BackHome />
       </div>
 
       <p className="gp-intro">

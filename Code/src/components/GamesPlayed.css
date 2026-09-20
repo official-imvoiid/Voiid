@@ -44,20 +44,6 @@
   line-height: 1.6;
 }
 
-/* ---- back button: the original pill, with a glow and lift added on top.
-       Colour, shape and the sliding green fill all stay inline in the JSX. ---- */
-.gp-back {
-  animation: gp-glow 2.8s ease-in-out infinite;
-  will-change: transform, box-shadow;
-}
-.gp-back:hover  { transform: translateY(-2px) scale(1.03); }
-.gp-back:active { transform: translateY(0) scale(0.99); }
-
-@keyframes gp-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(0,255,170,.28), 0 0 14px rgba(0,255,170,.13); }
-  50%      { box-shadow: 0 0 13px rgba(0,255,170,.6), 0 0 32px rgba(0,255,170,.26); }
-}
-
 /* ---- dynamic grid: tracks the screen ratio, never leaves a dead column ---- */
 .gp-grid {
   display: grid;
@@ -157,8 +143,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gp-back { animation: none; }
-  .gp-back:hover { transform: none; }
   .gp-card, .gp-card:hover { transform: none; }
   .gp-art img, .gp-card:hover .gp-art img { transform: none; }
   .gp-visit { transition: none; }

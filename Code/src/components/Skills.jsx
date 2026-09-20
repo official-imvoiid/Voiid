@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import BackHome from "./BackHome";
 
 const SkillSet = () => {
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 600);
@@ -35,60 +35,7 @@ const SkillSet = () => {
         <h1 style={{ color: "#fff", margin: 0, fontSize: isSmallScreen ? "1.5rem" : "2rem" }}>
           My Skill Set ⚡💻
         </h1>
-        <Link
-          to="/"
-          style={{
-            position: "relative",
-            display: "inline-block",
-            padding: isSmallScreen ? "0.3rem 0.8rem" : "0.4rem 1rem",
-            color: "#000",
-            fontWeight: "500",
-            textDecoration: "none",
-            overflow: "hidden",
-            borderRadius: "9999px",
-            background: "rgba(255, 255, 255, 0.96)",
-            backdropFilter: "blur(2px)",
-            WebkitBackdropFilter: "blur(6px)",
-            fontSize: isSmallScreen ? "0.75rem" : "0.85rem",
-            cursor: "pointer",
-            transition: "color 0.4s ease",
-          }}
-          onMouseEnter={(e) => {
-            const bg = e.currentTarget.querySelector(".bg");
-            bg.style.width = "100%";
-            e.currentTarget.style.color = "#000";
-          }}
-          onMouseLeave={(e) => {
-            const bg = e.currentTarget.querySelector(".bg");
-            bg.style.width = "35%";
-            e.currentTarget.style.color = "#000";
-          }}
-        >
-          <span
-            className="bg"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "35%",
-              height: "100%",
-              background: "rgba(0, 255, 170, 0.93)",
-              borderRadius: "9999px",
-              transition: "all 0.4s ease",
-              zIndex: 0,
-            }}
-          />
-          <span
-            style={{
-              position: "relative",
-              zIndex: 1,
-              whiteSpace: "nowrap",
-            }}
-            dangerouslySetInnerHTML={{
-              __html: `<span style="font-family: Pacifico, cursive !important; font-weight: 500; font-size: ${isSmallScreen ? "0.75rem" : "0.85rem"}; font-feature-settings: 'liga' 0;">&lt;&lt; Back home</span>`,
-            }}
-          />
-        </Link>
+        <BackHome />
       </div>
 
       {/* Introduction */}

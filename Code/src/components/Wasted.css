@@ -29,9 +29,9 @@
               border-color 0.25s ease, color 0.25s ease;
 }
 .gaming-card:hover .wasted-btn { opacity: 1; }
-/* The card tilts under the cursor on hover, which drags this button around
-   with it and makes a small target genuinely hard to hit. Pin it flat. */
-.gaming-card:hover .wasted-btn { transform: translateX(-50%) translateZ(60px); }
+/* the card tilts under the cursor, so keep the button flat against it rather
+   than pushing it out in Z, which moved the hit area away from the pixels */
+.gaming-card:hover .wasted-btn { transform: translateX(-50%); }
 .wasted-btn:hover {
   background: rgba(0, 0, 0, 0.42);
   border-color: rgba(255, 255, 255, 0.55);
