@@ -1,7 +1,8 @@
 /* Reset and Base */
-@import url('https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap');
+/* The three @import rules that used to sit here pointed at Google Fonts. An
+   @import blocks the stylesheet it lives in until it resolves, so offline it
+   held this entire file back - see src/styles/fonts.css, which now serves the
+   same faces from public/fonts/. */
 
 * {
   margin: 0;
@@ -11,16 +12,38 @@
   font-family: var(--font-default) !important;  
 }
 
+/* --------------------------------------------------------------------------
+   The page used to be `transform: scale(1.1)` on <html>, with every length
+   in this file carrying a matching `* 1.1` and html/body carrying `/ 1.1`
+   compensation. That one line caused all of it:
+
+     - a transformed <html> no longer paints the canvas, so any area the
+       scaled box did not cover fell back to a different colour: the grey
+       bands around the content when zoomed out
+     - `min-width: calc(100vw / 1.1)` is wider than the viewport once the
+       scale is applied, which is the horizontal scrollbar
+     - the compensation is only correct at exactly 100% browser zoom, so
+       zooming in or out drifted further out of line the further you went
+     - each breakpoint re-scaled html by a different factor (1.1 / 1.05 /
+       1.02 / 1 / 0.9), so the UI was a literally different size on each
+       class of device
+     - a transform makes <html> a containing block, which breaks every
+       `position: fixed` descendant
+
+   The scale is gone. Size now comes from a fluid root font-size, which is
+   what the transform was imitating - it responds to the viewport smoothly
+   instead of jumping at four breakpoints, and it composes correctly with
+   the browser's own zoom instead of fighting it.
+   -------------------------------------------------------------------------- */
 html {
-  font-size: 17.6px; /* Increased base font size to simulate 110% zoom */
+  /* ~15px on a phone up to ~19.4px on a desktop, with no steps in between.
+     19.36px is what the old 17.6px x 1.1 transform worked out to, so desktop
+     keeps the size it had. */
+  font-size: clamp(15px, 0.3vw + 14.4px, 19.36px);
   scroll-behavior: smooth;
   background-color: #1A1A1D;
   width: 100%;
-  height: 100%;
-  transform: scale(1.1); /* Apply 110% scale to entire page */
-  transform-origin: top left;
-  min-width: calc(100vw / 1.1); /* Compensate for scale */
-  min-height: calc(100vh / 1.1);
+  min-height: 100%;
 }
 
 :root {
@@ -47,13 +70,15 @@ body {
   line-height: 1.5;
   padding: 0;
   margin: 0;
-  width: calc(100% / 1.1); /* Compensate for html scale */
-  min-height: calc(100vh / 1.1);
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;   /* dvh so mobile browser chrome cannot leave a gap */
 }
 
 /* Layout */
 .portfolio {
-  min-height: calc(100vh / 1.1);
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-dark);
@@ -764,7 +789,10 @@ a {
 }
 
 .social-icon {
-  font-size: calc(1.75rem * 1.1);
+  /* Fluid, and declared ONCE. This was calc(1.75rem * 1.1) with a second
+     .social-icon rule further down the file overriding it - the value here
+     had no effect at all, which is exactly the trap this file is full of. */
+  font-size: clamp(1.75rem, 2.2vw, 2.6rem);
   color: var(--color-white);
   transition: transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease;
   position: relative;
@@ -812,45 +840,81 @@ a {
 }
 
 /* Responsive Design - Mobile First with Scaling */
-@media (max-width: calc(1024px / 1.1)) {
-  html {
-    transform: scale(1.05); /* Slightly less scale on tablets */
-    font-size: 16.8px;
-  }
-  
-  .cards-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .card-large {
-    grid-column: span 2;
-  }
+/* --------------------------------------------------------------------------
+   Column count by device class.
+
+   The board went straight from 4 columns to 2 with nothing in between, so a
+   769px tablet in portrait got the phone layout: two enormous cards per row
+   with the type sized for a phone. Three columns fills that gap, and every
+   step is one column apart rather than a jump.
+
+     >= 1100   4 columns   desktop
+     900-1099  3 columns   large tablet / small laptop
+     600-899   2 columns   tablet portrait, big phone landscape
+     < 600     2 columns   phone (Gui/Mobile.png)
+
+   A wide card spans 2 at every step, so it is always a clean half or
+   two-thirds of the row and never leaves a ragged hole.
+   -------------------------------------------------------------------------- */
+@media (max-width: 1149px) {
+  .cards-container { grid-template-columns: repeat(3, 1fr); }
+  .card-large { grid-column: span 2; }
 }
 
-@media (max-width: calc(768px / 1.1)) {
-  html {
-    transform: scale(1.02); /* Minimal scale on mobile */
-    font-size: 16.3px;
-  }
-  
+@media (max-width: 799px) {
+  .cards-container { grid-template-columns: repeat(2, 1fr); }
+  .card-large { grid-column: span 2; }
+}
+
+@media (max-width: 699px) {
+
+  /* between phone and desktop the type needs its own step, or tablet text is
+     either phone-tiny or desktop-huge */
+  .card-title { font-size: clamp(1.3rem, 3.1vw, 1.85rem); }
+  .card-subtitle { font-size: clamp(0.78rem, 1.7vw, 1rem); }
+  .card-link { font-size: clamp(0.85rem, 1.8vw, 1.05rem); }
+  .gaming-card .card-title,
+  .music-card .card-title { font-size: clamp(3.6rem, 10vw, 5.6rem); }
+  .github-card .card-title { font-size: clamp(8rem, 22vw, 13rem); }
+  .collaborate-card .card-title { font-size: clamp(1.7rem, 4.4vw, 2.5rem); }
+  .card-corner-icon { width: clamp(46px, 7vw, 68px); }
+  .resume-card,
+  .achievement-card { padding-bottom: calc(clamp(46px, 7vw, 68px) + 1.3rem); }
+}
+
+@media (max-width: 768px) {
+  /* One line, as in Gui/Mobile.png - it used to stack the logo, the nav and
+     the button into three rows, which is a different header from the design.
+     The type shrinks instead of the layout breaking apart. */
   .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: calc(1.5rem * 1.02);
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: clamp(8px, 2vw, 18px);
   }
-  
+
   .logo {
-    padding-left: 6px; /* Adjust VOID position for mobile */
+    padding-left: 6px;
+    font-size: clamp(1.45rem, 6.4vw, 2.2rem);
+    flex: 0 0 auto;
   }
-  
+
   .nav {
-    width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    width: auto;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: clamp(7px, 2.4vw, 20px);
+    min-width: 0;
   }
-  
+
+  .nav-link { font-size: clamp(0.62rem, 2.5vw, 0.86rem); }
+
   .get-in-touch {
-    margin-top: calc(1rem * 1.02);
+    margin-top: 0;
+    flex: 0 0 auto;
+    padding: clamp(0.34rem, 1.4vw, 0.6rem) clamp(0.6rem, 2.6vw, 1.1rem);
+    font-size: clamp(0.58rem, 2.3vw, 0.8rem);
   }
   
   .skills-grid {
@@ -867,33 +931,68 @@ a {
   }
 }
 
-@media (max-width: calc(640px / 1.1)) {
-  html {
-    transform: scale(1); /* No additional scale on small mobile */
-    font-size: 16px;
-  }
-  
-  .logo {
-    padding-left: 4px; /* Further adjust VOID position for small screens */
-  }
-  
-  .cards-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .card-large {
-    grid-column: span 1;
-  }
+/* --------------------------------------------------------------------------
+   Phones keep the two-column board.
+
+   This used to collapse to a single column, which made the phone layout a
+   different design from the one in Gui/Mobile.png - that reference is two
+   columns, with the wide cards spanning both. Holding the same grid all the
+   way down means a 320px phone and a 600px phone show the same composition,
+   just at different sizes, instead of two different layouts.
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .logo { padding-left: 4px; }
+
+  .cards-container { grid-template-columns: repeat(2, 1fr); }
+  .card-large { grid-column: span 2; }
+
+  /* the type has to come down with the card, or it overflows its box */
+  .card-title { font-size: calc(1.15rem * 1.1); }
+  .card-subtitle { font-size: calc(0.72rem * 1.1); }
+  .card-link { font-size: calc(0.8rem * 1.1); }
+  .card { padding: calc(15px * 1.1); }
+
+  .gaming-card .card-title,
+  .music-card .card-title { font-size: calc(3.1rem * 1.1); }
+  .github-card .card-title { font-size: calc(7rem * 1.1); }
+  .research-card .card-title { font-size: calc(1.35rem * 1.1); }
+  .collaborate-card .card-title { font-size: calc(1.6rem * 1.1); }
+
+  .card-corner-icon { width: clamp(38px, 11vw, 54px); }
+  .resume-card,
+  .achievement-card { padding-bottom: calc(clamp(38px, 11vw, 54px) + 1.1rem); }
 }
 
-@media (max-width: calc(480px / 1.1)) {
-  .skills-grid {
-    grid-template-columns: 1fr;
-  }
-  
+/* --------------------------------------------------------------------------
+   The smallest phones (320-480). Same two-column design, wound down far
+   enough that the header still fits on one line and the corner icon does not
+   crowd the View link inside a ~140px card.
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .skills-grid { grid-template-columns: repeat(2, 1fr); }
+
   .logo {
-    padding-left: 2px; /* Minimal adjustment for very small screens */
+    padding-left: 2px;
+    font-size: clamp(1.15rem, 5.6vw, 1.6rem);
   }
+
+  .nav { gap: clamp(5px, 1.8vw, 10px); }
+  .nav-link { font-size: clamp(0.53rem, 2.35vw, 0.7rem); }
+  .get-in-touch {
+    padding: 0.3rem 0.55rem;
+    font-size: clamp(0.5rem, 2.1vw, 0.64rem);
+  }
+
+  /* icon bottom-left, link bottom-right - both have to fit across one narrow
+     card, so both come down together */
+  .card-corner-icon { width: clamp(30px, 9vw, 44px); }
+  .resume-card,
+  .achievement-card { padding-bottom: calc(clamp(30px, 9vw, 44px) + 0.9rem); }
+  .card-link { font-size: clamp(0.66rem, 3vw, 0.8rem); }
+  .card-title { font-size: clamp(0.92rem, 4.2vw, 1.25rem); }
+  .card-subtitle { font-size: clamp(0.56rem, 2.6vw, 0.72rem); }
+  .card { padding: clamp(9px, 3.4vw, 15px); }
+  .research-card .card-title { font-size: clamp(1rem, 4.6vw, 1.4rem); }
 }
 
 /* High DPI Display Support */
@@ -905,14 +1004,46 @@ a {
 }
 
 /* Landscape Mobile Support */
+/* --------------------------------------------------------------------------
+   Phone held sideways.
+
+   A landscape phone is ~740x380: plenty of width, almost no height. The
+   portrait rules would apply their two-column grid to all that width, giving
+   enormous cards and a page you scroll forever. This treats the width as the
+   resource it is - more columns, tighter vertical rhythm - so it reads as the
+   same design, laid out for the shape of the screen.
+   -------------------------------------------------------------------------- */
 @media (max-height: 500px) and (orientation: landscape) {
-  html {
-    transform: scale(0.9);
-  }
-  
   .logo {
     padding-left: 3px;
+    font-size: clamp(1.3rem, 3.4vw, 1.9rem);
   }
+
+  .header { padding-top: 0.6rem; padding-bottom: 0.6rem; }
+
+  .cards-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(8px, 1.1vw, 14px);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  .card-large { grid-column: span 2; }
+
+  .card { padding: clamp(10px, 1.4vw, 16px); }
+  .card-title { font-size: clamp(0.95rem, 2.1vw, 1.4rem); }
+  .card-subtitle { font-size: clamp(0.62rem, 1.3vw, 0.82rem); }
+  .card-link { font-size: clamp(0.7rem, 1.4vw, 0.9rem); }
+
+  .gaming-card .card-title,
+  .music-card .card-title { font-size: clamp(2.2rem, 6vw, 3.6rem); }
+  .github-card .card-title { font-size: clamp(4.5rem, 13vw, 8rem); }
+  .collaborate-card .card-title { font-size: clamp(1.3rem, 3vw, 2rem); }
+
+  .card-corner-icon { width: clamp(34px, 4.4vw, 52px); }
+  .resume-card,
+  .achievement-card { padding-bottom: calc(clamp(34px, 4.4vw, 52px) + 1rem); }
+
+  .footer { padding: 1.2rem 0; }
 }
 
 /* ==========================================================================
@@ -1271,17 +1402,32 @@ a {
    Wider grid - less dead margin at the sides, so every card gains width
    ========================================================================== */
 .cards-container {
-  /* 4 columns need < 5*275 + 4*gap of content, or auto-fit adds a fifth and
-     the card-large spans reshuffle. 1400 - 32 = 1368 keeps it at four. */
-  max-width: 1400px;
-  padding: 0 16px;
-  gap: 20px;
+  /* --gutter and --page-max are shared with the header and come from
+     base.css, so the two boxes are the same box by construction - they can
+     no longer drift apart the way they did when the grid was widened and
+     the header was left behind. The gutter is fluid, so it shrinks smoothly
+     on a phone instead of stepping at a breakpoint. */
+  max-width: var(--page-max);
+  padding: 0 var(--gutter);
+  gap: clamp(12px, 1.4vw, 20px);
 }
 
-/* the scientist works the bottom half of the Research card, so the heading
-   moves up out of his way instead of him being shrunk into nothing */
+/* The scientist works the bottom half of the Research card, so the heading
+   moves up out of his way instead of him being shrunk into nothing. This said
+   `center`, which put the heading straight through him - the comment was
+   right and the value was not. The min-height buys the room the two of them
+   need to share the card without touching. */
 .cards-container .card.research-card {
+  /* back to centred - moving it to the top to dodge the scientist just made
+     the card look top-heavy. He sits BEHIND the copy instead (Scientist.css),
+     which is what actually solves the collision. */
   justify-content: center;
+  /* No min-height. Forcing 390px here made the Research card the tallest in
+     its row, and grid rows are equal height - so the GitHub and Collaborate
+     cards stretched to match and the whole board went out of proportion.
+     Keeping the title to one line (further down this file) shortens the
+     heading block enough that the scientist clears it inside the card's
+     natural height, with nothing else disturbed. */
 }
 
 
@@ -1291,13 +1437,59 @@ a {
    card-large spans 2, so a new column reshuffles the whole board. Pinning it
    lets the container get much wider with no risk of that.
    ========================================================================== */
-@media (min-width: 1100px) {
-  .cards-container {
-    grid-template-columns: repeat(4, 1fr);
-    max-width: 1680px;
-    padding: 0 14px;
-    gap: 20px;
-  }
+/* Four columns only once there is genuinely room for four.
+   This fired at 1100px, where the wide gutter leaves each of four columns
+   about 230px - but the >=1100 type rules put a 33px title and a 175px
+   subtitle in them, so "Skill-Set" and "LEARN MORE ABOUT ME" both wrapped.
+   That is the band you hit on the way through a zoom, which is why it looked
+   like zooming broke the cards. 1400 is where four columns actually fit. */
+/* --------------------------------------------------------------------------
+   Zoom resizes; it does not rearrange.
+
+   The board used to change column count three times on the way through a
+   desktop zoom - 4 at 1400, 3 at 1099, 2 at 899 - so every zoom step moved
+   the cards and buttons to new places. That is the "changing position" you
+   are seeing, and it is the thing that looks broken.
+
+   Type inside the columns is sized in vw so it shrinks WITH its column
+   rather than hitting a rem floor and wrapping.
+
+   The column count is the part that has to change, though. I tried holding
+   four columns down to 700px to avoid any rearrangement on zoom, and that was
+   wrong: at 700px four columns are ~160px each, which turns About Voiid into
+   a vertical ribbon and clips What I Do off the side. A card has a minimum
+   width below which it is broken, not merely small.
+
+   So: four columns while they are wide enough to work, three in the middle,
+   two below. Three steps across the whole zoom range, each one landing on a
+   layout that is actually usable.
+   -------------------------------------------------------------------------- */
+@media (min-width: 1150px) {
+  .cards-container { grid-template-columns: repeat(4, 1fr); }
+
+  /* The padding has to scale too. At a fixed 26px a side it was eating a
+     third of a 158px card, so the title had almost no room and "Play & Learn"
+     broke onto two lines even though the type had shrunk correctly. */
+  .card { padding: clamp(9px, 1.5vw, 30px); }
+
+  /* no rem floor: a floor is what makes text stop scaling and start wrapping */
+  .card-title { font-size: clamp(0.95rem, 2.05vw, 2.8rem); }
+  /* Titles may scale freely - they are display type and shrinking them is
+     fine. Labels you have to READ and CLICK are not: with a 0.6rem floor
+     "View" fell to 10px at 768, which is what was breaking. These floors keep
+     them legible while still scaling on the way up. */
+  .card-subtitle { font-size: clamp(0.7rem, 0.88vw, 1.32rem); letter-spacing: 0.04em; }
+  .card-link { font-size: clamp(0.82rem, 1vw, 1.42rem); }
+
+  .gaming-card .card-title,
+  .music-card .card-title { font-size: clamp(2rem, 7.6vw, 9rem); }
+  .github-card .card-title { font-size: clamp(4rem, 17vw, 20rem); }
+  .research-card .card-title { font-size: clamp(0.8rem, 2vw, 2.6rem); }
+  .collaborate-card .card-title { font-size: clamp(1rem, 3.1vw, 3.5rem); }
+
+  .card-corner-icon { width: clamp(28px, 4.4vw, 102px); }
+  .resume-card,
+  .achievement-card { padding-bottom: calc(clamp(28px, 4.4vw, 102px) + 1.2rem); }
 }
 
 
@@ -1306,19 +1498,23 @@ a {
    Scaled to roughly match the original card-to-type ratio, and the side gap
    comes back so the grid is not flush to the window edge.
    ========================================================================== */
-@media (min-width: 1100px) {
-  .cards-container { padding: 0 40px; }
-
-  .card-title { font-size: calc(1.72rem * 1.1); }
-  .card-subtitle { font-size: calc(0.95rem * 1.1); }
-  .card-link { font-size: calc(1.02rem * 1.1); }
+@media (min-width: 99999px) { /* superseded by the 1000px block above */
+  /* These were fixed rem values. Once the container was allowed to grow to
+     2400px the columns kept widening while the type stayed put, so a big
+     monitor showed the same words floating in much larger cards. A vw term
+     lets the type track the card it sits in.
+     Gated at 1400 with the four-column layout: below that the cards are
+     narrower and this type overflowed them. */
+  .card-title { font-size: clamp(1.89rem, 1.36vw, 2.4rem); }
+  .card-subtitle { font-size: clamp(1.045rem, 0.75vw, 1.32rem); }
+  .card-link { font-size: clamp(1.122rem, 0.81vw, 1.42rem); }
 
   .gaming-card .card-title,
-  .music-card .card-title { font-size: calc(5.9rem * 1.1); }
-  .github-card .card-title { font-size: calc(13.6rem * 1.1); }
-  .research-card .card-title { font-size: calc(2.4rem * 1.1); }
-  .collaborate-card .card-title { font-size: calc(2.5rem * 1.1); }
-  .card-corner-icon { width: clamp(62px, 5vw, 86px); }
+  .music-card .card-title { font-size: clamp(6.49rem, 4.7vw, 8.2rem); }
+  .github-card .card-title { font-size: clamp(14.96rem, 10.8vw, 19rem); }
+  .research-card .card-title { font-size: clamp(2.64rem, 1.9vw, 3.35rem); }
+  .collaborate-card .card-title { font-size: clamp(2.75rem, 1.98vw, 3.5rem); }
+  .card-corner-icon { width: clamp(62px, 4.4vw, 102px); }
 }
 
 
@@ -1400,20 +1596,296 @@ a {
    Download CV lines up with the last one. Vertical padding is untouched.
    ========================================================================== */
 .header {
-  max-width: 1400px;
+  max-width: var(--page-max);
   margin-left: auto;
   margin-right: auto;
-  /* 16px, not the old 22px - the "Wider grid" block above overrides the
-     base .cards-container padding down to 16px, and that is what the header
-     has to match below 1100px. */
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+  /* at extreme zoom the logo and the nav cannot both fit on one line - let
+     them stack instead of overflowing the page */
+  flex-wrap: wrap;
+  row-gap: 0.75rem;
 }
 
-@media (min-width: 1100px) {
+
+/* ==========================================================================
+   Corner-icon cards need the space the icon occupies reserved.
+
+   The icon is absolutely positioned bottom-left, so it contributes no
+   height. On a wide card the title cleared it anyway; once the card got
+   short - a phone, or the page zoomed in far enough that the phone layout
+   takes over - the icon rose straight into the title and the two overlapped.
+
+   Reserving a strip the height of the icon keeps the copy above it at every
+   size, instead of relying on the card happening to be tall enough.
+   ========================================================================== */
+.resume-card,
+.achievement-card {
+  padding-bottom: calc(clamp(54px, 6vw, 74px) + 1.6rem);
+}
+
+
+
+
+/* ==========================================================================
+   Final layout corrections.
+
+   These sit at the end of the file deliberately. Several of the rules they
+   override are unscoped (`.research-card .card-title`, `.logo`) and appear
+   later in the file than the media queries that were meant to override them.
+   Media queries add no specificity, so an unscoped rule further down the file
+   was winning over a phone-specific one further up. Putting the responsive
+   corrections last is what makes them apply.
+   ========================================================================== */
+
+/* ---- the header sits outside the grid's line ----
+   Flush alignment read as stiff. The header now runs to a slightly tighter
+   gutter than the cards, so VOIID and Download CV sit a little further out
+   than the grid does - the same relationship as the original Gui/PC.png
+   reference, where the header was wider than the card board. */
+.logo { padding-left: 0; }
+
+.header {
+  /* The header runs at 45% of the grid's gutter, so the step out is always
+     about half the page margin and scales with it - a fixed offset was
+     either invisible on a tablet or slammed the logo into the window edge.
+     The 8px floor keeps it off the edge on the narrowest phones. */
+  /* A fixed 10px step in from the grid, not a percentage. At 45% of the
+     gutter the header ended up almost against the glass; this keeps the
+     small gap you asked for while staying nowhere near the edge. */
+  /* The header runs WIDER than the card grid - VOIID and Download CV sit
+     closer to the screen edges than the cards do, which is the relationship
+     in the original Gui/PC.png reference. 55% of the gutter, so the step
+     scales with the page margin instead of being a fixed number that is
+     invisible on a tablet and enormous on a wide monitor. */
+  padding-left: max(12px, calc(var(--gutter) * 0.45));
+  padding-right: max(12px, calc(var(--gutter) * 0.45));
+}
+
+/* ---- tiny gap under the header ----
+   The grid opened with a 44px top margin on top of the header's own ~26px of
+   bottom padding: ~70px of empty band between VOIID and the first card. This
+   closes it to a thin, deliberate gap without touching the space above the
+   footer. */
+.cards-container { margin-top: clamp(6px, 0.7vw, 12px); }
+.header { padding-bottom: clamp(0.5rem, 0.9vw, 0.85rem); }
+
+/* ---- the Research card's title on small screens ----
+   `.research-card .card-title` is set unscoped at 2.31rem further up this
+   file, which beat the phone rules and left the title overlapping the
+   absolutely-positioned View link. */
+@media (max-width: 768px) {
+  .research-card .card-title { font-size: clamp(1.1rem, 4.6vw, 1.5rem); }
+}
+@media (max-width: 480px) {
+  .research-card .card-title { font-size: clamp(0.95rem, 4.2vw, 1.2rem); }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .research-card .card-title { font-size: clamp(1.1rem, 2.4vw, 1.6rem); }
+}
+
+
+/* ==========================================================================
+   Phone: the Game and Music cards carry a mascot and a giant glyph, but the
+   grid was sizing them off their (tiny) text content - 102px tall, which the
+   156px mascot could not fit inside, so the card clipped her at the
+   shoulders. Giving them a floor is the right fix: shrinking her far enough
+   to fit a 102px card made her unreadable.
+   ========================================================================== */
+@media (max-width: 899px) {
+  .gaming-card,
+  .music-card { min-height: 150px; }
+}
+
+@media (max-width: 599px) {
+  .gaming-card,
+  .music-card { min-height: 132px; }
+}
+
+/* landscape phone - height is scarce, so the floor comes down and the
+   mascot scale (in MascotScene.css) comes down with it */
+@media (max-height: 500px) and (orientation: landscape) {
+  .gaming-card,
+  .music-card { min-height: 130px; }
+}
+
+
+/* ==========================================================================
+   Round of corrections from the portrait/landscape review.
+   ========================================================================== */
+
+/* ---- 1. body text ran underneath the View / Read more link ----
+   `.card-link` is absolutely positioned bottom-right, so it contributes no
+   width and the paragraph laid out straight under it. Reserving a strip on
+   the right of the text makes it wrap before it reaches the link instead of
+   colliding with it. In `em`, so it tracks the text size at every
+   breakpoint rather than needing a value per screen. */
+/* On a wide card the text and the link share one line, so the text needs a
+   strip reserved on the right. On a narrow card that strip was most of the
+   width and "Lets Debug Together" came out one word per line. Below 900px
+   the link drops onto its own row instead and the text gets the full width
+   back. */
+@media (min-width: 900px) {
+  .project-card p,
+  .blog-card p { padding-right: 7em; }
+}
+
+@media (max-width: 899px) {
+  .project-card,
+  .blog-card { padding-bottom: 3.4rem; }
+  .project-card p,
+  .blog-card p { padding-right: 0; }
+  .project-card .card-link,
+  .blog-card .card-link { right: auto; left: calc(20px * 1.1); }
+}
+
+/* ---- 2. the Collaborate copy was indented off the title ----
+   `max-width: 80%` with `margin: 0 auto` centred the paragraph BOX while its
+   text stayed left-aligned, so the copy started ~40px right of the heading
+   for no visible reason. Flush left, with the measure kept by a character
+   count instead of a percentage. */
+.collaborate-card .card-subtitle {
+  max-width: min(100%, 48ch);
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* ---- 3. the footer ----
+   "Home" was the only link using .nav-link, so it rendered in a different
+   colour and weight from the three beside it. The social icons were
+   1.925rem - nearly 40px - which read as oversized next to 0.9rem text. */
+.footer-nav .nav-link {
+  color: var(--color-light-grey);
+  font-size: calc(0.95rem * 1.1);
+  font-weight: 500;
+}
+.footer-nav .nav-link:hover { color: var(--color-yellow); }
+.footer-nav .nav-link::after { display: none; }
+
+/* size lives on the base .social-icon rule above; only the gap is set here */
+.social-links { gap: clamp(16px, 1.9vw, 32px); }
+.footer-link,
+.footer-nav .nav-link { font-size: clamp(0.95rem, 1.15vw, 1.3rem); }
+
+/* ---- 4. the header sat almost on top of the first card ----
+   12px was too tight once the gutter grew; this gives the band under VOIID
+   room without going back to the ~70px dead zone it started with. */
+.cards-container { margin-top: clamp(16px, 1.9vw, 34px); }
+.header { padding-bottom: clamp(0.85rem, 1.5vw, 1.5rem); }
+
+/* ---- 5. corner-icon cards ----
+   The icon and the View link share the bottom strip. Pulling the icon in
+   from the corner and lifting the link off the floor stops them reading as
+   one crowded clump. */
+.card-corner-icon {
+  left: calc(22px * 1.1);
+  bottom: calc(22px * 1.1);
+  opacity: 0.9;
+}
+.resume-card .card-link,
+.achievement-card .card-link { bottom: calc(26px * 1.1); }
+
+
+/* ---- the Research heading stays on one line ----
+   Its height was the loose variable: at 1600 the title fitted one line and
+   the scientist cleared it, at 1200 the narrower column wrapped it to two and
+   he was back through it. Sizing it to fit the narrowest desktop column and
+   forbidding the wrap makes the heading block a known height, so the card's
+   floor is enough at every width instead of only some. */
+.research-card .card-title {
+  white-space: nowrap;
+  font-size: clamp(1.35rem, 2.2vw, 2.31rem);
+}
+@media (max-width: 899px) {
+  .research-card .card-title { font-size: clamp(1.1rem, 3.4vw, 1.7rem); }
+}
+@media (max-width: 599px) {
+  .research-card .card-title { font-size: clamp(0.95rem, 4.2vw, 1.25rem); }
+}
+
+
+/* ---- portrait phones: the header had slid too far out ----
+   The 45%-of-gutter offset works on a desktop, where the gutter is 40px+.
+   On a phone the gutter is 16px, so 45% put VOIID 7px from the glass. Below
+   900px the header simply shares the grid's gutter, and the band under it
+   opens up so the first card is not sitting on the nav. */
+@media (max-width: 899px) {
   .header {
-    max-width: 1680px;
-    padding-left: 40px;
-    padding-right: 40px;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+    padding-bottom: clamp(1.1rem, 3.4vw, 1.7rem);
+  }
+  .cards-container { margin-top: clamp(20px, 4vw, 32px); }
+}
+
+
+/* ---- the footer quote scales with the screen ----
+   It was a flat 1.925rem, so on a wide desktop it sat as a small line in a
+   lot of empty space. The vw term lets it grow into that space; the clamp
+   floor keeps it where it was on a phone. */
+.quote {
+  font-size: clamp(1.75rem, 3.1vw, 3.6rem);
+}
+
+
+/* ==========================================================================
+   Over-zoom / phone shape (below 700px).
+
+   Past about 275% zoom the board drops to the two-column phone layout, and
+   that layout had been left behind: the View links were rendering at 9.9px,
+   Download CV at 8px, and the card padding had collapsed to 9px a side while
+   the bottom still reserved 78px for a corner icon. Legible at a glance is
+   the requirement here - these still scale with the viewport, they just are
+   not allowed to scale into nothing.
+
+   Last in the file on purpose: several of the rules below are also declared
+   further up, and media queries carry no extra specificity.
+
+   Scoped to 799 so it covers the whole two-column range - at 699 there was a
+   100px band where neither this nor the desktop block applied and the cards
+   fell back to base styling.
+   ========================================================================== */
+@media (max-width: 799px) {
+  .card {
+    padding: clamp(13px, 3.4vw, 20px);
+  }
+
+  /* display type: free to scale */
+  .card-title { font-size: clamp(1.02rem, 4.4vw, 1.6rem); }
+  .collaborate-card .card-title { font-size: clamp(1.3rem, 5.4vw, 2rem); }
+  .research-card .card-title { font-size: clamp(0.95rem, 4vw, 1.35rem); }
+  .gaming-card .card-title,
+  .music-card .card-title { font-size: clamp(2.6rem, 12vw, 4.4rem); }
+  .github-card .card-title { font-size: clamp(5.5rem, 26vw, 9rem); }
+
+  /* read-and-tap type: floored so it stays legible */
+  .card-subtitle { font-size: clamp(0.64rem, 2.6vw, 0.82rem); }
+  .card-link { font-size: clamp(0.8rem, 3vw, 0.98rem); }
+  .nav-link { font-size: clamp(0.68rem, 2.6vw, 0.86rem); }
+  .get-in-touch {
+    font-size: clamp(0.72rem, 2.7vw, 0.9rem);
+    padding: clamp(0.38rem, 1.6vw, 0.6rem) clamp(0.7rem, 3vw, 1.15rem);
+  }
+
+  /* the icon and the link share the bottom strip - both come down together,
+     and the reserve comes down with them instead of holding 78px */
+  .card-corner-icon { width: clamp(30px, 8.5vw, 48px); }
+  .resume-card,
+  .achievement-card {
+    padding-bottom: calc(clamp(30px, 8.5vw, 48px) + 1rem);
   }
 }
+
+
+/* ---- the floor of the range: ~320px, or roughly 600% zoom ----
+   At this width a card is about 133px wide with ~107px of usable content, and
+   the 1.02rem title floor from the block above put "Play & Learn" at 113px -
+   just over, so it broke onto two lines. The floor drops a little further
+   here, and only here. */
+@media (max-width: 360px) {
+  .card-title { font-size: clamp(0.84rem, 4.4vw, 1.6rem); }
+  .card-subtitle { font-size: clamp(0.56rem, 2.6vw, 0.82rem); }
+  .card { padding: clamp(10px, 3.2vw, 16px); }
+  .cards-container { gap: 9px; }
+}
+

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Mascot from "./Mascot";
+import useCardPlay from "../hooks/useCardPlay";
 import "./MascotScene.css";
 
 /**
@@ -47,24 +48,15 @@ const MascotScene = ({
     at(walkMs + settleMs, "dancing");
   }, [clearTimers, walkMs, settleMs]);
 
-  // She only shows up while the cursor is on the card - walking in on hover
-  // and stepping back off when it leaves.
-  useEffect(() => {
-    const card = hostRef.current?.parentElement;
-    if (!card) return undefined;
+  const leave = useCallback(() => {
+    clearTimers();
+    setPhase("away");
+  }, [clearTimers]);
 
-    const leave = () => {
-      clearTimers();
-      setPhase("away");
-    };
-
-    card.addEventListener("mouseenter", play);
-    card.addEventListener("mouseleave", leave);
-    return () => {
-      card.removeEventListener("mouseenter", play);
-      card.removeEventListener("mouseleave", leave);
-    };
-  }, [play, clearTimers]);
+  // Cursor on the card starts her walking in; on a phone, the card scrolling
+  // into view does. Before this she simply never appeared on mobile - there
+  // was no hover to trigger her.
+  useCardPlay(hostRef, play, leave, { find: (el) => el.parentElement });
 
   // Shove the card's icon aside the moment she reaches it, and let it swing
   // back when she leaves. Driven inline rather than through a stylesheet rule

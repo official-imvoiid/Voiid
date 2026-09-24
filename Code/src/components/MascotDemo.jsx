@@ -19,7 +19,7 @@ const MascotDemo = () => {
     padding: "0.5rem 1.1rem",
     borderRadius: "9999px",
     border: active ? "2px solid #EAB308" : "2px solid #3F3F46",
-    background: active ? "#EAB308" : "#27272A",
+    background: active ? "var(--accent)" : "var(--surface)",
     color: active ? "#1A1A1D" : "#D1D5DB",
     fontWeight: 600,
     fontSize: "0.9rem",
@@ -28,7 +28,7 @@ const MascotDemo = () => {
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "#1A1A1D", color: "#fff", padding: "2rem 1rem" }}>
+    <div style={{ minHeight: "100dvh", background: "var(--app-bg)", color: "var(--ink)", padding: "2rem 1rem" }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         <div
           style={{

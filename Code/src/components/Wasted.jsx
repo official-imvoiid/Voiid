@@ -39,17 +39,40 @@ const TAUNTS = [
   "skill issue 💀",
 ];
 
-// Cracks radiating from the impact point, drawn in a 100x100 space so the
-// overlay can stretch them across the card at any size.
+/**
+ * The original crack pattern, scaled outward to fill the card.
+ *
+ * This is the hand-drawn set it started with - the generated shatter that
+ * replaced it read as scribble, not glass. The only change is SPREAD: every
+ * endpoint is pushed out from the impact point by 1.55x, so each fracture
+ * runs off the edge of the 100x100 box instead of stopping inside it. With
+ * `preserveAspectRatio="none"` the box is stretched to the card, so pushing
+ * past the boundary is what guarantees the corners and the side thirds are
+ * covered however wide the card gets.
+ */
+const SPREAD = 1.55;
+
+// push one "x y" pair out from the centre
+const spread = (x, y) => `${(50 + (x - 50) * SPREAD).toFixed(1)} ${(50 + (y - 50) * SPREAD).toFixed(1)}`;
+// rewrite every coordinate pair in a path command string
+const stretch = (d) =>
+  d.replace(/([ML])\s*(-?[\d.]+)\s+(-?[\d.]+)/g, (_, cmd, x, y) =>
+    `${cmd}${spread(parseFloat(x), parseFloat(y))}`
+  );
+
 const CRACKS = [
   "M50 50 L18 4", "M50 50 L34 0", "M50 50 L62 0", "M50 50 L86 8",
   "M50 50 L98 26", "M50 50 L100 54", "M50 50 L92 84", "M50 50 L68 100",
   "M50 50 L44 100", "M50 50 L14 92", "M50 50 L0 70", "M50 50 L2 34",
+  // a few more of the same, filling the gaps between the originals
+  "M50 50 L8 18", "M50 50 L76 2", "M50 50 L100 78", "M50 50 L28 100",
+  "M50 50 L0 46", "M50 50 L100 34",
   // secondary webbing
   "M32 27 L44 14 M44 14 L60 18 M60 18 L72 12",
   "M28 62 L40 74 M40 74 L58 76 M58 76 L74 66",
   "M22 44 L36 40 M64 36 L78 44 M66 62 L80 58",
-];
+  "M20 34 L32 22 M70 24 L82 34 M24 70 L34 82",
+].map(stretch);
 
 const LABELS = ["press me 3x", "again…", "one more 👀"];
 
@@ -157,9 +180,14 @@ export const useWasted = ({ sound = "/audio/fahhhhh.mp3" } = {}) => {
         aria-hidden="true"
       >
         {CRACKS.map((d, i) => (
-          <path key={i} d={d} style={{ animationDelay: `${0.035 * i}s` }} />
+          <path
+            key={i}
+            d={d}
+            pathLength="1"
+            style={{ animationDelay: `${0.022 * i}s` }}
+          />
         ))}
-        <circle className="wasted-impact" cx="50" cy="50" r="1.6" />
+        <circle className="wasted-impact" cx="50" cy="50" r="2.6" />
       </svg>
       <div className="wasted-stack">
         <div className="wasted-text">WASTED</div>

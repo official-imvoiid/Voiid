@@ -69,17 +69,43 @@ const Teamwork = ({ message = "Great things are never built alone." }) => {
     timer.current = setTimeout(() => setAwake(false), WAKE_MS);
   }, []);
 
+  const sleep = useCallback(() => {
+    clearTimeout(timer.current);
+    setAwake(false);
+  }, []);
+
   useEffect(() => {
     const card = hostRef.current?.closest(".card");
     if (!card) return undefined;
+
+    // With a cursor: moving over the card wakes the packets for a moment.
     if (window.matchMedia("(hover: hover)").matches) {
       card.addEventListener("mousemove", wake);
+      return () => {
+        card.removeEventListener("mousemove", wake);
+        clearTimeout(timer.current);
+      };
     }
+
+    // Without one: the card being on screen is the signal. This branch used
+    // to do nothing at all, so on a phone the packets stayed asleep forever.
+    if (typeof IntersectionObserver === "undefined") {
+      setAwake(true);
+      return () => clearTimeout(timer.current);
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        clearTimeout(timer.current);
+        setAwake(entry.isIntersecting);
+      },
+      { threshold: 0.35 }
+    );
+    io.observe(card);
     return () => {
-      card.removeEventListener("mousemove", wake);
+      io.disconnect();
       clearTimeout(timer.current);
     };
-  }, [wake]);
+  }, [wake, sleep]);
 
   return (
     <>

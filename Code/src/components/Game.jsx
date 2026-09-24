@@ -439,7 +439,7 @@ checkPasswordStrength("StrongP@ssword123");`,
         animation: 'fadeIn 0.5s ease-in'
       }}>
         <div style={{
-          backgroundColor: '#111827',
+          backgroundColor: 'var(--surface)',
           padding: '2.5rem',
           borderRadius: '0.75rem',
           border: '2px solid #f59e0b',
@@ -522,7 +522,7 @@ checkPasswordStrength("StrongP@ssword123");`,
         </div>
 
         <style jsx global>{`
-          @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+          /* Dancing Script is loaded locally - see src/styles/fonts.css */
 
           @keyframes sway {
             0%, 100% { transform: rotate(-2deg) translateY(0); }
@@ -538,11 +538,22 @@ checkPasswordStrength("StrongP@ssword123");`,
     );
   };
 
+  /* the page behind the panel - without this the panel WAS the page, so on
+     any screen wider than 80rem the app background showed around it in a
+     different colour */
+  const pageStyle = {
+    minHeight: '100dvh',
+    width: '100%',
+    backgroundColor: 'var(--app-bg)',
+    padding: 'clamp(14px, 2.6vw, 40px) var(--gutter)',
+    boxSizing: 'border-box',
+  };
+
   const containerStyle = {
     maxWidth: '80rem',
     margin: '0 auto',
     padding: '1.5rem',
-    backgroundColor: '#111827',
+    backgroundColor: 'var(--surface)',
     color: '#ffffff',
     borderRadius: '0.5rem',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
@@ -571,7 +582,7 @@ checkPasswordStrength("StrongP@ssword123");`,
     padding: '1.5rem',
     border: '1px solid #374151',
     borderRadius: '0.5rem',
-    backgroundColor: '#1f2937',
+    backgroundColor: 'var(--surface-3)',
     marginBottom: '1.5rem'
   };
 
@@ -579,7 +590,7 @@ checkPasswordStrength("StrongP@ssword123");`,
     padding: '1.5rem',
     border: '1px solid #374151',
     borderRadius: '0.5rem',
-    backgroundColor: '#1f2937'
+    backgroundColor: 'var(--surface-3)'
   };
 
   const textareaStyle = {
@@ -587,7 +598,7 @@ checkPasswordStrength("StrongP@ssword123");`,
     height: '16rem',
     fontFamily: 'monospace',
     padding: '1rem',
-    backgroundColor: '#111827',
+    backgroundColor: 'var(--surface)',
     color: '#d1d5db',
     border: '1px solid #374151',
     borderRadius: '0.25rem',
@@ -638,13 +649,13 @@ checkPasswordStrength("StrongP@ssword123");`,
   const solutionContainerStyle = {
     marginTop: '1.5rem',
     padding: '1rem',
-    backgroundColor: '#1f2937',
+    backgroundColor: 'var(--surface-3)',
     border: '1px solid #374151',
     borderRadius: '0.5rem'
   };
 
   const preStyle = {
-    backgroundColor: '#111827',
+    backgroundColor: 'var(--surface)',
     color: '#d1d5db',
     padding: '1rem',
     borderRadius: '0.25rem',
@@ -658,11 +669,11 @@ checkPasswordStrength("StrongP@ssword123");`,
     padding: '1.5rem',
     border: '1px solid #374151',
     borderRadius: '0.5rem',
-    backgroundColor: '#1f2937'
+    backgroundColor: 'var(--surface-3)'
   };
 
   const outputPreStyle = {
-    backgroundColor: '#000000',
+    backgroundColor: 'var(--surface-2)',
     color: '#4ade80',
     padding: '1rem',
     borderRadius: '0.25rem',
@@ -672,6 +683,7 @@ checkPasswordStrength("StrongP@ssword123");`,
   };
 
   return (
+    <div style={pageStyle}>
     <div style={containerStyle}>
       {/* Top Bar */}
       <div style={{
@@ -812,6 +824,7 @@ checkPasswordStrength("StrongP@ssword123");`,
       )}
 
       {showCompletionPopup && <CompletionPopup />}
+    </div>
     </div>
   );
 };

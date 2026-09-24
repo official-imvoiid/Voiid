@@ -6,13 +6,21 @@
 
 .ms-host {
   position: absolute;
-  bottom: 0;                  /* short card - she needs every pixel */
-  left: 0;
-  right: 0;
-  z-index: 2;
+  /* Spans the FULL card, with her aligned to the floor of it. It used to be
+     bottom-anchored and only as tall as she is, which meant the lyric's
+     `bottom: 76%` was 76% of HER height - still down at the note's level.
+     Measured against the whole card, the same percentage puts it above. */
+  inset: 0;
+  /* MUST out-rank the music glyph (.music-card .card-title, z-index 3).
+     This was 2, and because a positioned element with a z-index creates a
+     stacking context, everything inside here - including the lyric at
+     z-index 8 - was trapped at level 2 and painted behind the note. The
+     lyric's own z-index could never win; this is the number that decides it. */
+  z-index: 6;
   pointer-events: none;      /* never steal the card's own click target */
   line-height: 0;
   display: flex;
+  align-items: flex-end;     /* she still stands on the card floor */
   justify-content: flex-start;
 }
 .ms-host[data-side="right"] { justify-content: flex-end; }
@@ -43,10 +51,22 @@
   .ms-host[data-phase="away"] .ms-mover { opacity: 1; }
 }
 
-/* On narrow cards she crowds the note - scale her down in place. */
-@media (max-width: 720px) {
-  .ms-host { transform: scale(0.8); transform-origin: bottom left; }
-  .ms-host[data-side="right"] { transform-origin: bottom right; }
+/* --------------------------------------------------------------------------
+   She is drawn at a fixed pixel size, but the card is not: on a phone the
+   music card is ~102px tall and she is 156px, so the card's `overflow:
+   hidden` was cutting her off at the shoulders. Scaling from the bottom edge
+   keeps her feet on the floor of the card while she shrinks to fit it.
+   -------------------------------------------------------------------------- */
+.ms-host { transform-origin: bottom left; }
+.ms-host[data-side="right"] { transform-origin: bottom right; }
+
+@media (max-width: 1099px) { .ms-host { transform: scale(0.86); } }
+@media (max-width: 899px)  { .ms-host { transform: scale(0.74); } }
+@media (max-width: 599px)  { .ms-host { transform: scale(0.58); } }
+
+/* landscape phone: the card is short but wide, so height is the constraint */
+@media (max-height: 500px) and (orientation: landscape) {
+  .ms-host { transform: scale(0.62); }
 }
 
 /* ==========================================================================
@@ -54,10 +74,16 @@
    ========================================================================== */
 .ms-lyrics {
   position: absolute;
-  left: 30%;
-  bottom: 52%;
+  /* Across the music note and IN FRONT of it, flying over the glyph - not
+     parked above it. The note sits at z-index 3 inside the card's isolation
+     context, so the lyric layer has to out-rank that, which is what z-index
+     8 below is for. */
+  left: 28%;
+  bottom: 46%;
   width: 0;
-  z-index: 3;
+  /* in front of the big music glyph - the card title sits at a stacking level
+     that was painting over the lyric, so it read as half-hidden behind it */
+  z-index: 8;
   pointer-events: none;
 }
 
@@ -66,18 +92,40 @@
   left: 0;
   bottom: 0;
   white-space: nowrap;
-  font-family: Pacifico, "Cabin Sketch", cursive;
-  font-weight: 600;
-  color: #FFD977;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  /* Pacifico is a script face - all the letterforms join and the strokes
+     thin out, which is unreadable at this size over a busy card. Space
+     Grotesk is already self-hosted for the site, and at 700 it stays legible
+     small. */
+  /* !important is required here: WebSite.css opens with
+     `* { font-family: var(--font-default) !important }`, which forces the
+     sketchy display face onto every element on the page. Without matching
+     that !important this declaration is silently ignored - which is exactly
+     why the font appeared not to change. */
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif !important;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  /* Black. Light text on the red card was the whole problem - every variant
+     of cream, gold or white washed into it. Black reads against that red at
+     any size, with a faint light halo to lift it off the busier patches. */
+  color: #000000;
+  /* pure black, with a tight white rim so it never merges into the red */
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55),
+    0 -1px 0 rgba(255, 255, 255, 0.3),
+    0 0 8px rgba(255, 255, 255, 0.4);
+  /* .ms-host sets line-height: 0 (it exists to strip the inline gap under the
+     SVG), and the lyric was inheriting it - so its box measured zero tall and
+     every attempt to position it by percentage landed on a line with no
+     height. It needs its own. */
+  line-height: 1.15;
   opacity: 0;
   animation: ms-lyric-float 3.4s ease-out infinite;
 }
-.ms-lyric-1 { font-size: clamp(13px, 4.4vw, 21px); animation-delay: 0.3s; }
+.ms-lyric-1 { font-size: clamp(15px, 4.6vw, 24px); animation-delay: 0.3s; }
 .ms-lyric-2 {
   left: 22%;
   bottom: -38px;
-  font-size: clamp(10px, 3.3vw, 16px);
+  font-size: clamp(12px, 3.5vw, 18px);
   opacity: 0;
   animation-delay: 1.85s;
 }
@@ -90,5 +138,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ms-lyric { animation: none; opacity: 0.9; }
+  .ms-lyric { animation: none; opacity: 1; }
 }

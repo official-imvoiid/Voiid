@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import useCardPlay from "../hooks/useCardPlay";
 import "./Scientist.css";
 
 /**
@@ -24,7 +25,7 @@ const TIMELINE = [
   ["away", 6600],
 ];
 
-const Scientist = ({ size = 124, side = "left" }) => {
+const Scientist = ({ height = "64%", side = "left" }) => {
   const [phase, setPhase] = useState("away");
   const hostRef = useRef(null);
   const timers = useRef([]);
@@ -42,23 +43,18 @@ const Scientist = ({ size = 124, side = "left" }) => {
     });
   }, [clearTimers]);
 
-  useEffect(() => {
-    const card = hostRef.current?.parentElement;
-    if (!card) return undefined;
+  const leave = useCallback(() => {
+    clearTimers();
+    setPhase("away");
+  }, [clearTimers]);
 
-    const leave = () => {
-      clearTimers();
-      setPhase("away");
-    };
+  // Hover where there is a cursor, scrolled-into-view where there is not -
+  // on a phone he used to never run at all.
+  useCardPlay(hostRef, play, leave, { find: (el) => el.parentElement });
 
-    card.addEventListener("mouseenter", play);
-    card.addEventListener("mouseleave", leave);
-    return () => {
-      card.removeEventListener("mouseenter", play);
-      card.removeEventListener("mouseleave", leave);
-      clearTimers();
-    };
-  }, [play, clearTimers]);
+  // the timeline is a chain of setTimeouts - drop any still pending when he
+  // unmounts, or they fire setPhase on a component that is gone
+  useEffect(() => clearTimers, [clearTimers]);
 
   return (
     <div
@@ -66,7 +62,10 @@ const Scientist = ({ size = 124, side = "left" }) => {
       className="sci"
       data-phase={phase}
       data-side={side}
-      style={{ width: size }}
+      /* a share of the card's height, not a pixel width - his art is
+         200x330, so any width I picked became a height 1.65x larger that
+         the card had no say in, and he grew straight through the heading */
+      style={{ height }}
       aria-hidden="true"
     >
       <svg className="sci-art" viewBox="0 0 200 330" xmlns="http://www.w3.org/2000/svg">

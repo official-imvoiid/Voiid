@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import PageShell from "./PageShell";
+import { useContent } from "../content/ContentContext";
 
 /**
  * Certifications - what is earned, what is underway, what is next.
@@ -17,96 +18,6 @@ import PageShell from "./PageShell";
  * status: "done" | "active" | "planned"
  * ---------------------------------------------------------------------------
  */
-const CERTS = [
-  {
-    name: "Google Cybersecurity Certificate",
-    issuer: "Google / Coursera",
-    status: "active",
-    date: "In progress",
-    blurb: "Eight-course grounding in SOC work, Linux, SQL, Python and incident response.",
-    tags: ["SIEM", "Linux", "Python"],
-  },
-  {
-    name: "Certified in Cybersecurity (CC)",
-    issuer: "ISC2",
-    status: "active",
-    date: "In progress",
-    blurb: "Entry-level certification covering security principles, access control and network security.",
-    tags: ["Access Control", "BCDR"],
-  },
-  {
-    name: "CompTIA Security+",
-    issuer: "CompTIA",
-    status: "planned",
-    date: "Targeting 2026",
-    blurb: "The baseline the industry actually asks for - threats, architecture, operations, governance.",
-    tags: ["Baseline", "DoD 8570"],
-  },
-  {
-    name: "Jr Penetration Tester",
-    issuer: "TryHackMe",
-    status: "active",
-    date: "In progress",
-    blurb: "Hands-on offensive path: enumeration, web exploitation, privilege escalation.",
-    tags: ["Web", "PrivEsc", "Labs"],
-  },
-  {
-    name: "eJPT",
-    issuer: "INE Security",
-    status: "planned",
-    date: "Next up",
-    blurb: "Fully practical entry pentest exam - assess a live network end to end.",
-    tags: ["Practical", "Networks"],
-  },
-  {
-    name: "CCNA",
-    issuer: "Cisco",
-    status: "planned",
-    date: "Targeting 2026",
-    blurb: "Routing, switching and network fundamentals - the layer everything else sits on.",
-    tags: ["Routing", "Switching"],
-  },
-  {
-    name: "SC-900: Security Fundamentals",
-    issuer: "Microsoft",
-    status: "planned",
-    date: "Planned",
-    blurb: "Identity, compliance and security across the Microsoft cloud stack.",
-    tags: ["Azure", "Identity"],
-  },
-  {
-    name: "AWS Certified Cloud Practitioner",
-    issuer: "Amazon Web Services",
-    status: "planned",
-    date: "Planned",
-    blurb: "Cloud literacy - services, shared responsibility model, billing and security basics.",
-    tags: ["Cloud", "IAM"],
-  },
-  {
-    name: "Burp Suite Certified Practitioner",
-    issuer: "PortSwigger",
-    status: "planned",
-    date: "Long term",
-    blurb: "Proof of real web application testing skill, examined hands-on.",
-    tags: ["Web AppSec", "OWASP"],
-  },
-  {
-    name: "CPTS",
-    issuer: "Hack The Box",
-    status: "planned",
-    date: "Long term",
-    blurb: "Full penetration testing engagement plus a professional report.",
-    tags: ["Red Team", "Reporting"],
-  },
-  {
-    name: "OSCP",
-    issuer: "OffSec",
-    status: "planned",
-    date: "The goal",
-    blurb: "Twenty-four hours, a live network, and a report. The one worth the wait.",
-    tags: ["Offensive", "Milestone"],
-  },
-];
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -118,11 +29,13 @@ const FILTERS = [
 const TONE_LABEL = { done: "Earned", active: "In progress", planned: "Planned" };
 
 const Certifications = () => {
+  /* the list lives in src/content/defaults.js and is editable at /admin */
+  const { certifications: CERTS } = useContent();
   const [filter, setFilter] = useState("all");
 
   const shown = useMemo(
     () => (filter === "all" ? CERTS : CERTS.filter((c) => c.status === filter)),
-    [filter]
+    [filter, CERTS]
   );
 
   const earned = CERTS.filter((c) => c.status === "done").length;

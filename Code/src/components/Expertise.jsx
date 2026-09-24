@@ -3,11 +3,11 @@ import BackHome from "./BackHome";
 const Expertise = () => (
   <div
     style={{
-      minHeight: "100vh",
-      background: "#141416",
-      color: "#F2F2F4",
+      minHeight: "100dvh",
+      background: "var(--app-bg)",
+      color: "var(--ink)",
       fontFamily: "Montserrat, Arial, sans-serif",
-      padding: "clamp(18px, 4vw, 44px) clamp(14px, 5vw, 56px) 64px",
+      padding: "clamp(18px, 4vw, 44px) var(--gutter) 64px",
       boxSizing: "border-box",
     }}
   >

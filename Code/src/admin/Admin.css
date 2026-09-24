@@ -1,0 +1,320 @@
+/* ==========================================================================
+   Admin portal.
+
+   Deliberately plainer than the public site - this is a tool, not a page.
+   It uses the same surface tokens so it still belongs to the same product,
+   and it is built fluid so it works on a phone as well as a desktop: edits
+   are the kind of thing you end up doing from wherever you are.
+   ========================================================================== */
+
+.adm {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background: var(--app-bg);
+  color: var(--ink);
+  font-family: "Montserrat", Arial, sans-serif;
+  padding: clamp(16px, 3vw, 34px) var(--gutter) 60px;
+  box-sizing: border-box;
+}
+
+.adm * { font-family: inherit !important; }
+
+/* ---- top bar ---- */
+.adm-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  max-width: 1240px;
+  margin: 0 auto clamp(14px, 2vw, 22px);
+}
+
+.adm-title {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.adm-sub {
+  margin: 6px 0 0;
+  max-width: 62ch;
+  color: var(--ink-dim);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.adm-sub strong { color: var(--ink); font-weight: 700; }
+
+.adm-top-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---- buttons ---- */
+.adm-btn {
+  padding: 0.48rem 0.95rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease, opacity .2s ease;
+}
+.adm-btn:hover:not(:disabled) { background: var(--surface-3); border-color: rgba(255,255,255,.2); }
+.adm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.adm-btn.is-ghost { background: transparent; }
+.adm-btn.is-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1A1A1D;
+}
+.adm-btn.is-primary:hover { background: #F5C451; border-color: #F5C451; }
+
+/* ---- flash ---- */
+.adm-flash {
+  max-width: 1240px;
+  margin: 0 auto 14px;
+  padding: 9px 13px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+.adm-flash.is-ok  { color: #4ADE80; border-color: rgba(74,222,128,.35); background: rgba(74,222,128,.07); }
+.adm-flash.is-bad { color: #F87171; border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.07); }
+
+/* ---- layout: rail + panel, stacking on narrow screens ---- */
+.adm-body {
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+  gap: clamp(12px, 1.6vw, 22px);
+  max-width: 1240px;
+  margin: 0 auto;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .adm-body { grid-template-columns: 1fr; }
+  .adm-nav {
+    flex-direction: row !important;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .adm-tab { flex: 0 0 auto; }
+}
+
+/* ---- section rail ---- */
+.adm-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 16px;
+}
+@media (max-width: 760px) { .adm-nav { position: static; } }
+
+.adm-tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-dim);
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease;
+}
+.adm-tab:hover { background: var(--surface); color: var(--ink); }
+.adm-tab[aria-current="true"] {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+.adm-tab.is-reset { margin-top: 10px; color: #F87171; font-weight: 600; }
+.adm-tab.is-reset:hover { background: rgba(248,113,113,.09); color: #FCA5A5; }
+
+/* an edited section is marked, so you can see what differs from the build */
+.adm-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: 0 0 auto;
+}
+
+/* ---- panel ---- */
+.adm-panel {
+  min-width: 0;
+  padding: clamp(14px, 2vw, 20px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.adm-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.adm-panel-title { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.adm-panel-blurb {
+  margin: 5px 0 0;
+  max-width: 68ch;
+  color: var(--ink-dim);
+  font-size: 0.79rem;
+  line-height: 1.55;
+}
+.adm-panel-tools { display: flex; gap: 8px; }
+
+/* ---- fields ---- */
+.adm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 12px;
+}
+
+.adm-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.adm-field.is-narrow { max-width: 150px; }
+
+.adm-label {
+  color: var(--ink-dim);
+  font-size: 0.71rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.adm-input {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 0.85rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.adm-input:focus {
+  border-color: color-mix(in srgb, var(--accent) 65%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 13%, transparent);
+}
+.adm-textarea { resize: vertical; line-height: 1.5; }
+.adm-select { cursor: pointer; }
+
+.adm-hint {
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.adm-color { display: flex; gap: 8px; align-items: center; }
+.adm-swatch {
+  width: 38px; height: 34px;
+  flex: 0 0 auto;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-2);
+  cursor: pointer;
+}
+
+/* ---- list rows ---- */
+.adm-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+
+.adm-row {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.adm-row[data-open="true"] { border-color: rgba(255,255,255,.14); }
+
+.adm-row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 7px 3px 0;
+}
+
+.adm-row-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 0.7rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.adm-caret { color: var(--ink-faint); flex: 0 0 auto; }
+.adm-row-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.adm-row-tools { display: flex; gap: 3px; flex: 0 0 auto; }
+
+.adm-icon {
+  width: 27px; height: 27px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color .16s ease, color .16s ease, opacity .16s ease;
+}
+.adm-icon:hover:not(:disabled) { background: var(--surface-3); color: var(--ink); }
+.adm-icon:disabled { opacity: 0.25; cursor: not-allowed; }
+.adm-icon.is-danger:hover { background: rgba(248,113,113,.14); color: #FCA5A5; }
+
+.adm-row .adm-grid { padding: 4px 12px 14px; }
+
+.adm-empty {
+  padding: 30px;
+  text-align: center;
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+/* ---- gate ---- */
+.adm-gate-page { display: grid; place-items: center; }
+
+.adm-gate {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: min(340px, 100%);
+  padding: clamp(20px, 4vw, 30px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  text-align: center;
+}
+.adm-gate-title { margin: 0; font-size: 1.3rem; font-weight: 700; }
+.adm-gate-sub { margin: 0 0 4px; color: var(--ink-dim); font-size: 0.82rem; }
+.adm-gate-err { margin: 0; color: #F87171; font-size: 0.78rem; font-weight: 600; }
+.adm-gate-back {
+  margin-top: 2px;
+  color: var(--ink-faint);
+  font-size: 0.76rem;
+  text-decoration: none;
+}
+.adm-gate-back:hover { color: var(--ink-dim); }
