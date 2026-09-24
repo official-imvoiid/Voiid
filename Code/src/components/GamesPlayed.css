@@ -3,17 +3,18 @@
    ========================================================================== */
 
 .gp-page {
-  --gp-bg: #141416;
-  --gp-card: #1D1D21;
+  --gp-bg: var(--app-bg);
+  --gp-card: var(--surface);
   --gp-accent: #f39c12;
   --gp-dim: #9a9aa4;
 
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   background: var(--gp-bg);
   color: #f2f2f4;
   font-family: "Montserrat", Arial, sans-serif;
-  padding: clamp(18px, 4vw, 44px) clamp(14px, 5vw, 56px) 64px;
+  padding: clamp(18px, 4vw, 44px) var(--gutter) 64px;
   box-sizing: border-box;
 }
 

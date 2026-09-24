@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import PageShell from "./PageShell";
+import { useContent } from "../content/ContentContext";
 
 /**
  * My Study Notes - the B.Tech notes shelf.
@@ -17,58 +18,14 @@ import PageShell from "./PageShell";
  * before every PDF is written.
  * ---------------------------------------------------------------------------
  */
-const NOTES = [
-  // ---- Semester 1 ----
-  { sem: 1, subject: "Engineering Mathematics I", title: "Calculus & Matrices", tags: ["Limits", "Eigenvalues", "Integration"] },
-  { sem: 1, subject: "Programming for Problem Solving", title: "C Fundamentals", tags: ["Pointers", "Arrays", "Recursion"] },
-  { sem: 1, subject: "Engineering Physics", title: "Waves, Optics & Modern Physics", tags: ["Interference", "Lasers"] },
-  { sem: 1, subject: "Basic Electrical Engineering", title: "Circuit Theory Essentials", tags: ["KVL / KCL", "Thevenin"] },
-
-  // ---- Semester 2 ----
-  { sem: 2, subject: "Engineering Mathematics II", title: "Differential Equations & Transforms", tags: ["Laplace", "Fourier"] },
-  { sem: 2, subject: "Data Structures", title: "Linear & Non-Linear Structures", tags: ["Stacks", "Trees", "Graphs"] },
-  { sem: 2, subject: "Engineering Chemistry", title: "Bonding, Polymers & Corrosion", tags: ["Electrochemistry"] },
-  { sem: 2, subject: "Environmental Science", title: "Ecosystems & Pollution Control", tags: ["Sustainability"] },
-
-  // ---- Semester 3 ----
-  { sem: 3, subject: "Discrete Mathematics", title: "Logic, Sets & Graph Theory", tags: ["Proofs", "Relations", "Combinatorics"] },
-  { sem: 3, subject: "Object Oriented Programming", title: "Java & OOP Principles", tags: ["Inheritance", "Collections", "Exceptions"] },
-  { sem: 3, subject: "Digital Logic Design", title: "Gates to Sequential Circuits", tags: ["K-Map", "Flip-Flops"] },
-  { sem: 3, subject: "Computer Organization", title: "CPU, Memory & Pipelining", tags: ["Cache", "Addressing Modes"] },
-
-  // ---- Semester 4 ----
-  { sem: 4, subject: "Operating Systems", title: "Processes, Scheduling & Deadlocks", tags: ["Semaphores", "Paging", "Deadlock"] },
-  { sem: 4, subject: "DBMS", title: "Relational Model to Transactions", tags: ["SQL", "Normalisation", "ACID"] },
-  { sem: 4, subject: "Design & Analysis of Algorithms", title: "Complexity & Strategy", tags: ["Greedy", "DP", "Big-O"] },
-  { sem: 4, subject: "Computer Networks", title: "OSI, TCP/IP & Routing", tags: ["Subnetting", "TCP", "DNS"] },
-
-  // ---- Semester 5 ----
-  { sem: 5, subject: "Cryptography & Network Security", title: "Ciphers, Keys & Protocols", tags: ["AES", "RSA", "TLS", "Hashing"] },
-  { sem: 5, subject: "Software Engineering", title: "SDLC, Agile & Testing", tags: ["UML", "Scrum"] },
-  { sem: 5, subject: "Theory of Computation", title: "Automata, Grammars & Turing Machines", tags: ["DFA", "CFG", "Pumping Lemma"] },
-  { sem: 5, subject: "Web Technologies", title: "Frontend, Backend & REST", tags: ["React", "HTTP", "APIs"] },
-
-  // ---- Semester 6 ----
-  { sem: 6, subject: "Ethical Hacking", title: "Recon to Post-Exploitation", tags: ["Nmap", "Burp Suite", "OWASP Top 10"] },
-  { sem: 6, subject: "Cloud Computing", title: "Virtualisation & Service Models", tags: ["IaaS", "Containers", "IAM"] },
-  { sem: 6, subject: "Machine Learning", title: "Supervised & Unsupervised Learning", tags: ["Regression", "SVM", "Clustering"] },
-  { sem: 6, subject: "Compiler Design", title: "Lexical Analysis to Code Generation", tags: ["Parsing", "SDT"] },
-
-  // ---- Semester 7 ----
-  { sem: 7, subject: "Digital Forensics", title: "Evidence, Imaging & Chain of Custody", tags: ["Autopsy", "Volatility", "Artifacts"] },
-  { sem: 7, subject: "Malware Analysis", title: "Static & Dynamic Analysis", tags: ["Sandboxing", "IOCs", "Reversing"] },
-  { sem: 7, subject: "Cyber Law & Ethics", title: "IT Act, Privacy & Compliance", tags: ["GDPR", "IT Act 2000"] },
-  { sem: 7, subject: "Big Data Analytics", title: "Distributed Processing", tags: ["Hadoop", "Spark"] },
-
-  // ---- Semester 8 ----
-  { sem: 8, subject: "Security Operations", title: "SOC Workflow & SIEM", tags: ["Splunk", "Triage", "MITRE ATT&CK"] },
-  { sem: 8, subject: "Advanced Penetration Testing", title: "Red Team Methodology", tags: ["Active Directory", "Pivoting", "Reporting"] },
-  { sem: 8, subject: "Major Project", title: "Research, Build & Defend", tags: ["Thesis", "Documentation"] },
-];
-
-const SEMS = [...new Set(NOTES.map((n) => n.sem))].sort((a, b) => a - b);
 
 const Notes = () => {
+  /* the shelf lives in src/content/defaults.js and is editable at /admin */
+  const { notes: NOTES } = useContent();
+  const SEMS = useMemo(
+    () => [...new Set(NOTES.map((n) => n.sem))].sort((a, b) => a - b),
+    [NOTES]
+  );
   const [sem, setSem] = useState("all");
   const [q, setQ] = useState("");
 
@@ -83,7 +40,7 @@ const Notes = () => {
         n.tags.some((t) => t.toLowerCase().includes(term))
       );
     });
-  }, [sem, q]);
+  }, [sem, q, NOTES]);
 
   const ready = NOTES.filter((n) => n.file).length;
 

@@ -14,13 +14,19 @@ import Contact from "./components/contact";
 import Certifications from "./components/Certifications";
 import Notes from "./components/Notes";
 import Roadmap from "./components/Roadmap";
+import Admin from "./admin/Admin";
+import { ContentProvider } from "./content/ContentContext";
 import MascotDemo from "./components/MascotDemo";
 import OfflineNotification from "./components/OfflineCheck";
 
 function App() {
   return (
+    <ContentProvider>
     <Router>
-      <div className="app-container" style={{ minHeight: "100vh", backgroundColor: "#222", color: "#fff" }}>
+      {/* colour and height come from base.css now - the inline #222 here was
+          a seventh background, and it was the one showing around every page
+          that did not fill the window */}
+      <div className="app-container">
       <OfflineNotification /> {/* <- Put it here globally */} 
         <Routes>
           <Route path="/" element={<Portfolio />} />
@@ -37,10 +43,12 @@ function App() {
           <Route path="/certifications" element={<Certifications />} />
           <Route path="/notes" element={<Notes />} />
           <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/mascot" element={<MascotDemo />} />
         </Routes>
       </div>
     </Router>
+    </ContentProvider>
   );
 }
 

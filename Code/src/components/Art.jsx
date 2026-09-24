@@ -422,8 +422,9 @@ const Art = () => {
   return (
     <div
       style={{
-        backgroundColor: 'black',
-        height: '100vh',
+        /* was pure black - the one page that did not sit on the app colour */
+        backgroundColor: 'var(--app-bg)',
+        height: '100dvh',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',

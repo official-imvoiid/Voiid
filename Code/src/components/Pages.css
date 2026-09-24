@@ -7,18 +7,21 @@
    ========================================================================== */
 
 .pg {
-  --pg-bg: #141416;
-  --pg-card: #1D1D21;
-  --pg-line: rgba(255, 255, 255, 0.07);
+  /* the shared tokens, so these pages cannot drift from the rest of the
+     site the way the old hardcoded #141416 / #1D1D21 pair did */
+  --pg-bg: var(--app-bg);
+  --pg-card: var(--surface);
+  --pg-line: var(--line);
   --pg-dim: #9A9AA4;
   --pg-accent: #F5C451;
 
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   background: var(--pg-bg);
   color: #F2F2F4;
   font-family: "Montserrat", Arial, sans-serif;
-  padding: clamp(18px, 4vw, 44px) clamp(14px, 5vw, 56px) 72px;
+  padding: clamp(18px, 4vw, 44px) var(--gutter) 72px;
   box-sizing: border-box;
 }
 

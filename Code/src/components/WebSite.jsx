@@ -25,6 +25,7 @@ import {
   faGraduationCap,
 } from "@fortawesome/free-solid-svg-icons";
 import MascotScene from "./MascotScene";
+import { useContent } from "../content/ContentContext";
 import { useWasted } from "./Wasted";
 import Teamwork from "./Teamwork";
 import Scientist from "./Scientist";
@@ -33,6 +34,20 @@ import "./WebSite.css";
 
 const Portfolio = () => {
   const wasted = useWasted();
+  /* Card destinations and social handles come from the content store, so
+     they are editable at /admin instead of being hardcoded here. Anything
+     still blank renders as plain text rather than a link to nowhere. */
+  const { links, social } = useContent();
+
+  // an <a> only when there is somewhere to go
+  const Out = ({ href, children, ...rest }) =>
+    href ? (
+      <a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
+        {children}
+      </a>
+    ) : (
+      <span {...rest} aria-disabled="true">{children}</span>
+    );
 
   // Cursor-driven 3D tilt + a specular highlight that tracks the pointer.
   // Kept deliberately shallow (9deg) so it reads as depth, not a gimmick.
@@ -72,12 +87,20 @@ const Portfolio = () => {
     <div className="portfolio">
       {/* ===== HEADER SECTION ===== */}
       <header className="header container">
-        <a href="#" className="logo">VOIID</a>
+        {/* href="#" put a bare "#" in the address bar on every click. This
+            scrolls to the top and leaves the URL alone. */}
+        <a
+          href="/"
+          className="logo"
+          onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+        >
+          VOIID
+        </a>
         <nav className="nav">
           <Link to="/certifications" className="nav-link">Certifications</Link>
           <Link to="/notes" className="nav-link">Notes</Link>
           <Link to="/roadmap" className="nav-link">Roadmap</Link>
-          <a href="/cv/Voiid-CV.pdf" download className="get-in-touch">Download CV</a>
+          <a href={links.cv} download className="get-in-touch">Download CV</a>
         </nav>
       </header>
 
@@ -116,14 +139,14 @@ const Portfolio = () => {
         <div className="card research-card">
           <span className="card-subtitle">My Papers</span>
           <h2 className="card-title">Research <FontAwesomeIcon icon={faFlask} /></h2>
-          <Scientist />
-          <a href="#" className="card-link">View <span>→</span></a>
+          <Scientist height="76%" />
+          <Out href={links.research} className="card-link">View <span>→</span></Out>
         </div>
 
         <div className="card github-card">
-          <a href="#" target="_blank" rel="noopener noreferrer">
+          <Out href={links.github}>
             <FontAwesomeIcon icon={faGithub} className="card-title" />
-          </a>
+          </Out>
         </div>
 
         {/* ----- Call to Action Card ----- */}
@@ -133,9 +156,10 @@ const Portfolio = () => {
           <p className="card-subtitle">
             Let's create something amazing and build the future of tech together
           </p>
-          <Link to="/contact">
-          <a href="#" className="card-link">Get in touch <span>→</span></a>
-          </Link>
+          {/* the inner element must not be an <a>: Link renders one, and an
+              anchor inside an anchor is invalid HTML - React was logging it
+              on every render, and the nested href="#" fought the navigation */}
+          <Link to="/contact" className="card-link">Get in touch <span>→</span></Link>
         </div>
 
         {/* ----- About Section ----- */}
@@ -192,14 +216,14 @@ const Portfolio = () => {
           <span className="card-subtitle">Featured Work</span>
           <h2 className="card-title">Discord</h2>
           <p>Lets Debug Together</p>
-          <a href="#" className="card-link">View <span>→</span></a>
+          <Out href={links.discord} className="card-link">View <span>→</span></Out>
         </div>
 
         <div className="card blog-card">
           <span className="card-subtitle">From my blog</span>
           <h2 className="card-title">Latest Articles</h2>
           <p>Learn & Build🚀</p>
-          <a href="#" className="card-link">Read more <span>→</span></a>
+          <Out href={links.article} className="card-link">Read more <span>→</span></Out>
         </div>
 
         {/* ----- Entertainment Cards ----- */}
@@ -218,7 +242,7 @@ const Portfolio = () => {
             <span className="music-note">
               <FontAwesomeIcon icon={faMusic} className="card-title" />
             </span>
-            <MascotScene size={120} />
+            <MascotScene size={145} />
           </div>
         </Link>
       </div>
@@ -227,7 +251,7 @@ const Portfolio = () => {
       <footer className="footer">
         {/* Navigation Links */}
         <div className="footer-nav">
-          <Link to="/" className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <Link to="/" className="footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
             Home
           </Link>
           <Link to="/certifications" className="footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
@@ -246,27 +270,27 @@ const Portfolio = () => {
 
         {/* Social Media Links */}
         <div className="social-links">
-          <a href="#" className="social-icon instagram">
+          <Out href={social.instagram} className="social-icon instagram">
             <FontAwesomeIcon icon={faInstagram} />
-          </a>
-          <a href="#" className="social-icon linkedin">
+          </Out>
+          <Out href={social.linkedin} className="social-icon linkedin">
             <FontAwesomeIcon icon={faLinkedin} />
-          </a>
-          <a href="#" className="social-icon pinterest">
+          </Out>
+          <Out href={social.pinterest} className="social-icon pinterest">
             <FontAwesomeIcon icon={faPinterest} />
-          </a>
-          <a href="#" className="social-icon github">
+          </Out>
+          <Out href={social.github} className="social-icon github">
             <FontAwesomeIcon icon={faGithub} />
-          </a>
-          <a href="#" className="social-icon reddit">
+          </Out>
+          <Out href={social.reddit} className="social-icon reddit">
             <FontAwesomeIcon icon={faReddit} />
-          </a>
-          <a href="#" className="social-icon youtube">
+          </Out>
+          <Out href={social.youtube} className="social-icon youtube">
             <FontAwesomeIcon icon={faYoutube} />
-          </a>
-          <a href="#" className="social-icon civitai">
+          </Out>
+          <Out href={social.civitai} className="social-icon civitai">
             <FontAwesomeIcon icon={faBolt} />
-          </a>
+          </Out>
         </div>
 
         {/* Copyright Notice */}

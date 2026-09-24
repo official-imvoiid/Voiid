@@ -39,7 +39,8 @@ const MusicList = () => {
       margin: "0 auto",
       padding: "30px 20px",
       fontFamily: "'Montserrat', 'Arial', sans-serif",
-      backgroundColor: "#181818",
+      backgroundColor: "var(--app-bg)",
+      minHeight: "100dvh",
       color: "#fff",
       borderRadius: "12px",
       boxShadow: "0 4px 30px rgba(0, 0, 0, 0.3)",
@@ -115,7 +116,7 @@ const MusicList = () => {
           }}>
             {songs.map((song, index) => (
               <div key={index} style={{
-                backgroundColor: "#222",
+                backgroundColor: "var(--surface)",
                 borderRadius: "12px",
                 overflow: "hidden",
                 boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
