@@ -1,110 +1,79 @@
-# 🌌 VOIID - Personal Portfolio
+# VOIID
 
-<div align="center">
+Personal portfolio website of Voiid, a developer and cyber-security student.
+Built with React and Vite, with a self-hosted Express backend.
 
-![Portfolio Preview](https://github.com/official-imvoiid/Voiid/blob/main/Gui/PC.png)
+## Features
 
-**A Developer & Cyber-Security Student's Digital Space**
+- Portfolio pages: skills, development projects, art, literature, 3D models, certifications, music, games and learning roadmaps
+- Notes library with folders, search and in-page PDF viewing
+- 3D model viewer (VRM, GLB, FBX, OBJ)
+- JavaScript coding game running in a sandboxed frame
+- Contact form with server-side bot protection (no third-party services)
+- Admin portal with two-factor authentication, encrypted inbox and content editor
+- Separate layouts for desktop, mobile portrait and mobile landscape
 
-*"BE THE BEGINNING OF THE CHANGE"*
+## Tech Stack
 
-</div>
+- **Frontend:** React 19, React Router 7, Vite 6, Three.js
+- **Backend:** Node.js, Express 4, Helmet, express-rate-limit
+- **Storage:** Local files, messages and secrets encrypted with AES-256-GCM
 
----
+## Setup
 
-## 🎯 About
+Requires Node.js 20 or later.
 
-**VOIID** is a modern, responsive portfolio showcasing expertise in web development, cybersecurity, AI research, and creative design. The name represents the fusion of "Void" and extra "i"—symbolizing endless potential through vision and imagination.
-
----
-
-## ✨ Features
-
-- 🎨 **Modern Dark UI** - Professional design with smooth animations
-- 📱 **Fully Responsive** - Optimized for all devices
-- ⚡ **Fast Performance** - Built with React and Vite
-- 🔐 **Secure Contact** - Protected forms with reCAPTCHA
-- 📝 **Blog Integration** - Latest articles and research
-- 🤝 **Collaboration Ready** - Professional engagement platform
-
----
-
-## 📋 Sections
-
-| Section | Description |
-|---------|-------------|
-| **Profile** | Introduction as developer & cybersecurity student |
-| **Skill-Set** | Technical abilities across multiple domains |
-| **Play & Learn** | Interactive learning experiences |
-| **Research** | Academic papers and publications |
-| **GitHub** | Open-source contributions |
-| **Blog** | Articles on tech and security |
-| **What I Do** | Development, Cybersecurity, AI Research, 3D Design |
-| **Collaboration** | Professional opportunities |
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend:** React 18.x + Vite 5.x
-- **Styling:** Custom CSS3
-- **Routing:** React Router
-- **Forms:** EmailJS + reCAPTCHA
-- **Deployment:** GitHub Pages
-
----
-
-## 🚀 Quick Start
-
-**Clone & Install**
 ```bash
 git clone https://github.com/official-imvoiid/Voiid.git
 cd Voiid/Code
 npm install
+cp .env.example .env
 ```
 
-**Run Development Server**
+Fill in `.env` as described in `.env.example`. Then start the backend and the dev server in separate terminals:
+
 ```bash
+npm run server
 npm run dev
 ```
 
-**Open locally in Browser**  
-```
-http://localhost:5000
-```  
+The site runs at `http://localhost:5000`.
 
-**Build for Production**
-```bash
-npm install
-npm install vite --save-dev
-npm install react-router-
-npm install emailjs-com react-google-recaptcha
-```
+## Scripts
 
----
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the development server |
+| `npm run server` | Start the backend |
+| `npm run build` | Build for production into `dist/` |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Run ESLint |
 
-## 📱 Connect
+## Deployment
 
-<div align="center">
+1. Run `npm run build`.
+2. Run `server.js` with `NODE_ENV=production`.
+3. Serve `dist/` through a reverse proxy over HTTPS, forwarding `/api`, `/uploads` and `/files` to the backend.
+4. Set `TRUST_PROXY_HOPS` to the number of proxies in front of the server.
 
-[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/i.m.voiid/)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/voiidnova/)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/official-imvoiid)
+Never commit `.env` or the `data/` directory.
 
-</div>
+## Security
 
----
+Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
 
-## 📜 License
+## License
 
-MIT License - Open source and free to use.
+This project is licensed under the [Voiid Personal & Educational License](LICENSE).
 
----
+- Personal and educational use is permitted.
+- Forks and redistribution are permitted, provided the license is kept and the changes made are recorded in `CHANGELOG.md`.
+- Pull requests must describe what was changed, in which files and why, and include the matching `CHANGELOG.md` entry.
+- Commercial use requires prior written permission.
+- Personal content (artwork, music, writing, models, name and identity) is not licensed for reuse.
 
-<div align="center">
+## Contact
 
-**💫 Made with Passion, Imagination, and Code**
-
-⭐ Star this repo if you found it helpful!
-
-</div>
+- GitHub: [official-imvoiid](https://github.com/official-imvoiid)
+- LinkedIn: [voiidnova](https://www.linkedin.com/in/voiidnova/)
+- Instagram: [i.m.voiid](https://www.instagram.com/i.m.voiid/)

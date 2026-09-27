@@ -1,21 +1,85 @@
-MIT License
+Voiid Personal and Educational License
+Version 1.0
 
-Copyright (c) 2025 Shido
+Copyright (c) 2025-2026 Voiid (https://github.com/official-imvoiid)
+All rights reserved except as expressly granted below.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Definitions
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+   "Software" means the source code, documentation and other files in this
+   repository, excluding Personal Content.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   "Personal Content" means the author's artwork, images, audio, video,
+   writing, 3D models, certificates, curriculum vitae, name, logo, likeness
+   and contact details contained in this repository.
+
+   "Commercial Use" means any use intended for or directed toward commercial
+   advantage or monetary compensation, including selling, licensing or
+   hosting the Software as a paid product or service, using it in paid work
+   for clients or employers, using it within a business, or using it to
+   train commercial machine-learning models.
+
+2. Grant of Permission
+
+   Subject to the conditions of this License, permission is granted, free of
+   charge, to any person obtaining a copy of the Software to:
+
+   (a) use the Software for personal, non-commercial purposes;
+   (b) study and use the Software for learning and teaching;
+   (c) fork and modify the Software; and
+   (d) redistribute the Software or modified versions of it free of charge.
+
+3. Conditions
+
+   (a) This License and the above copyright notice must be included in all
+       copies and modified versions of the Software.
+
+   (b) Every modified version must include a file named CHANGELOG.md that
+       records the changes made by the person distributing it, stating the
+       date, the author, the files affected, and a description of each
+       change. Only that person's own changes need to be recorded.
+
+   (c) Every pull request or patch submitted to the original repository must
+       describe the changes made and include the corresponding CHANGELOG.md
+       entry.
+
+   (d) Every modified version must state that it is a modified version and
+       link to the original repository.
+
+   (e) Modified versions may only be distributed under this License.
+
+4. Restrictions
+
+   (a) Commercial Use of the Software, in whole or in part, is prohibited
+       without prior written permission from the copyright holder.
+
+   (b) Personal Content is not licensed under this License. It may not be
+       used, reproduced or distributed separately from the original
+       repository without prior written permission.
+
+   (c) The Software may not be used to impersonate the copyright holder or
+       to imply endorsement by the copyright holder.
+
+5. Third-Party Components
+
+   Third-party libraries and assets used by the Software remain subject to
+   their own licenses.
+
+6. Termination
+
+   Any breach of this License automatically terminates the rights granted
+   under it. Upon termination, all use and distribution of the Software
+   must cease.
+
+7. Disclaimer
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+For permission requests, contact the copyright holder through
+https://github.com/official-imvoiid.
