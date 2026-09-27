@@ -1,0 +1,195 @@
+/* ==========================================================================
+   ProfilePlayer - the profile card turns into a video player in place.
+   The stage is absolutely positioned over the card, so opening it never
+   reflows the grid and the card keeps exactly the size it already had.
+   ========================================================================== */
+
+.pp {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;      /* only the pieces below opt back in */
+  border-radius: inherit;
+}
+
+/* ---- the affordance on the avatar --------------------------------------- */
+.pp-hit {
+  position: absolute;
+  top: calc(24px * 1.1);
+  left: calc(24px * 1.1);
+  width: calc(78px * 1.1);
+  height: calc(78px * 1.1);
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+.pp[data-mode="play"] .pp-hit { display: none; }
+
+.pp-hit::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(234, 179, 8, 0);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.pp-hit:hover::before,
+.pp-hit:focus-visible::before {
+  border-color: rgba(234, 179, 8, 0.85);
+  box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.12);
+}
+.pp-hit:hover { background: rgba(0, 0, 0, 0.35); }
+.pp-hit:active { transform: scale(0.96); }
+
+.pp-hint {
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  text-align: center;
+  line-height: 1.1;
+  pointer-events: none;
+}
+.pp-hit:hover .pp-hint,
+.pp-hit:focus-visible .pp-hint { opacity: 1; transform: translateY(0); }
+
+/* ---- the line that pops up first ---------------------------------------- */
+.pp-note {
+  position: absolute;
+  left: calc(24px * 1.1);
+  right: calc(24px * 1.1);
+  bottom: calc(22px * 1.1);
+  margin: 0;
+  padding: 9px 13px;
+  border-radius: 12px;
+  background: rgba(16, 16, 20, 0.92);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  color: #F3EAD0;
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-size: clamp(0.72rem, 1.3vw, 0.86rem);
+  font-weight: 600;
+  line-height: 1.4;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+@keyframes pp-note-in {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.96); }
+  18%  { opacity: 1; transform: translateY(0) scale(1); }
+  82%  { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-6px) scale(0.98); }
+}
+.pp[data-mode="note"] .pp-note { animation: pp-note-in 2.2s ease-out both; }
+
+/* ---- the player itself --------------------------------------------------- */
+.pp-stage {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  background: #07070A;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.97);
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(.34,1.2,.64,1),
+              visibility 0s linear 0.4s;
+}
+.pp[data-mode="play"] .pp-stage {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.pp-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #07070A;
+}
+
+/* ---- controls ------------------------------------------------------------ */
+.pp-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.74), transparent);
+}
+.pp-right { display: flex; gap: 8px; }
+
+.pp-btn {
+  padding: 0.3rem 0.72rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #fff;
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.pp-btn:hover {
+  background: rgba(234, 179, 8, 0.9);
+  border-color: rgba(234, 179, 8, 1);
+  color: #14100a;
+  transform: translateY(-1px);
+}
+.pp-btn:active { transform: translateY(0) scale(0.97); }
+
+/* fullscreen: let the video use the whole screen rather than the card box */
+.pp:fullscreen { background: #000; }
+.pp:fullscreen .pp-stage { border-radius: 0; }
+.pp:fullscreen .pp-video { object-fit: contain; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-note { animation: none !important; }
+  .pp[data-mode="note"] .pp-note { opacity: 1; transform: none; }
+  .pp-stage { transition: none; }
+}
+
+/* shown only if autoplay was refused */
+.pp-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 58px;
+  height: 58px;
+  z-index: 3;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(10, 10, 12, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  color: #fff;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.pp-play:hover { background: rgba(234, 179, 8, 0.92); color: #14100a; transform: scale(1.07); }

@@ -1,0 +1,121 @@
+/* ==========================================================================
+   base.css - the one foundation every page sits on.
+
+   Loaded once from main.jsx, before anything else, so these tokens exist no
+   matter which route the browser lands on first.
+
+   The problem this solves: the site had six different "dark" backgrounds -
+   #222 on the app container, #1A1A1D on the home page, #141416 on the games
+   and nav pages, #181818 on music, #1A1A1D on the mascot demo - and two
+   different card greys. Any time a page did not fill the window (short page,
+   zoomed out, ultra-wide monitor) the layer underneath showed through in a
+   different colour. That is the banding in the screenshots.
+
+   One background token, set on html, body and #root, means there is nothing
+   underneath to mismatch. A page can be any height at any zoom and the
+   colour behind it is always the same.
+   ========================================================================== */
+
+:root {
+  /* ---- surfaces ---- */
+  --app-bg: #1A1A1D;        /* the page, everywhere */
+  --surface: #27272A;       /* a card sitting on the page */
+  --surface-2: #1F1F23;     /* a recessed panel: code output, wells */
+  --surface-3: #32323A;     /* a raised panel sitting on a card */
+  --line: rgba(255, 255, 255, 0.07);
+
+  /* ---- text ---- */
+  --ink: #F2F2F4;
+  --ink-dim: #9A9AA4;
+  --ink-faint: #6F6F7B;
+
+  /* ---- accents ---- */
+  --accent: #EAB308;
+  --accent-mint: #7CF2D0;
+  --accent-violet: #A78BFA;
+
+  /* ---- the page gutter, shared by the header, the grid and the footer ----
+     One value means the header can never drift out of line with the cards
+     again, whatever the width. */
+  /* 1.5vw pinned the board to the window edges. 2.7vw gives the grid room to
+     breathe again (~43px at 1600, ~50px at 1850) without going back to the
+     125px dead margin it started with. The header runs at 45% of this, so a
+     bigger gutter also widens the visible step between VOIID and the grid. */
+  --gutter: clamp(14px, 5.6vw, 118px);
+  /* 1680 left ~85px of dead margin on each side of a 1850px monitor, on top
+     of the gutter - the logo ended up ~125px in from the edge. 1920 covers
+     every common desktop from 1366 up with no centring margin at all, so the
+     content sits near the edge and the composition stays identical as you
+     resize. 2400 carries that up through 2560 monitors too - a hard 1920
+     cap put 343px of dead margin back on each side of a 2560 screen, which
+     is the same complaint one screen size later. */
+  --page-max: 2400px;
+
+  color-scheme: dark;
+}
+
+/* Every layer of the document paints the same colour, so no zoom level, page
+   height or monitor width can reveal a different one behind the content. */
+html,
+body,
+#root {
+  background-color: var(--app-bg);
+}
+
+html {
+  /* Horizontal overflow is clipped; vertical MUST stay scrollable.
+     `overflow-x: clip` on its own is a trap: when one axis is `clip` and the
+     other is left at `visible`, the spec makes the `visible` axis compute to
+     `clip` too - so `overflow-x: clip` alone silently killed vertical
+     scrolling for the whole document. Naming the vertical axis explicitly
+     stops that propagation. (`hidden` has the same trap with `auto`.) */
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  /* Not repeated on body - one clipping ancestor is enough, and body's
+     overflow propagates to the viewport in ways that fight the rule above. */
+}
+
+/* The app shell is a column so a short page still pins its footer to the
+   bottom instead of leaving a differently-coloured strip below it. */
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: var(--app-bg);
+}
+
+/* Media never overflows its column, at any zoom. */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+/* A page that is shorter than the window still covers the full height, so
+   there is never a band of anything else below it. */
+.page-fill {
+  flex: 1 0 auto;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--app-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
