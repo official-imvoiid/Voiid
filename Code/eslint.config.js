@@ -8,7 +8,7 @@ export default [
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 'latest',
       globals: globals.browser,
       parserOptions: {
         ecmaVersion: 'latest',
@@ -23,7 +23,8 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^(motion|[A-Z_])' }],
+      // components and constants are capitalised; a leading _ marks a value that is only destructured away
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
@@ -31,25 +32,8 @@ export default [
     },
   },
   {
-    // ESLint config specifically for tailwind.config.js
-    files: ['tailwind.config.js'],
-    env: {
-      node: true,  // Enable Node.js environment
-    },
-    rules: {
-      // Disable 'no-undef' for this file since `module` is a Node.js global
-      'no-undef': 'off',
-    },
-  },
-  {
-    // ESLint config for server.js (Node environment)
-    files: ['server.js'],
-    env: {
-      node: true,
-    },
-    rules: {
-      // Disable 'no-undef' so that Node globals like require and process are allowed
-      'no-undef': 'off',
-    },
+    // server.js runs in Node, not the browser
+    files: ['server.js', 'vite.config.js'],
+    languageOptions: { globals: globals.node },
   },
 ];
