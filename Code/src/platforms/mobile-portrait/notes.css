@@ -1,0 +1,27 @@
+/* platforms/mobile-portrait/notes.css - the notes library. Looks: common/styles/pages/notes.css
+   Sizes and layout for mobile portrait. */
+
+.nb-search { width: 100%; }
+
+/* a file row: name, size and the buttons all on one line */
+.nb-file-main { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; padding: 12px 10px 12px 14px; }
+.nb-file-meta { display: none; }
+
+/* phones: the buttons keep just their icons so the row still fits */
+@media (max-width: 600px) {
+  .nb-file { padding-right: 8px; }
+  .nb-file-size { display: none; }
+  .nb-file-actions .nb-btn { gap: 0; padding: 8px 10px; font-size: 0; }
+  .nb-file-actions .nb-btn svg { width: 18px; height: 18px; }
+}
+
+.nb-viewer { padding: 0; }
+.nb-viewer-box { height: 100%; border-radius: 0; grid-template-columns: minmax(0, 1fr); }   /* a long file name never widens it */
+.nb-viewer .nb-btn span, .nb-viewer-name span { display: none; }
+
+/* a long folder name in the path shortens with "…" instead of pushing the
+   whole page wider than the screen */
+.nb > * { min-width: 0; }
+.nb-crumbs { max-width: 100%; }
+.nb-crumb-step { min-width: 0; max-width: 100%; }
+.nb-crumb { max-width: calc(100vw - 2 * var(--gutter, 16px) - 30px); }

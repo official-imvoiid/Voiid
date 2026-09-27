@@ -1,0 +1,235 @@
+/* pages/models.css - 3D & Editing (/3d): the character overview and the
+   Blender-style viewer. Sizes per device: platforms/<device>/models.css */
+
+/* ---- the Instagram link and the honest note ---- */
+.m3-cards-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 14px;
+  margin-bottom: clamp(24px, 3vw, 34px);
+}
+.m3-insta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid #2c2c34;
+  border-radius: 14px;
+  background: #18181d;
+  color: #f2f2f5;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.m3-insta:hover { transform: translateY(-2px); border-color: #d62976; background: #1d1c22; }
+/* Instagram's colours live on the icon only */
+.m3-insta svg {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  padding: 10px;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #f58529, #dd2a7b 50%, #8134af);
+  color: #fff;
+}
+.m3-insta span { display: grid; gap: 3px; }
+.m3-insta strong { font-size: 1.05rem; }
+.m3-insta small { color: #e1306c; font-size: 0.85rem; font-weight: 600; }
+
+.m3-note {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px dashed color-mix(in srgb, var(--pg-accent) 55%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--pg-accent) 7%, transparent);
+  color: #d8d8e0;
+}
+.m3-note svg { width: 26px; height: 26px; flex: none; color: var(--pg-accent); margin-top: 2px; }
+.m3-note p { margin: 0; line-height: 1.6; font-size: 0.95rem; }
+.m3-note strong { color: #fff; }
+
+.m3-heading { margin: 0; font-size: clamp(1.1rem, 1.4vw, 1.3rem); color: var(--pg-accent); }
+
+/* ---- the character cards ---- */
+.m3-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.m3-card {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #2c2c34;
+  border-radius: 16px;
+  background: #18181d;
+  color: #f2f2f5;
+  text-align: left;
+  cursor: pointer;
+  animation: m3-in 0.5s ease both;
+  animation-delay: calc(var(--i) * 0.05s);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+@keyframes m3-in { from { opacity: 0; transform: translateY(10px); } }
+.m3-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--pg-accent) 60%, transparent);
+  box-shadow: 0 18px 34px -18px color-mix(in srgb, var(--pg-accent) 70%, transparent);
+}
+.m3-card-art {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--pg-accent) 28%, transparent), transparent 65%),
+    linear-gradient(180deg, #24242c, #141418);
+}
+.m3-card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  transition: transform 0.4s ease;
+}
+.m3-card:hover .m3-card-art img { transform: scale(1.04); }
+.m3-card-placeholder { width: 64px; height: 64px; margin: auto; color: #5a5a66; }
+.m3-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: rgba(10, 10, 14, 0.75);
+  color: #d9d9e2;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.m3-badge.is-free { left: auto; right: 10px; background: #2fbf71; color: #062312; }
+.m3-card-info { display: grid; gap: 4px; padding: 14px 16px 16px; }
+.m3-card-info strong { font-size: 1.05rem; }
+.m3-card-info small { color: var(--pg-accent); font-weight: 600; }
+.m3-card-info em { color: #9d9da8; font-size: 0.85rem; font-style: normal; }
+.m3-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: #f2f2f5;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.m3-card-cta svg { width: 16px; height: 16px; }
+
+/* ---- the viewer: a Blender-grey viewport, full screen ---- */
+.m3-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: radial-gradient(ellipse at 50% 40%, #4a4a52 0%, #2d2d33 55%, #1c1c20 100%);
+  animation: m3-fade 0.2s ease both;
+}
+@keyframes m3-fade { from { opacity: 0; } }
+.m3-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.m3-canvas:active { cursor: grabbing; }
+
+.m3-bar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  pointer-events: none;
+}
+.m3-bar > * { pointer-events: auto; }
+.m3-title {
+  display: grid;
+  gap: 2px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(20, 20, 24, 0.8);
+  color: #fff;
+}
+.m3-title span { color: var(--pg-accent, #A78BFA); font-size: 0.82rem; font-weight: 600; }
+.m3-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 12px;
+  background: rgba(20, 20, 24, 0.85);
+}
+.m3-tools button,
+.m3-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  min-width: 34px;
+  justify-content: center;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: #e8e8ee;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.m3-tools svg { width: 17px; height: 17px; }
+.m3-tools button:hover { background: #3a3a44; }
+.m3-tools button[aria-pressed="true"] { background: #4772b3; color: #fff; }   /* Blender's selection blue */
+.m3-download { background: #2fbf71; color: #062312; }
+.m3-download:hover { filter: brightness(1.1); }
+.m3-close:hover { background: #c0392b !important; }
+.m3-sep { width: 1px; height: 22px; margin: 0 4px; background: #3a3a44; }
+
+.m3-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  margin: 0;
+  color: #e8e8ee;
+  text-align: center;
+  pointer-events: none;
+}
+.m3-loading p { margin: 0; }
+.m3-progress { width: 240px; height: 6px; overflow: hidden; border-radius: 99px; background: #3a3a44; }
+.m3-progress span { display: block; height: 100%; background: var(--pg-accent, #A78BFA); transition: width 0.2s ease; }
+.m3-help {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 2;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 99px;
+  background: rgba(20, 20, 24, 0.8);
+  color: #b8b8c4;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m3-card, .m3-viewer { animation: none; }
+  .m3-card:hover, .m3-insta:hover { transform: none; }
+}

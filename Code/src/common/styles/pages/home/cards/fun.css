@@ -1,0 +1,81 @@
+/* pages/home/cards/fun.css - Game + Music cards - light sweep, floating glyph, starfield, mascot. */
+
+.gaming-card,
+.music-card {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: var(--fun-min-height);
+}
+.gaming-card { background: linear-gradient(135deg, #312E81, #4F46E5); }
+.music-card  { background: linear-gradient(135deg, #7F1D1D, #EF4444); }
+
+.gaming-card .card-title,
+.music-card .card-title {
+  position: relative;
+  z-index: 3;
+  font-family: var(--font-alt) !important;
+  font-size: var(--big-glyph);
+  color: white;
+  animation: card-float 4.4s ease-in-out infinite;
+}
+@keyframes card-float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-10px) rotate(3deg); }
+}
+
+.gaming-card::before,
+.music-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 42%,
+              rgba(255, 255, 255, 0.17) 50%, transparent 58%);
+  animation: card-sheen 6.5s ease-in-out infinite;
+}
+@keyframes card-sheen {
+  0%, 60% { transform: translateX(-75%); }
+  100%    { transform: translateX(75%); }
+}
+
+.gaming-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 18% 28%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(2px 2px at 71% 19%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(2px 2px at 44% 68%, rgba(255, 255, 255, 0.60), transparent),
+    radial-gradient(2px 2px at 86% 61%, rgba(255, 255, 255, 0.50), transparent),
+    radial-gradient(2px 2px at 29% 86%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(2px 2px at 62% 91%, rgba(255, 255, 255, 0.40), transparent);
+  animation: star-twinkle 3.6s ease-in-out infinite alternate;
+}
+@keyframes star-twinkle {
+  from { opacity: 0.32; transform: translateY(2px); }
+  to   { opacity: 1;    transform: translateY(-2px); }
+}
+
+/* the mascot shoves this wrapper aside (the svg itself ignores transforms) */
+.music-note {
+  display: inline-flex;
+  position: relative;
+  z-index: 3;
+  will-change: transform;
+}
+.music-card .ms-lyric-1 { font-size: var(--lyric); }
+.music-card .ms-lyric-2 { font-size: calc(var(--lyric) * 0.75); }
+
+.gaming-card .wasted-btn { font-size: var(--wasted-btn, calc(var(--sub) * 0.82)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gaming-card::before,
+  .music-card::before,
+  .gaming-card::after,
+  .gaming-card .card-title,
+  .music-card .card-title { animation: none; }
+}

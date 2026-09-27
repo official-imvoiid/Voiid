@@ -116,7 +116,7 @@ const ProfilePlayer = ({ src = "/video/Kurumi.mp4", poster }) => {
           muted={muted}
           onEnded={onEnded}
           onPlay={() => setStalled(false)}
-          preload="metadata"
+          preload="none"
           autoPlay={mode === "play"}
         />
 

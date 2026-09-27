@@ -1,0 +1,62 @@
+/* platforms/mobile-portrait/home/page.css - header + footer sizes, touch, held upright. */
+
+.portfolio {
+  --logo:        clamp(1.15rem, 5.6vw, 2.4rem);
+  --nav:         clamp(0.68rem, 2.6vw, 1.05rem);
+  --nav-gap:     clamp(7px, 2.4vw, 22px);
+  --cv:          clamp(0.72rem, 2.7vw, 0.95rem);
+  --head-x:      var(--gutter);
+  --head-top:    1.36rem;
+  --head-bottom: clamp(1.1rem, 3.4vw, 1.7rem);
+
+  --board-top:    clamp(20px, 4vw, 32px);
+  --board-bottom: 44px;
+
+  --foot-pad:   2rem;
+  --foot-link:  0.95rem;
+  --foot-gap:   clamp(14px, 5vw, 34px);
+  --quote:      clamp(1.2rem, 5.5vw, 2rem);
+  --social:     clamp(1.5rem, 6.5vw, 2.2rem);
+  --social-gap: clamp(14px, 4vw, 28px);
+  --copy:       0.8rem;
+}
+
+/* smallest phones (320-480): tighter gaps so the header still fits */
+@media (max-width: 480px) {
+  .portfolio { --nav-gap: clamp(5px, 1.8vw, 10px); }
+}
+
+/* ---- header, upright phone: two tidy rows ----
+   row 1: the logo on the left, Download CV on the right
+   row 2: the three page links, evenly spaced as tap-sized tabs
+   (.nav steps aside with display: contents so its links and the CV
+   button can each take their own place in the header's grid) */
+.header {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 12px 8px;
+}
+.logo { grid-column: 1 / 3; grid-row: 1; justify-self: start; }
+.nav { display: contents; }
+.get-in-touch {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  padding: 0.6em 1.05em;
+  font-size: 0.72rem;
+}
+.nav-link {
+  grid-row: 2;
+  display: grid;
+  place-items: center;
+  min-height: 40px;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.82rem;
+  text-align: center;
+}
+.nav-link::after { display: none; }           /* the desktop underline */
+.nav-link:active { background: rgba(255, 255, 255, 0.1); }

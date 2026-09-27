@@ -1,0 +1,103 @@
+/* platforms/desktop/home/zoom.css - browser zoomed in (~175% and beyond on a 1920 screen).
+
+   Every card size is a fraction of one column (--colw), so the board keeps
+   its proportions all the way to 500%. The column count drops 4 -> 3 -> 2
+   as you zoom, so content really does get bigger. The px in each max() is
+   the floor that keeps small labels readable. */
+
+@media (max-width: 1149px) {
+  .portfolio {
+    --logo:        clamp(20px, 2.77vw, 64px);
+    --nav:         clamp(11px, 1.11vw, 26px);
+    --nav-gap:     clamp(10px, 2.2vw, 44px);
+    --cv:          clamp(10px, 0.97vw, 22px);
+    --head-top:    clamp(10px, 1.375vw, 30px);
+    --head-bottom: clamp(8px, 1.5vw, 29px);
+
+    --board-top:    clamp(12px, 1.9vw, 34px);
+    --board-bottom: clamp(20px, 2.3vw, 44px);
+
+    --foot-pad:      clamp(16px, 2.2vw, 44px);
+    --foot-link:     clamp(11px, 1.15vw, 26px);
+    --foot-gap:      clamp(12px, 2.2vw, 44px);
+    --quote:         clamp(15px, 3.1vw, 68px);
+    --quote-top:     0.925em;
+    --quote-bottom:  0.716em;
+    --social:        clamp(18px, 2.2vw, 48px);
+    --social-gap:    clamp(10px, 1.9vw, 32px);
+    --social-bottom: calc(var(--foot-gap) * 0.75);
+    --copy:          clamp(10px, 0.97vw, 22px);
+  }
+
+  .cards-container {
+    --cols: 3;
+    --gap: clamp(8px, 1.4vw, 20px);
+  }
+
+  /* card sizes as fractions of one column; the px in max() is the floor */
+  .cards-container > * {
+    --pad:          max(8px,  calc(var(--colw) * 0.07));
+    --title:        max(12px, calc(var(--colw) * 0.097));
+    --title-gap:    calc(var(--title) * 0.28);
+    --link-gap:     0.46em;
+    --sub:          max(10px, calc(var(--colw) * 0.042));
+    --link:         max(11px, calc(var(--colw) * 0.047));
+    --text:         max(11px, calc(var(--colw) * 0.0475));
+    --link-inset:   max(8px,  calc(var(--colw) * 0.054));
+
+    --icon:         calc(var(--colw) * 0.207);
+    --icon-inset:   calc(var(--colw) * 0.06);
+    --icon-reserve: calc(var(--icon) + var(--colw) * 0.0505);
+    --avatar:       calc(var(--colw) * 0.216);
+
+    --research:         max(11px, calc(var(--colw) * 0.104));
+    --research-sub:     max(10px, calc(var(--colw) * 0.05));
+    --github:           calc(var(--colw) * 0.8);
+    --collab:           max(14px, calc(var(--colw) * 0.146));
+    --collab-title-gap: calc(var(--title) * 0.42);
+    --collab-sub-gap:   1.175em;
+    --collab-sub:       max(11px, calc(var(--colw) * 0.0575));
+    --tm:               max(12px, calc(var(--colw) * 0.0665));
+
+    --skill-gap:    calc(var(--colw) * 0.04);
+    --skill-top:    calc(var(--colw) * 0.054);
+    --skill-name:   max(10px, calc(var(--colw) * 0.047));
+    --skill-label:  1em;
+    --skill-pad:    0.574em 0.861em;
+    --skill-inner-gap: 0.46em;
+    --skill-icon:   calc(var(--colw) * 0.078);
+
+    --big-glyph:      calc(var(--colw) * 0.358);
+    --fun-min-height: calc(var(--colw) * 0.555);
+    --mascot:         calc(var(--colw) * 0.356);
+    --lyric:          max(12px, calc(var(--colw) * 0.059));
+    --wasted-btn:     calc(var(--sub) * 0.82);
+  }
+
+  .project-card p,
+  .blog-card p { padding-right: calc(var(--colw) * 0.3); }
+}
+
+/* two columns (~300% zoom and beyond) */
+@media (max-width: 759px) {
+  .cards-container { --cols: 2; }
+
+  /* Discord / Articles: the link gets its own row */
+  .project-card,
+  .blog-card { padding-bottom: calc(var(--pad) + var(--link) * 2.4); }
+  .project-card p,
+  .blog-card p { padding-right: 0; }
+  .project-card .card-link,
+  .blog-card .card-link { right: auto; left: var(--pad); }
+
+  /* the subtitle wraps longer here, so keep it clear of "Get in touch" */
+  .collaborate-card { --collab-bottom: calc(var(--link-inset) + var(--link) * 2.2); }
+}
+
+/* header: two rows once logo + nav stop fitting on one */
+@media (max-width: 599px) {
+  .nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

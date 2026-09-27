@@ -1,0 +1,32 @@
+/* pages/home/cards/collaborate.css - Collaborate card - backdrop + slogan live in components/teamwork.css. */
+
+.collaborate-card {
+  --collab-bg: rgba(67, 56, 202, 0.7);   /* also its hover (platforms/desktop/home/hover.css) */
+  justify-content: center;
+  padding-bottom: var(--collab-bottom, var(--pad));   /* room for the link */
+  background: var(--collab-bg);   /* over the flat page colour - nothing behind it to blur */
+  border: 1px solid rgba(109, 40, 217, 0.3);
+}
+.collaborate-card .tm-msg { font-size: var(--tm); }
+.collaborate-card .card-title {
+  margin: 0 0 var(--collab-title-gap, calc(var(--title) * 0.42));
+  font-size: var(--collab);
+  background: linear-gradient(100deg, #FFFFFF 0%, #FFFFFF 38%, #BFD4FF 50%, #FFFFFF 62%, #FFFFFF 100%);
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.collaborate-card .card-subtitle {
+  font-size: var(--collab-sub);
+  max-width: min(100%, 48ch);
+  margin: 0 0 var(--collab-sub-gap, 1.175em);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* the clean face - Cabin Sketch is hard work in a paragraph */
+.collaborate-card .card-title,
+.collaborate-card .card-subtitle,
+.collaborate-card p { font-family: var(--font-clean) !important; }
+.collaborate-card .card-title { letter-spacing: -0.015em; }

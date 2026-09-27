@@ -1,0 +1,43 @@
+/* reset.css - the site-wide reset and type: box-sizing, the sketch font on
+   everything, the fluid root font-size, the shared colour names. */
+
+/* ---- reset + global type ---- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-default) !important;
+}
+
+html {
+  font-size: clamp(15px, 0.3vw + 14.4px, 19.36px);
+  scroll-behavior: smooth;
+  width: 100%;
+  min-height: 100%;
+}
+
+:root {
+  /* the page background and accent are --app-bg and --accent in base.css */
+  --color-white: #fff;
+  --color-grey: #9CA3AF;
+  --color-light-grey: #D1D5DB;
+  --color-github: #F9A825;
+  --color-blue: #0ea5e9;
+  --font-default: 'Cabin Sketch', cursive;
+  --font-alt: Arial, sans-serif;
+  --font-clean: "Space Grotesk", "Inter", system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--app-bg);
+  color: var(--color-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  width: 100%;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

@@ -1,0 +1,47 @@
+/* platforms/mobile-portrait/home/board.css - grid + card sizes, touch, held upright.
+   Card sizes are fractions of one column (--colw); the px floor in each
+   max()/clamp() keeps small labels readable on a real phone. */
+
+/* ---- board: columns -------------------------------------------------- */
+.cards-container {
+  --cols: 2;
+  --gap: clamp(10px, 3vw, 20px);
+}
+@media (min-width: 760px) { .cards-container { --cols: 3; } }
+
+/* ---- board: card sizes, as fractions of one column ------------------- */
+.cards-container > * {
+  --pad:          max(10px, calc(var(--colw) * 0.08));
+  --title:        max(13px, calc(var(--colw) * 0.103));
+  --sub:          max(10px, calc(var(--colw) * 0.06));
+  --link:         max(12px, calc(var(--colw) * 0.07));
+  --text:         clamp(12px, calc(var(--colw) * 0.097), 17px);
+  --link-inset:   max(10px, calc(var(--colw) * 0.1));
+
+  --icon:         clamp(30px, calc(var(--colw) * 0.2), 64px);
+  --icon-inset:   max(10px, calc(var(--colw) * 0.1));
+  --icon-reserve: calc(var(--icon) + 1rem);   /* padding under the corner icon cards */
+  --collab-bottom: calc(var(--link-inset) + var(--link) * 2.2);
+  --avatar:       clamp(56px, calc(var(--colw) * 0.45), 88px);
+
+  --research:     max(12px, calc(var(--colw) * 0.093));
+  --research-min-height: calc(var(--colw) * 1.15);   /* room for the scientist */
+  --research-sub: max(10px, calc(var(--colw) * 0.06));
+  --github:       calc(var(--colw) * 0.61);
+  --collab:       max(16px, calc(var(--colw) * 0.126));
+  --collab-sub:   clamp(12px, calc(var(--colw) * 0.09), 18px);
+  --tm:           clamp(13px, calc(var(--colw) * 0.1), 20px);
+
+  --skill-cols:   2;
+  --skill-gap:    clamp(10px, calc(var(--colw) * 0.08), 18px);
+  --skill-name:   clamp(11px, calc(var(--colw) * 0.08), 16px);
+  --skill-icon:   clamp(18px, calc(var(--colw) * 0.15), 28px);
+
+  --big-glyph:      calc(var(--colw) * 0.34);
+  --fun-min-height: max(160px, calc(var(--colw) * 1.05));
+  --mascot:         min(145px, calc(var(--colw) * 0.64));
+  --lyric:          clamp(12px, calc(var(--colw) * 0.1), 24px);
+}
+@media (min-width: 760px) {
+  .cards-container > * { --skill-cols: 3; }
+}

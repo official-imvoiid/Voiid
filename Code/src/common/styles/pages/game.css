@@ -1,0 +1,259 @@
+/* pages/game.css - Code Clash, the JavaScript game (/game).
+   The frame (background, title, back button, intro) comes from
+   info-pages.css via PageShell. One background colour for the page, cards
+   in --surface on top of it - no lighter panel wrapped around everything.
+   Sizes/columns that change per device: platforms/<device>/game.css */
+
+/* ---- level picker ---- */
+.game-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: clamp(16px, 2vw, 24px);
+}
+.game-level {
+  padding: 0.6rem 1.3rem;
+  border: 1px solid var(--pg-line);
+  border-radius: 9999px;
+  background: var(--pg-card);
+  color: #F2F2F4;
+  cursor: pointer;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+.game-level:hover:not(:disabled) { border-color: rgba(255, 255, 255, 0.25); }
+.game-level.is-current {
+  border-color: var(--pg-accent);
+  background: var(--pg-accent);
+  color: #0D0D0F;
+}
+.game-level.is-locked {
+  color: var(--pg-dim);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.game-level-label {
+  font-family: Pacifico, cursive !important;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* ---- layout: one column; platforms/desktop/game.css makes it two ---- */
+.game-layout {
+  display: grid;
+  gap: clamp(14px, 1.6vw, 20px);
+  align-items: start;
+}
+.game-col {
+  display: grid;
+  gap: clamp(14px, 1.6vw, 20px);
+  min-width: 0;
+}
+
+/* ---- cards ---- */
+.game-box {
+  min-width: 0;
+  padding: clamp(16px, 1.8vw, 24px);
+  border: 1px solid var(--pg-line);
+  border-radius: 14px;
+  background: var(--pg-card);
+}
+.game-box-title {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #F2F2F4;
+}
+.game-box-title.is-accent { color: var(--pg-accent); }
+
+.game-sub-title {
+  margin: 18px 0 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pg-dim);
+}
+
+.game-challenge {
+  line-height: 1.65;
+  white-space: pre-wrap;
+  color: #D1D5DB;
+}
+.game-tests {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.game-tests li {
+  padding-left: 18px;
+  position: relative;
+  font-size: 0.9rem;
+  color: #C9C9D1;
+}
+.game-tests li::before {
+  content: "›";
+  position: absolute;
+  left: 4px;
+  color: var(--pg-accent);
+}
+
+/* ---- editor ---- */
+.game-code {
+  display: block;
+  width: 100%;
+  min-height: 18rem;
+  padding: 1rem;
+  border: 1px solid var(--pg-line);
+  border-radius: 10px;
+  outline: none;
+  background: var(--surface-2);
+  color: #E5E7EB;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace !important;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  resize: vertical;
+  transition: border-color 0.25s ease;
+}
+.game-code:focus { border-color: color-mix(in srgb, var(--pg-accent) 60%, transparent); }
+
+.game-error {
+  margin-top: 12px;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  background: rgba(127, 29, 29, 0.55);
+  color: #fecaca;
+}
+
+/* ---- buttons ---- */
+.game-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+}
+.game-actions-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.game-btn {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 9999px;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.game-btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+.game-btn:disabled { opacity: 0.6; cursor: wait; }
+.game-btn.is-run    { background-color: #059669; }
+.game-btn.is-answer { background-color: #2563eb; }
+.game-btn.is-next,
+.game-btn.is-apply  { background-color: #7c3aed; }
+.game-btn.is-apply  { margin-top: 12px; }
+
+/* ---- solution + output ---- */
+.game-pre,
+.game-output-pre {
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace !important;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.game-pre { max-height: 26rem; color: #d1d5db; }
+.game-output-pre {
+  max-height: 16rem;
+  white-space: pre-wrap;
+  color: #4ade80;
+}
+
+/* ---- "Magic Unlocked" popup after the last level ---- */
+.game-done {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  animation: game-fade-in 0.5s ease-in;
+}
+.game-done-box {
+  position: relative;
+  overflow: hidden;
+  max-width: 32rem;
+  padding: 2.5rem;
+  border: 2px solid #f59e0b;
+  border-radius: 0.75rem;
+  background-color: var(--surface);
+  text-align: center;
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+  transform: rotate(-2deg);
+  animation: game-sway 3s ease-in-out infinite;
+}
+.game-done-glow {
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.game-done-title {
+  margin-bottom: 1.5rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #f59e0b;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+.game-done-text {
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  line-height: 1.6;
+  color: #f3f4f6;
+}
+.game-done-text p:first-child { margin-bottom: 1rem; }
+
+.game-done-btn {
+  position: relative;
+  overflow: hidden;
+  padding: 1rem 2.5rem;
+  border: 2px solid #f59e0b;
+  border-radius: 999px;
+  background: transparent;
+  color: #f59e0b;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.game-done-btn:hover {
+  background: rgba(245, 158, 11, 0.1);
+  transform: scale(1.05) rotate(2deg);
+}
+.game-done-btn-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.game-done-btn-label {
+  font-family: Pacifico, cursive !important;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+@keyframes game-sway {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50%      { transform: rotate(2deg) translateY(-10px); }
+}
+@keyframes game-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

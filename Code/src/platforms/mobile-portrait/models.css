@@ -1,0 +1,10 @@
+/* platforms/mobile-portrait/models.css - 3D & Editing (/3d). Looks: common/styles/pages/models.css
+   Sizes and layout for mobile portrait. */
+
+.m3-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.m3-card-info { padding: 10px 12px 12px; }
+.m3-card-info em { display: none; }
+
+/* one finger turns, two fingers pinch / move - the long mouse help doesn't apply */
+.m3-help { display: none; }
+.m3-tools button { padding: 0 8px; }

@@ -1,0 +1,36 @@
+/* platforms/desktop/home/hover.css - mouse-only effects: lift + cursor-driven tilt
+   (the tilt values come from useCardTilt.js). */
+
+.card { transform-style: preserve-3d; }
+.card:hover { will-change: transform; }   /* a GPU layer only while it tilts, not one per card all the time */
+.card:hover { background-color: #3F3F46; }
+.cards-container .card:hover {
+  transform: rotateX(var(--tilt-x, 0deg))
+             rotateY(var(--tilt-y, 0deg))
+             translateY(-6.6px)
+             scale(1.015);
+}
+/* cards with their own look keep it on hover */
+.cards-container .about-card:hover,
+.cards-container .collaborate-card:hover { transform: none; }
+.about-card:hover { background: var(--about-bg); }
+.collaborate-card:hover { background: var(--collab-bg); }
+
+/* specular highlight that follows the pointer */
+.cards-container .card:not(.gaming-card):not(.music-card):not(.research-card):not(.about-card)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
+              rgba(255, 255, 255, 0.10), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cards-container .card:not(.gaming-card):not(.music-card):not(.research-card):not(.about-card):hover::after { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cards-container .card:hover { transform: none; }
+}

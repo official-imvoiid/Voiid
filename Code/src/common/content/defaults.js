@@ -37,7 +37,8 @@ const defaults = {
   },
 
   /* Footer icons, in order. platform = one of the keys in
-     src/common/content/platforms.js; empty url = the icon is not shown. */
+     src/common/content/platforms.js; with an empty url the icon still shows,
+     just not as a link (home/Footer.jsx). */
   social: [
     { platform: "instagram", url: "https://www.instagram.com/voiid.ae/" },
     { platform: "linkedin", url: "" },
@@ -72,7 +73,9 @@ const defaults = {
 
   /* ---------------------------------------------------------------------
      Games I've Conquered. glowColor: a colour, or "auto" to take it from
-     the cover image.
+     the cover image. url: the game's official site. MiSide and Date A Live
+     point at a Steam search because neither has a stable official page -
+     swap in the real links here (or in /admin -> Games) whenever you like.
      --------------------------------------------------------------------- */
   games: [
     { name: "Clash of Clans", image: "/images/clash_of_clans.jpg", glowColor: "#FF4500", theme: "Strategy", url: "https://supercell.com/en/games/clashofclans/" },
@@ -251,18 +254,6 @@ const defaults = {
   ],
 
   /* ---------------------------------------------------------------------
-     Roadmap. status: done | active | planned
-     --------------------------------------------------------------------- */
-  roadmap: [
-    { when: "Foundation", title: "Learn to build before learning to break", status: "done", blurb: "Programming, data structures and the web stack - enough to write real software rather than just read about it.", items: ["C & Java fundamentals", "Data structures & algorithms", "React, HTTP and APIs", "Git and version control"] },
-    { when: "Core Systems", title: "Understand the machine underneath", status: "done", blurb: "You cannot secure what you cannot explain. Operating systems, databases and networking, properly.", items: ["Operating systems internals", "DBMS & SQL", "TCP/IP and routing", "Linux as a daily driver"] },
-    { when: "Now", title: "Security fundamentals & hands-on labs", status: "active", blurb: "Moving from theory to practice - cryptography, web exploitation and daily lab work, with the certifications that evidence it.", items: ["Cryptography & network security", "OWASP Top 10, hands-on", "TryHackMe / Hack The Box streak", "Google Cybersecurity & ISC2 CC"] },
-    { when: "Next", title: "Prove it under exam conditions", status: "planned", blurb: "Practical, examined certifications plus projects big enough to be worth writing up.", items: ["Security+ and eJPT", "Build & publish security tooling", "Full penetration test write-ups", "First internship"] },
-    { when: "Specialise", title: "Pick a side and go deep", status: "planned", blurb: "Offensive and defensive both matter, but depth beats breadth. Red team methodology, forensics and malware analysis.", items: ["Red team methodology", "Digital forensics & malware analysis", "Cloud security", "CPTS / BSCP"] },
-    { when: "The Goal", title: "Security engineer, building and breaking", status: "planned", blurb: "Working professionally on systems that matter - with OSCP behind me and a body of public work in front.", items: ["OSCP", "Full-time security engineering", "Research worth publishing", "Give the notes back to the next student"] },
-  ],
-
-  /* ---------------------------------------------------------------------
      Literature: the poems (admin -> Poems). The shipped set is in poems.js.
      --------------------------------------------------------------------- */
   poems: POEMS,
@@ -270,7 +261,8 @@ const defaults = {
   /* ---------------------------------------------------------------------
      3D & Editing: the models (admin -> 3D models). file is served by
      server.js from data/models; thumb is the card picture.
-     downloadable: "yes" shows a Download button, "no" is view-only.
+     downloadable: "yes" shows a Download button in the viewer; "no" hides it.
+     (The viewer still fetches the whole file, so this is a courtesy, not a lock.)
      --------------------------------------------------------------------- */
   models: [
     { name: "Kurumi Tokisaki - Astral", file: "/files/models/kurumi-astral.vrm", format: "vrm", thumb: "/images/models/kurumi-astral.webp", credit: "Cskai", description: "Date A Live", downloadable: "no" },

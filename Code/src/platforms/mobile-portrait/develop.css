@@ -1,0 +1,13 @@
+/* platforms/mobile-portrait/develop.css - GitHub project map (/develop). Looks: common/styles/pages/develop.css
+   Sizes and layout for mobile portrait. */
+
+/* the map keeps a readable size (it's drawn at least 720px wide) and
+   scrolls sideways inside its frame */
+.dv-map { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.dv-map .dv-svg { max-width: none; }          /* keep its full width - don't shrink it back */
+
+/* the Map I / II pager: compact, and the title stays on one line */
+.dv-pager { gap: 8px; }
+.dv-page-btn { padding: 8px 10px; font-size: 0.78rem; }
+.dv-page-title { font-size: 0.95rem; white-space: nowrap; }
+.dv-page-title span { font-size: 0.72rem; }

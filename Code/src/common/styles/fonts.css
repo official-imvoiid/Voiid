@@ -1,21 +1,8 @@
 /* ==========================================================================
-   fonts.css - the site's typefaces, served from this project.
-
-   These used to be three @import rules at the top of WebSite.css pointing at
-   fonts.googleapis.com. An @import blocks the stylesheet that contains it
-   until it resolves - so with no network the browser sat waiting on a request
-   that was never going to answer, and until it gave up, WebSite.css was not
-   applied at all. That is why the whole design, animations included, "went
-   away" offline: the stylesheet had simply not been applied yet.
-
-   Self-hosted there is nothing to wait for and nothing to fail, so the site
-   renders the same with the network unplugged. It is faster online too - no
-   extra DNS lookup, no second TLS connection, no round trip before any text
-   can be painted.
-
-   Latin subsets only; the other scripts were bytes nothing here would use.
-   Dancing Script and Space Grotesk are variable fonts, so every weight is
-   served from one file rather than one file per weight.
+   fonts.css - the site's typefaces, served from public/fonts.
+   Self-hosted so text renders offline and without extra connections.
+   Latin subsets only. Dancing Script and Space Grotesk point every weight at
+   one file (they must be variable fonts for the bold weights to show).
    ========================================================================== */
 
 @font-face {

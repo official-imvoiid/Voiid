@@ -52,9 +52,8 @@ const MascotScene = ({
     setPhase("away");
   }, [clearTimers]);
 
-  // Cursor on the card starts her walking in; on a phone, the card scrolling
-  // into view does. Before this she simply never appeared on mobile - there
-  // was no hover to trigger her.
+  // cursor on the card starts her walking in; on a phone, the card scrolling
+  // into view does
   useCardPlay(hostRef, play, leave, { find: (el) => el.parentElement });
 
   // Shove the card's icon aside the moment she reaches it, and let it swing

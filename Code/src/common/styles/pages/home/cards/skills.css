@@ -1,0 +1,41 @@
+/* pages/home/cards/skills.css - What I do card - the skill tiles. */
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--skill-cols), 1fr);
+  gap: var(--skill-gap);
+  margin-top: var(--skill-top, calc(var(--skill-gap) * 1.33));
+}
+.skill-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--skill-inner-gap, 0.46em);
+  padding: var(--skill-pad, 0.574em 0.861em);
+  border-radius: 8.8px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: var(--skill-name);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+.skill-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
+}
+.skill-icon {
+  display: inline-block;
+  font-size: var(--skill-icon);
+  color: var(--accent);
+  transition: transform 0.3s ease, text-shadow 0.3s ease;
+}
+.skill-icon:hover {
+  transform: scale(2);
+  text-shadow: 0 0 10px var(--color-blue), 0 0 20px var(--color-blue);
+}
+.skill-name {
+  font-size: var(--skill-label, 1em);
+  font-weight: 500;
+  text-align: center;
+  color: #fff;
+}

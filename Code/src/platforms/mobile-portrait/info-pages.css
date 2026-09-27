@@ -1,0 +1,37 @@
+/* platforms/mobile-portrait/info-pages.css - Certifications, Notes, Roadmap. Looks: common/styles/pages/info-pages.css
+   Sizes and layout for mobile portrait (touch, upright). */
+
+/* the title and Back home share one line: the title shrinks to fit rather
+   than pushing the button down under it */
+.pg-head { flex-wrap: nowrap; gap: 12px; }
+.pg-title {
+  min-width: 0;
+  font-size: clamp(0.95rem, 4.5vw, 2rem);   /* a little smaller, so it fits on one line */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pg-head .bh { flex: none; }
+
+/* ---- Certifications viewer: certificate on top, details underneath ----
+   Side by side, the 260px details column squeezed the certificate and
+   pushed everything off the screen. */
+.cert-view { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; min-width: 0; }
+.cert-view > * { min-width: 0; }
+/* the full-screen frame never grows past the screen to fit a long name */
+.cert-viewer-root .nb-viewer-box { grid-template-columns: minmax(0, 1fr); width: 100%; overflow: hidden; }
+.cert-view .nb-viewer-stage { min-height: 42vh; }
+.cert-details {
+  max-height: 34vh;
+  padding: 14px 16px 18px;
+  border-left: 0;
+  border-top: 1px solid #2a2a31;
+}
+.cert-view .zi-hint { display: none; }
+.cert-view .zi-tools { bottom: 10px; }
+
+/* the narrowest phones (320-360px): a touch smaller again, so the longest
+   titles still fit on one line beside Back home */
+@media (max-width: 360px) {
+  .pg-title, .gp-title { font-size: 4vw; }
+}

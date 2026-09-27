@@ -1,0 +1,53 @@
+/* platforms/mobile-portrait/home/cards.css - card layout tweaks, touch, held upright. */
+
+/* ---- Discord / Articles: text gets the full width, the link sits in its
+   own strip underneath - on the right, like every other card's link ---- */
+.project-card,
+.blog-card { padding-bottom: calc(var(--pad) + var(--link) * 2.4); }
+
+/* ---- Research: the scientist's share of the card's height ----
+   (the card's own height is --research-min-height in board.css) */
+.research-card .sci { height: 76% !important; }
+
+/* ---- the scientist's "oops... big test" bubble: starts further in (up by
+   his head) and stays on one line, so it isn't cut off by a narrow card ---- */
+.research-card .sci-bubble {
+  left: 30%;
+  bottom: 86%;
+  padding: 5px 9px;
+  white-space: nowrap;
+  font-size: 10.5px;
+  line-height: 1.2;
+}
+.research-card .sci-bubble::after { left: 12px; }
+
+/* ---- Play & Learn on a portrait tablet ----
+   The card is stretched to the height of Research beside it; the </> badge
+   stays in its corner, a little larger, lined up with the View link. */
+@media (min-width: 760px) {
+  .achievement-card .card-corner-icon {
+    --badge: calc(var(--colw) * 0.22);
+    width: var(--badge);
+    /* the link's text centre (its bottom + 5px padding + half a line),
+       minus half the badge's height (the art is 327 x 275). The link's
+       line is 1.5x its font, so its text centre is 0.79 of the font up. */
+    bottom: calc(var(--icon-inset) * 1.2 + 5px + var(--link) * 0.79 - var(--badge) * 0.4205 + 6px);   /* + a little lift */
+  }
+}
+
+/* the narrowest phones (320-360px): start the bubble further left so the
+   one-line "oops… big test" still fits inside the card */
+@media (max-width: 360px) {
+  .research-card .sci-bubble { left: 4%; font-size: 10px; }
+}
+
+/* ---- "Good person - you follow instructions..." on one line ---- */
+.pp-note {
+  left: 10px;
+  right: 10px;
+  padding: 8px 10px;
+  white-space: nowrap;
+  font-size: clamp(9px, 2.55vw, 12px);
+  letter-spacing: -0.01em;
+  text-align: center;
+}

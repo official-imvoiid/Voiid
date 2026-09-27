@@ -61,9 +61,8 @@ const Scientist = ({ height = "64%", side = "left" }) => {
       className="sci"
       data-phase={phase}
       data-side={side}
-      /* a share of the card's height, not a pixel width - his art is
-         200x330, so any width I picked became a height 1.65x larger that
-         the card had no say in, and he grew straight through the heading */
+      /* a share of the card's height, not a pixel width: his art is 200x330,
+         so a fixed width would set a height the card has no say in */
       style={{ height }}
       aria-hidden="true"
     >
@@ -114,8 +113,9 @@ const Scientist = ({ height = "64%", side = "left" }) => {
             <ellipse cx="78" cy="84" rx="9" ry="6" fill="#4A4250" opacity="0.4" />
           </g>
 
-          {/* mouth */}
-          <path className="sci-mouth" d="M92 98 q8 6 16 0" fill="none" strokeWidth="4" />
+          {/* mouth: a smile, and the "oh" after the bang - swapped by opacity */}
+          <path className="sci-mouth is-calm" d="M92 98 q8 6 16 0" fill="none" strokeWidth="4" />
+          <path className="sci-mouth is-oh" d="M91 100 q9 -7 18 0" fill="none" strokeWidth="4" />
 
           {/* ---- left arm + flask, this is the one that pours ---- */}
           <g className="sci-arm-l">

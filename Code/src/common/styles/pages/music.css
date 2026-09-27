@@ -1,0 +1,242 @@
+/* pages/music.css - the music page (/musiclist).
+   The frame (background, title, back button, intro, chips, grid, card)
+   comes from info-pages.css via PageShell; this adds only what is musical.
+   Sizes that change per device: platforms/<device>/music.css */
+
+.music-intro-quote {
+  display: block;
+  margin-top: 6px;
+  font-style: italic;
+  color: var(--pg-dim);
+}
+
+/* ---- one section per genre ---- */
+/* --cat is the category's colour, set from admin -> Music */
+.music-genre { --cat: var(--pg-accent); }
+.music-genre + .music-genre { margin-top: clamp(28px, 3.4vw, 44px); }
+
+.music-genre-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: clamp(12px, 1.4vw, 18px);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pg-line);
+  font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+  font-weight: 700;
+  color: var(--cat);
+}
+.music-genre-count {
+  padding: 2px 9px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--cat) 16%, transparent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--cat);
+}
+
+/* a selected category chip takes that category's colour */
+.pg-chip.music-chip[aria-pressed="true"] {
+  background: var(--cat);
+  border-color: var(--cat);
+}
+
+/* ---- song card: video on top, name underneath ---- */
+.pg-card.music-song {   /* two classes: beats .pg-card in info-pages.css, which styles/index.css imports later */
+  padding: 0;
+  gap: 0;
+}
+
+.music-video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+}
+
+/* the video's own thumbnail with a play button - the player opens in a pop-up */
+.music-poster {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: #000;
+  cursor: pointer;
+}
+.music-poster img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.82;
+  transition: opacity 0.3s ease, transform 0.5s ease;
+}
+.music-play {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(3px);
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+.music-play svg { width: 26px; height: 26px; margin-left: 3px; fill: #fff; transition: fill 0.25s ease; }
+.music-poster:hover img,
+.music-poster:focus-visible img { opacity: 1; transform: scale(1.05); }
+.music-poster:hover .music-play,
+.music-poster:focus-visible .music-play {
+  background: var(--cat);
+  border-color: var(--cat);
+  transform: scale(1.1);
+}
+.music-poster:hover .music-play svg,
+.music-poster:focus-visible .music-play svg { fill: #0D0D0F; }
+
+/* small YouTube shortcut in the corner of each card */
+.music-yt-link {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+.music-video:hover .music-yt-link,
+.music-yt-link:focus-visible { opacity: 1; }
+.music-yt-link:hover { background: #FF0033; }
+.music-yt-icon { width: 20px; height: 20px; fill: #fff; flex: none; }
+
+.music-info {
+  display: grid;
+  gap: 4px;
+  padding: 13px 16px 15px;
+}
+
+/* ---- the pop-up player ---- */
+.music-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vw, 40px);
+  background: rgba(5, 5, 8, 0.82);
+  backdrop-filter: blur(8px);
+  animation: music-fade 0.2s ease both;
+}
+@media (pointer: coarse) { .music-modal { backdrop-filter: blur(4px); } }   /* phones: a full-screen blur is dear */
+@keyframes music-fade { from { opacity: 0; } }
+
+.music-modal-box {
+  position: relative;
+  width: min(1200px, 100%, calc((100dvh - 190px) * 16 / 9));
+  border: 1px solid color-mix(in srgb, var(--cat) 45%, transparent);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #141418;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.9),
+              0 0 60px -25px var(--cat);
+  animation: music-pop 0.3s cubic-bezier(.2, .9, .3, 1.15) both;
+}
+@keyframes music-pop { from { opacity: 0; transform: translateY(14px) scale(0.96); } }
+
+.music-modal-screen { position: relative; aspect-ratio: 16 / 9; background: #000; }
+.music-modal-screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+.music-modal-blocked { position: absolute; inset: 0; display: grid; place-items: center; }
+.music-modal-blocked img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; filter: blur(2px) brightness(0.45);
+}
+.music-modal-blocked-text { position: relative; display: grid; gap: 16px; justify-items: center; padding: 20px; text-align: center; }
+.music-modal-blocked-text p { margin: 0; color: #ECECF0; font-size: 1.05rem; }
+
+.music-modal-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-top: 3px solid var(--cat);
+}
+.music-modal-meta { min-width: 0; }
+.music-modal-cat {
+  margin: 0;
+  color: var(--cat);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.music-modal-title {
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: #F2F2F4;
+  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-modal-artist { margin: 2px 0 0; color: var(--pg-dim, #9d9da8); font-size: 0.92rem; }
+
+.music-modal-nav,
+.music-modal-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #3a3a44;
+  border-radius: 50%;
+  background: #1f1f25;
+  color: #ECECF0;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.music-modal-nav svg,
+.music-modal-close svg {
+  width: 20px; height: 20px;
+  fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
+}
+.music-modal-nav:hover { background: var(--cat); border-color: var(--cat); color: #0D0D0F; }
+
+.music-modal-close { margin-left: 4px; }
+.music-modal-close:hover { background: #fff; border-color: #fff; color: #0D0D0F; }
+
+.music-modal-yt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #FF0033;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.music-modal-yt:hover { filter: brightness(1.12); transform: translateY(-1px); }
+.music-modal-yt.is-big { padding: 14px 24px; font-size: 1.1rem; }
+.music-modal-yt.is-big .music-yt-icon { width: 26px; height: 26px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .music-modal, .music-modal-box { animation: none; }
+}
+
+/* touch screens have no hover: keep the YouTube shortcut visible */
+@media (hover: none) {
+  .music-yt-link { opacity: 1; }
+}

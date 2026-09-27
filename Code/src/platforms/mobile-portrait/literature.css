@@ -1,0 +1,11 @@
+/* platforms/mobile-portrait/literature.css - the poems (/literature). Looks: common/styles/pages/literature.css
+   Sizes and layout for mobile portrait. */
+
+/* two books a row */
+.lit-books { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; }
+/* the title sizes itself to the cover (common literature.css) */
+.lit-book-face { margin: 7px; padding: 12px 10px 10px; }
+.lit-book:hover, .lit-book:focus-visible { transform: none; }
+
+.lit-reader { padding-top: 66px; }
+.lit-reader-bar { right: 10px; }

@@ -1,0 +1,468 @@
+/* pages/develop.css - the GitHub project map (/develop).
+   The frame comes from info-pages.css via PageShell; this is the map itself
+   (parchment, trail, stops, creatures, ship) and the side column.
+   Layout per device (map + card side by side, or stacked):
+   platforms/<device>/develop.css */
+
+.dv-page {
+  --map-ink: #4a3217;
+  --ink-soft: #7a5a32;
+  --paper: #ead9b3;
+  --paper-dark: #d8bf8c;
+  --blood: #a3261b;
+}
+
+/* ---- intro: one wide line, tight under the title ---- */
+.pg-intro.dv-intro {
+  max-width: none;
+  margin: 2px 0 clamp(16px, 2.2vw, 24px);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+}
+
+/* ---- the right-hand column: the project card, then the ship's log ---- */
+.dv-side { display: grid; gap: 16px; align-content: start; min-width: 0; }
+
+.dv-log {
+  display: grid;
+  gap: 14px;
+  padding: 18px 22px 20px;
+  border-radius: 10px;
+  background: radial-gradient(ellipse at center, #efe1bf 60%, #dcc594 100%);
+  box-shadow: inset 0 0 26px rgba(110, 70, 25, 0.5), 0 14px 30px -16px rgba(0, 0, 0, 0.8);
+  color: var(--map-ink);
+}
+.dv-log-title {
+  margin: 0;
+  color: var(--blood);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.dv-log-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.dv-log-stats dt { color: var(--ink-soft); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.dv-log-stats dd {
+  margin: 2px 0 0;
+  color: var(--map-ink);
+  font-family: var(--font-clean);
+  font-size: 1.45rem;
+  white-space: nowrap;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.dv-log-langs { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.dv-key { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin: 0; padding: 0; list-style: none; }
+.dv-key li { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600; }
+.dv-key svg { width: 24px; height: 24px; flex: none; overflow: visible; }
+.dv-log-langs li {
+  display: grid;
+  grid-template-columns: 9em minmax(0, 1fr) 2ch;
+  gap: 10px;
+  align-items: center;
+  color: var(--map-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.dv-log-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dv-log-bar {
+  height: 7px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--lang) calc(var(--share) * 100%), rgba(122, 90, 50, 0.2) 0);
+  box-shadow: inset 0 0 0 1px rgba(74, 50, 23, 0.35);
+}
+.dv-log-n { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* drawn icons inside the buttons */
+.dv-icon {
+  width: 1.05em;
+  height: 1.05em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+  vertical-align: -0.15em;
+}
+
+.dv-layout {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+}
+
+/* ---- the parchment ----
+   Drawn like an old engraved map: one brown ink on aged paper, red kept
+   for the route and the X. */
+.dv-page {
+  --map-font: "Palatino Linotype", "Book Antiqua", Palatino, "Iowan Old Style", Georgia, serif;
+  --sea: rgba(122, 104, 70, 0.10);
+}
+.dv-map {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  border-radius: 6px;
+  background:
+    /* soft wood grain, drawn once as an image */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.003 0.09' numOctaves='3' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.32 0 0 0 0 0.25 0 0 0 0 0.16 0 0 0 0.32 -0.08'/%3E%3C/filter%3E%3Crect width='600' height='400' filter='url(%23g)'/%3E%3C/svg%3E"),
+    /* faint seams between wide planks */
+    repeating-linear-gradient(180deg, transparent 0 139px, rgba(80, 60, 40, 0.08) 139px 140px),
+    linear-gradient(180deg, #e2d8c3, #d8ccb3);
+  box-shadow:
+    inset 0 0 50px rgba(70, 50, 30, 0.22),
+    0 18px 40px -18px rgba(0, 0, 0, 0.8);
+}
+.dv-svg { display: block; }
+.dv-svg text { font-family: var(--map-font); }
+
+/* ---- the world: solid stamped continents with the engraver's ornament ---- */
+.dv-world-land { fill: #a8733f; }
+.dv-world-coast { fill: none; stroke: #5b3818; stroke-width: 0.9; stroke-linejoin: round; }
+.dv-orn path { fill: none; stroke: #4a2c10; stroke-width: 1; opacity: 0.5; }
+.dv-orn path.is-fine { stroke-width: 0.6; }
+.dv-orn .dv-orn-star { fill: #4a2c10; stroke: none; opacity: 0.55; }
+.dv-orn .dv-orn-guide { stroke: none; }
+.dv-orn-text {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  fill: #4a2c10;
+  opacity: 0.6;
+}
+.dv-rose-print .is-dark { fill: #4a2c10; opacity: 0.6; }
+.dv-rose-print .is-light { fill: none; stroke: #4a2c10; stroke-width: 0.8; opacity: 0.6; }
+.dv-rose-print .dv-orn-line { fill: none; stroke: #4a2c10; stroke-width: 0.8; opacity: 0.55; }
+
+/* ---- compass rose ---- */
+.dv-rose-ring { fill: #efe2c1; stroke: var(--map-ink); stroke-width: 1.2; }
+.dv-rose-ring + .dv-rose-ring { fill: none; }
+.dv-rose-ticks { stroke: var(--map-ink); stroke-width: 0.9; }
+.dv-rose-dark { fill: var(--map-ink); }
+.dv-rose-light { fill: #f4e8c9; stroke: var(--map-ink); stroke-width: 0.8; stroke-linejoin: round; }
+.dv-rose-hub { fill: #f4e8c9; stroke: var(--map-ink); stroke-width: 1; }
+.dv-rose-n { font-size: 17px; font-weight: 700; font-style: italic; fill: var(--map-ink); text-anchor: middle; }
+
+/* ---- the trail ---- */
+.dv-trail-casing { fill: none; stroke: rgba(252, 245, 228, 0.9); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.dv-trail {
+  fill: none;
+  stroke: #2a1606;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-dasharray: 7 5;
+}
+.dv-trail.is-travelled {
+  stroke: #c0281a;
+  stroke-width: 3.6;
+  stroke-dasharray: none;
+}
+.dv-walked { fill: none; stroke: #fff; stroke-width: 10; }
+.dv-trail.is-future { stroke-dasharray: 1 8; opacity: 0.6; }
+
+/* ---- stops: a town mark ---- */
+.dv-stop { cursor: pointer; outline: none; }   /* no browser focus box on click */
+.dv-hit { fill: transparent; }
+.dv-town { fill: #f4e8c9; stroke: var(--map-ink); stroke-width: 1.5; }
+.dv-town-dot { fill: var(--map-ink); }
+.dv-fork-ring { fill: none; stroke: var(--map-ink); stroke-width: 1.1; }
+.dv-smoke { fill: none; stroke: var(--ink-soft); stroke-width: 1.1; stroke-linecap: round; opacity: 0.85; }
+.dv-stop:hover .dv-town { stroke-width: 2.2; }
+.dv-label {
+  font-size: 13px;
+  font-style: normal;
+  fill: #0d0802;
+  paint-order: stroke;               /* text-anchor comes from each label's placement */
+  font-weight: 700;
+  stroke: rgba(252, 246, 232, 0.95);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.dv-stop.is-selected .dv-label { font-size: 14px; fill: var(--blood); }
+.dv-stop:hover .dv-label { fill: var(--blood); }
+.dv-next-label { font-size: 11px; font-style: italic; fill: #3a2410; text-anchor: middle; opacity: 0.8;
+  paint-order: stroke; stroke: rgba(242, 226, 192, 0.8); stroke-width: 3px; }
+/* X marks the spot: a red painted cross on a dark edge */
+.dv-x-edge { fill: none; stroke: #3b0c05; stroke-width: 7; stroke-linecap: round; }
+.dv-x { fill: none; stroke: #d42d1c; stroke-width: 4.2; stroke-linecap: round; }
+.dv-stop.is-selected .dv-town { stroke: var(--blood); }
+
+.dv-pulse {
+  fill: none;
+  stroke: var(--blood);
+  stroke-width: 1.4;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: dv-pulse 2.2s ease-out infinite;
+}
+@keyframes dv-pulse {
+  from { opacity: 0.8; transform: scale(0.6); }
+  to   { opacity: 0;   transform: scale(1.5); }
+}
+
+.dv-next circle { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; stroke-dasharray: 2 3; }
+.dv-next .dv-label { fill: var(--ink-soft); }
+/* ---- the little folk between the rows (DevelopCreatures.jsx) ----
+   drawn as marginalia: ink and paper, no colour but a red flame */
+.dv-creature { cursor: pointer; outline: none; }
+.dv-creature .dv-cr-hit { fill: transparent; stroke: none; }
+.dv-cr-body {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform 0.25s cubic-bezier(.3, 1.6, .5, 1);
+}
+.dv-creature:hover .dv-cr-body,
+.dv-creature.is-open .dv-cr-body { transform: scale(1.15) rotate(-4deg); }
+
+.dv-creature path, .dv-creature circle, .dv-creature ellipse {
+  fill: #efe2c1;
+  stroke: var(--map-ink); stroke-width: 1.2; stroke-linejoin: round; stroke-linecap: round;
+}
+.dv-cr-line, .dv-cr-staff, .dv-cr-visor, .dv-cr-cross, .dv-cr-sword, .dv-cr-grin,
+.dv-cr-belly, .dv-cr-gold-line, .dv-cr-tail { fill: none !important; }
+.dv-cr-staff, .dv-cr-tail { stroke-width: 1.8 !important; }
+.dv-cr-eye, .dv-cr-mouth { fill: var(--map-ink) !important; stroke: none !important; }
+/* shaded parts - the engraver's darker tone */
+.dv-cr-wing, .dv-cr-hat, .dv-cr-rag, .dv-cr-shield, .dv-cr-plume, .dv-cr-gold { fill: #d3b98a !important; }
+.dv-cr-dragon, .dv-cr-goblin, .dv-cr-robe, .dv-cr-armor, .dv-cr-helm { fill: #e4d2a8 !important; }
+.dv-cr-fire { fill: rgba(163, 38, 27, 0.75) !important; stroke: var(--blood) !important; }
+.dv-cr-star, .dv-cr-orb { fill: #f4e8c9 !important; }
+.dv-cr-cross { stroke: var(--map-ink) !important; }
+.dv-cr-kraken { fill: #d3b98a !important; }
+.dv-cr-tentacle { fill: none !important; stroke-width: 2.4 !important; }
+.dv-cr-patch { fill: var(--map-ink) !important; }
+.dv-cr-broom { fill: #d3b98a !important; }
+.dv-cr-semi { font-size: 16px; font-weight: 700; fill: var(--blood); }
+.dv-cr-shadow { fill: rgba(74, 50, 23, 0.15) !important; stroke: none !important; }
+.dv-cr-float { animation: dv-float 3s ease-in-out infinite; }
+@keyframes dv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* a little "!" invites a hover, and goes once it has spoken */
+.dv-cr-hint {
+  font-size: 13px; font-weight: 700; fill: var(--blood);
+  animation: dv-hint 1.6s ease-in-out infinite;
+}
+.dv-creature:hover .dv-cr-hint, .dv-creature.is-open .dv-cr-hint { opacity: 0; animation: none; }
+@keyframes dv-hint { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.9; } }
+
+/* the speech bubble: pops up, then the words type themselves out */
+.dv-bubble {
+  pointer-events: none;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  scale: 0.5;
+  transition: opacity 0.2s ease, scale 0.3s cubic-bezier(.3, 1.6, .5, 1);
+}
+.dv-creature:hover .dv-bubble,
+.dv-creature:focus-visible .dv-bubble,
+.dv-creature.is-open .dv-bubble { opacity: 1; scale: 1; }
+.dv-bubble-box {
+  fill: #fbf3df !important;
+  stroke: var(--map-ink) !important;
+  stroke-width: 1.3 !important;
+  filter: drop-shadow(0 3px 3px rgba(74, 50, 23, 0.25));
+}
+.dv-bubble-text {
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 700;
+  fill: var(--map-ink);
+  text-anchor: middle;
+  clip-path: inset(0 100% 0 0);
+}
+.dv-creature:hover .dv-bubble-text,
+.dv-creature:focus-visible .dv-bubble-text,
+.dv-creature.is-open .dv-bubble-text {
+  animation: dv-type calc(var(--chars) * 0.04s) steps(var(--chars)) 0.15s forwards;
+}
+@keyframes dv-type { to { clip-path: inset(0 0 0 0); } }
+
+/* ---- year flags ---- */
+.dv-flag-pole { fill: none; stroke: #1c1006; stroke-width: 2; stroke-linecap: round; }
+.dv-flag-cloth { fill: #d42d1c; stroke: #3b0c05; stroke-width: 1.2; stroke-linejoin: round; }
+.dv-flag-knob { fill: #e9b949; stroke: #1c1006; stroke-width: 0.8; }
+.dv-flag text {
+  font-size: 13px; font-weight: 700; fill: #0d0802;
+  paint-order: stroke; stroke: rgba(252, 246, 232, 0.95); stroke-width: 4px; stroke-linejoin: round;
+}
+
+/* ---- treasure (starred) + ruins (archived) ---- */
+.dv-chest path { fill: #efe2c1; stroke: var(--map-ink); stroke-width: 1.1; stroke-linejoin: round; }
+.dv-chest .dv-chest-band { fill: none; stroke-width: 0.9; }
+.dv-stop.is-archived .dv-town { stroke-dasharray: 2 2; }
+.dv-stop.is-archived .dv-label { opacity: 0.6; text-decoration: line-through; }
+
+/* ---- the ship ---- */
+.dv-ship-wrap { pointer-events: none; will-change: transform; }
+.dv-ship { animation: dv-bob 2.6s ease-in-out infinite; }
+@keyframes dv-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-3px) rotate(2deg); }
+}
+.dv-ship-hull { fill: #d3b98a; stroke: var(--map-ink); stroke-width: 1.3; stroke-linejoin: round; }
+.dv-ship-line, .dv-ship-mast { fill: none; stroke: var(--map-ink); stroke-width: 1.2; }
+.dv-ship-mast { stroke-width: 1.6; }
+.dv-ship-sail { fill: #f4e8c9; stroke: var(--map-ink); stroke-width: 1.1; stroke-linejoin: round; }
+.dv-ship-pennant { fill: var(--blood); stroke: none; }
+
+/* ---- the details card: a scrap of the same paper ---- */
+.dv-card {
+  display: grid;
+  gap: 12px;
+  padding: 22px 22px 20px;
+  border-radius: 10px;
+  background: radial-gradient(ellipse at center, #efe1bf 60%, #dcc594 100%);
+  box-shadow: inset 0 0 26px rgba(110, 70, 25, 0.5), 0 14px 30px -16px rgba(0, 0, 0, 0.8);
+  color: var(--map-ink);
+  animation: dv-card-in 0.35s ease both;
+}
+@keyframes dv-card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.dv-card-step {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.dv-card-title {
+  font-size: 1.5rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  color: var(--map-ink);
+}
+.dv-card-desc { line-height: 1.55; color: #5a3f1f; }
+
+.dv-card-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dv-card-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid rgba(74, 50, 23, 0.35);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.dv-lang-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.dv-card-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+}
+.dv-card-dates dt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.dv-card-dates dd { margin: 2px 0 0; font-weight: 700; }
+
+.dv-card-topics { display: flex; flex-wrap: wrap; gap: 6px; }
+.dv-card-topics span {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(74, 50, 23, 0.1);
+  font-size: 0.74rem;
+}
+
+.dv-card-nav {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  margin-top: 4px;
+}
+.dv-btn {
+  display: grid;
+  place-items: center;
+  min-width: 46px;
+  padding: 0.65rem 0.9rem;
+  border: 2px solid var(--map-ink);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--map-ink);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.dv-btn:hover { background: var(--map-ink); color: #f3e6c6; }
+.dv-btn.is-visit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 0.6rem;
+  font-size: 0.95rem;
+  border-color: var(--blood);
+  background: var(--blood);
+  color: #fff3df;
+  white-space: nowrap;
+}
+.dv-btn.is-visit:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+.dv-card-live { justify-self: start; font-weight: 700; color: var(--blood); text-decoration: underline; }
+.dv-card-warn { font-size: 0.8rem; color: var(--blood); }
+
+.dv-error { display: grid; gap: 10px; justify-items: start; color: #C9C9D1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dv-pulse, .dv-card, .dv-ship, .dv-cr-float, .dv-cr-hint { animation: none; }
+  .dv-creature .dv-bubble-text { animation: none !important; clip-path: none; }
+}
+
+/* ---- more than one map: a pager above it ---- */
+.dv-maps { display: grid; gap: 12px; min-width: 0; }
+.dv-pager {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+.dv-page-title {
+  margin: 0;
+  color: var(--pg-accent);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+}
+.dv-page-title span { display: block; color: #9d9da8; font-size: 0.8rem; font-weight: 600; }
+.dv-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid color-mix(in srgb, var(--pg-accent) 45%, transparent);
+  border-radius: 10px;
+  background: #1f1f24;
+  color: #F2F2F5;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.dv-page-btn:hover:not(:disabled) { background: var(--pg-accent); color: #0D0D0F; }
+.dv-page-btn:disabled { opacity: 0.35; cursor: default; }

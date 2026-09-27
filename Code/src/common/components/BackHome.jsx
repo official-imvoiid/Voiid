@@ -5,10 +5,8 @@ import { Link } from "react-router-dom";
  *
  *   <BackHome />
  *
- * Copied from the music page, which had it right: white pill, green fill at
- * 35% that slides across on hover, Pacifico label. Every page used to carry
- * its own inline copy - some with a glow, some with a lift, all drifting
- * apart. They all point here now, so it only ever has to be changed once.
+ * One component so every page's back button looks and behaves the same.
+ * Looks: common/styles/components/back-home.css
  */
 const BackHome = ({ label = "<< Back home", to = "/", className = "" }) => (
   <Link

@@ -6,10 +6,11 @@ const HUES = ["#F39C12", "#3B82F6", "#10B981", "#EC4899", "#8B5CF6", "#06B6D4", 
 
 /* An .svg logo is drawn as a silhouette in the skill's colour, so every icon
    matches; a photo-type logo (png, jpg, webp) is shown as it is. */
+const cssUrl = (u) => `url("${String(u).replace(/[\\"()\s]/g, encodeURIComponent)}")`;   // can't break out of the url()
 const SkillIcon = ({ skill }) => {
   if (!skill.logo) return skill.icon;
   if (/\.svg(\?|$)/i.test(skill.logo)) {
-    return <span className="skills-glyph" style={{ "--logo": `url("${skill.logo}")` }} />;
+    return <span className="skills-glyph" style={{ "--logo": cssUrl(skill.logo) }} />;
   }
   return <img src={skill.logo} alt="" loading="lazy" draggable={false} />;
 };
@@ -47,7 +48,7 @@ const SkillSet = () => {
       <ul className="skills-grid-list">
         {skills.map((sk, i) => (
           <li
-            key={sk.label}
+            key={`${sk.label}-${i}`}
             className="pg-card skills-tile"
             style={{ "--i": i, "--hue": sk.color && sk.color !== "auto" ? sk.color : HUES[i % HUES.length] }}
           >

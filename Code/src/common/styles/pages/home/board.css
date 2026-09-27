@@ -1,0 +1,124 @@
+/* pages/home/board.css - the card grid and what every card shares
+   (title, subtitle, View link, corner badge).
+
+   Every size is a token. The platform folders set them in platforms/<device>/home/board.css:
+   --cols and --gap on .cards-container, card sizes on .cards-container > *.
+   --colw (one column's width) is worked out here and can be used in any
+   device file to size something relative to its card. */
+
+.cards-container {
+  container: board / inline-size;   /* 100cqi = the board's inner width */
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-auto-flow: dense;            /* no holes when a wide card wraps */
+  gap: var(--gap);
+  width: 100%;
+  max-width: var(--page-max);
+  margin: var(--board-top) auto var(--board-bottom);
+  padding: 0 var(--gutter);
+}
+
+/* the width of one column - every card size token is built from this */
+.cards-container > * {
+  --colw: calc((100cqi - (var(--cols) - 1) * var(--gap)) / var(--cols));
+}
+
+/* the Game and Music cards are links: an invisible full-size <Link> over the
+   card's art (glyph z 3), under anything that has to stay clickable (the
+   Wasted button, z 6) */
+.card-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  isolation: isolate;
+  padding: var(--pad);
+  border-radius: 17.6px;
+  background-color: #27272A;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.card-large { grid-column: span 2; }
+
+/* out of view (useCardPause.js): every looping effect in the card stands still */
+.card.is-offscreen,
+.card.is-offscreen *,
+.card.is-offscreen::before,
+.card.is-offscreen::after { animation-play-state: paused; }
+
+.card-title {
+  font-size: var(--title);
+  font-weight: 700;
+  /* tied to the title size, not the element's own font-size - the GitHub
+     and Game glyphs reuse .card-title at 8x the size and would get 8x the gap */
+  margin: var(--title-gap, calc(var(--title) * 0.28)) 0;
+}
+.card-subtitle {
+  font-size: var(--sub);
+  color: var(--color-grey);
+  text-transform: uppercase;
+}
+.card p:not([class]) { font-size: var(--text); }   /* body copy only */
+
+/* "View ->" link, pinned bottom-right */
+.card-link {
+  position: absolute;
+  right: var(--link-inset);
+  bottom: var(--link-inset);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--link-gap, 0.46em);
+  padding-bottom: 5px;
+  font-size: var(--link);
+  font-weight: 600;
+  color: var(--accent);
+  transition: gap 0.3s ease, color 0.3s ease;
+}
+.card-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent);
+  transition: width 0.3s ease;
+}
+.card-link span {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+.card-link:hover { gap: calc(var(--link-gap, 0.46em) * 1.5); }
+.card-link:hover::after { width: 100%; }
+.card-link:hover span { animation: arrow-pulse 1.5s infinite; }
+@keyframes arrow-pulse {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(5px); }
+}
+
+/* badge in the bottom-left corner of Skill-Set and Play & Learn */
+.card-corner-icon {
+  position: absolute;
+  left: var(--icon-inset);
+  bottom: var(--icon-inset);
+  z-index: 2;
+  width: var(--icon);
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+  user-select: none;
+}
+/* the icon adds no height, so reserve the strip it sits in */
+.resume-card,
+.achievement-card { padding-bottom: var(--icon-reserve); }
+.resume-card .card-link,
+.achievement-card .card-link {
+  z-index: 3;
+  bottom: calc(var(--icon-inset) * 1.2);
+}

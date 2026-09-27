@@ -1,0 +1,58 @@
+/* pages/home/cards/about.css - About Voiid card. */
+
+.about-card {
+  --about-bg: linear-gradient(145deg, #23232B 0%, #1B1B22 55%, #201F2A 100%);   /* also its hover (platforms/desktop/home/hover.css) */
+  justify-content: center;
+  background: var(--about-bg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: #E6E6EE;
+}
+.about-card .card-subtitle {
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  font-weight: 700;
+}
+.about-card .card-title { color: #fff; }
+.about-card p {
+  max-width: 62ch;
+  line-height: 1.75;
+  color: #C9C9D6;
+}
+.about-card p strong {
+  color: #FFD76A;
+  font-weight: 700;
+}
+.about-card .card-subtitle,
+.about-card .card-title,
+.about-card p { animation: about-rise 0.6s cubic-bezier(.2, .8, .3, 1) backwards; }
+.about-card .card-subtitle { animation-delay: 0.10s; }
+.about-card .card-title    { animation-delay: 0.22s; }
+.about-card p              { animation-delay: 0.36s; }
+@keyframes about-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.about-card::after {                 /* slow gold sheen */
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 44%,
+              rgba(234, 179, 8, 0.07) 50%, transparent 56%);
+  animation: card-sheen 9s ease-in-out infinite;
+}
+
+/* the clean face - Cabin Sketch is hard work in a paragraph */
+.about-card .card-title,
+.about-card .card-subtitle,
+.about-card p,
+.about-card p strong { font-family: var(--font-clean) !important; }
+.about-card .card-title { letter-spacing: -0.015em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .about-card::after,
+  .about-card .card-subtitle,
+  .about-card .card-title,
+  .about-card p { animation: none; }
+}

@@ -1,0 +1,20 @@
+/* platforms/mobile-landscape/art.css - AI Canvas gallery (/art). Looks: common/styles/pages/art.css
+   Sizes and layout for mobile landscape (touch, sideways). */
+
+/* gallery columns by width */
+@media (min-width: 1401px) {
+  .gallery-container { column-count: 4; }
+}
+@media (min-width: 1001px) and (max-width: 1400px) {
+  .gallery-container { column-count: 3; }
+}
+@media (min-width: 601px) and (max-width: 1000px) {
+  .gallery-container { column-count: 2; }
+}
+@media (max-width: 600px) {
+  .gallery-container { column-count: 1; }
+}
+
+/* the lightbox's thumbnail strip: fixed-size thumbnails, swiped sideways */
+.lightbox-thumb { flex: none; }
+.lightbox-thumb img { width: 52px; height: 40px; }

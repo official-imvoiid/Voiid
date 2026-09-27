@@ -1,0 +1,32 @@
+/* components/coming-soon.css - the placeholder page (About, Expertise, Work). */
+
+.cs {
+  min-height: 100dvh;
+  padding: clamp(18px, 4vw, 44px) var(--gutter) 64px;
+  background: var(--app-bg);
+  color: var(--ink);
+}
+
+.cs-shell {
+  max-width: var(--page-max);
+  margin: 0 auto;
+}
+
+.cs-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.cs-title {
+  margin: 0;
+  font-size: clamp(1.7rem, 4.2vw, 2.6rem);
+  color: #f39c12;
+}
+
+.cs-text {
+  margin-top: 18px;
+  color: #9A9AA4;
+}

@@ -15,8 +15,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *   </div>
  *
  * The host needs `position: relative` and `overflow: hidden`; the Game card
- * already has both. Type scales off the card width via container units, so
- * the banner fits whatever size the grid gives it.
+ * already has both. The button sits above the card's link overlay, so a
+ * press never navigates. Type scales off the card width via container
+ * units, so the banner fits whatever size the grid gives it.
  *
  * The audio only ever plays as a direct result of the third click, so it
  * never trips the browser's autoplay block.
@@ -39,15 +40,11 @@ const TAUNTS = [
 ];
 
 /**
- * The original crack pattern, scaled outward to fill the card.
- *
- * This is the hand-drawn set it started with - the generated shatter that
- * replaced it read as scribble, not glass. The only change is SPREAD: every
- * endpoint is pushed out from the impact point by 1.55x, so each fracture
- * runs off the edge of the 100x100 box instead of stopping inside it. With
- * `preserveAspectRatio="none"` the box is stretched to the card, so pushing
- * past the boundary is what guarantees the corners and the side thirds are
- * covered however wide the card gets.
+ * The hand-drawn crack pattern, scaled outward to fill the card: every
+ * endpoint is pushed out from the impact point by SPREAD, so each fracture
+ * runs off the edge of the 100x100 box. With `preserveAspectRatio="none"`
+ * the box is stretched to the card, so that is what keeps the corners and
+ * the side thirds covered however wide the card gets.
  */
 const SPREAD = 1.55;
 
@@ -97,10 +94,7 @@ export const useWasted = ({ sound = "/audio/fahhhhh.mp3" } = {}) => {
   }, [sound]);
 
   const onClick = useCallback(
-    (e) => {
-      // the button lives inside a <Link>, so the navigation has to be stopped
-      e.preventDefault();
-      e.stopPropagation();
+    () => {
       // `active` only updates on the next render, so mashing the button could
       // slip several clicks past this check and fire the whole thing twice.
       // The ref flips immediately.
@@ -145,9 +139,7 @@ export const useWasted = ({ sound = "/audio/fahhhhh.mp3" } = {}) => {
     [active]
   );
 
-  const dismiss = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const dismiss = useCallback(() => {
     // A 4th rapid press lands on the overlay, which covers the card - without
     // this it would dismiss the thing it just triggered.
     if (Date.now() - firedAt.current < DISMISS_LOCK_MS) return;

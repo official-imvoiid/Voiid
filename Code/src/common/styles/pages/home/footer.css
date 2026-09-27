@@ -1,0 +1,79 @@
+/* pages/home/footer.css - links, quote, social icons. Sizes: platforms/<device>/home/page.css */
+
+.footer {
+  width: 100%;
+  margin-top: auto;
+  padding: var(--foot-pad) 0;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--app-bg);
+  animation: fadeInUp 1s ease-in-out;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em var(--foot-gap);
+  margin-bottom: var(--foot-gap);
+}
+.footer-link {
+  position: relative;
+  font-size: var(--foot-link);
+  color: var(--color-white);
+}
+.footer-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent);
+  transition: width 0.3s ease;
+}
+.footer-link:hover::after { width: 100%; }
+
+.quote {
+  margin: var(--quote-top, 0.925em) 0 var(--quote-bottom, 0.716em);
+  font-family: 'Dancing Script', cursive !important;
+  font-size: var(--quote);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--social-gap);
+  margin-bottom: var(--social-bottom, calc(var(--foot-gap) * 0.75));
+  animation: fadeInUp 1s ease-in-out both;
+}
+.social-icon {
+  position: relative;
+  font-size: var(--social);
+  color: var(--color-white);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+/* the glyph itself brightens - no shadow to scatter */
+.social-icon:hover {
+  transform: scale(1.18) rotate(4deg);
+  filter: brightness(1.5) saturate(1.6);
+}
+/* each icon's brand colour comes from content/platforms.js as --brand */
+.social-icon:hover { color: var(--brand, var(--accent)); }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.copyright {
+  font-size: var(--copy);
+  color: var(--color-grey);
+  text-transform: uppercase;
+}

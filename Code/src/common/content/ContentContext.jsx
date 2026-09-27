@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import defaults from "./defaults";
+import { asJson } from "./api";
 
 /**
  * ContentContext - the site's editable content.
@@ -50,12 +51,11 @@ export const ContentProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: sections }),
       });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) return body.error || "Could not save.";
+      const body = await asJson(res, "Could not save.");
       setOverrides(body.data || {});
       return null;
-    } catch {
-      return "Can't reach the server - is `npm run server` running?";
+    } catch (err) {
+      return err.status ? err.message : "Can't reach the server - is `npm run server` running?";
     }
   }, []);
 

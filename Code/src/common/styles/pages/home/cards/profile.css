@@ -1,0 +1,31 @@
+/* pages/home/cards/profile.css - Profile card - avatar, greeting, video player hit area. */
+
+.avatar {
+  width: var(--avatar);
+  height: var(--avatar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--title-gap, calc(var(--title) * 0.28));
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #3182ce;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* the video player's click target sits exactly on the avatar */
+.profile-card .pp-hit {
+  top: var(--pad);
+  left: var(--pad);
+  width: var(--avatar);
+  height: var(--avatar);
+}
+.profile-card .pp-note {
+  left: var(--pad);
+  right: var(--pad);
+  bottom: var(--pad);
+  font-size: var(--sub);
+}
