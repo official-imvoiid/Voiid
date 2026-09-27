@@ -1,0 +1,6 @@
+/* platforms/mobile-landscape/civitai.css - /gone. Looks: common/styles/pages/civitai.css
+   Sizes and layout for mobile landscape: smaller hanging art, the low row hidden. */
+
+.cv-hang { width: calc(var(--size) * 0.6); margin-left: calc(var(--size) * -0.3); }
+.cv-hang.is-low { display: none; }
+.cv-talker { width: 150px; }

@@ -1,0 +1,14 @@
+/* Home page - how it looks on every device.
+   Sizes come from platforms/<device>/home/. */
+@import "./page.css";
+@import "./header.css";
+@import "./board.css";
+@import "./cards/profile.css";
+@import "./cards/research.css";
+@import "./cards/github.css";
+@import "./cards/collaborate.css";
+@import "./cards/about.css";
+@import "./cards/skills.css";
+@import "./cards/projects.css";
+@import "./cards/fun.css";
+@import "./footer.css";

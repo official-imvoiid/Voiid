@@ -1,0 +1,29 @@
+/* ==========================================================================
+   platforms - sizes and layout per device. Exactly one folder applies.
+
+     desktop/           mouse / trackpad (Windows, Mac, Linux), any zoom
+     mobile-portrait/   touch screens held upright (phones, tablets)
+     mobile-landscape/  touch screens held sideways (phones, tablets)
+
+   Every folder has the same files, one per page, so the same page is always
+   in the same place: e.g. platforms/mobile-landscape/game.css.
+
+   Inside a folder you write plain CSS - the device condition is applied
+   here, once. Loaded after common/styles, so a rule here beats the same
+   rule there.
+
+   Why desktop keys on the pointer, not the width: zooming to 500% on a
+   1920 screen gives a 384px-wide page, which width rules cannot tell apart
+   from a phone. A mouse is a mouse at any zoom.
+   ========================================================================== */
+
+@import "./desktop/index.css"
+  (hover: hover) and (pointer: fine);
+
+@import "./mobile-portrait/index.css"
+  (hover: none) and (orientation: portrait),
+  (pointer: coarse) and (orientation: portrait);
+
+@import "./mobile-landscape/index.css"
+  (hover: none) and (orientation: landscape),
+  (pointer: coarse) and (orientation: landscape);

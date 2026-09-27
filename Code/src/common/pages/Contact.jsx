@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
    Messages go to server.js, which checks the robot question, saves them
    encrypted, and shows them in /admin -> Inbox. No third-party services. */
 
-const ALLOWED_DOMAINS = ["gmail.com", "outlook.com"];
+const ALLOWED_DOMAINS = ["gmail.com", "outlook.com"];   // keep in step with ALLOWED_DOMAINS in server.js
 
 const Contact = () => {
   const navigate = useNavigate();
@@ -19,22 +19,6 @@ const Contact = () => {
   const [redirectCountdown, setRedirectCountdown] = useState(5);
   const [challenge, setChallenge] = useState(null);   // { question, nonce, issuedAt, sig }
   const [answer, setAnswer] = useState("");
-
-  // Disable right-click and certain key shortcuts (superficial)
-  useEffect(() => {
-    const disableContextMenu = (e) => e.preventDefault();
-    const disableKeys = (e) => {
-      if ((e.ctrlKey && (e.key === "u" || e.key === "s" || e.key === "i")) || e.key === "F12") {
-        e.preventDefault();
-      }
-    };
-    document.addEventListener("contextmenu", disableContextMenu);
-    document.addEventListener("keydown", disableKeys);
-    return () => {
-      document.removeEventListener("contextmenu", disableContextMenu);
-      document.removeEventListener("keydown", disableKeys);
-    };
-  }, []);
 
   // Handle countdown and redirect after successful submission
   useEffect(() => {

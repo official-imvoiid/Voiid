@@ -1,24 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import PageShell from "../components/PageShell";
+import sandboxRunner from "./gameSandbox.js?raw";
 
 /* Looks: common/styles/pages/game.css
-   Sizes: platforms/<device>/game.css */
-const JavaScriptCodingGame = () => {
-  const [currentLevel, setCurrentLevel] = useState(1);
-  const [codeValue, setCodeValue] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [output, setOutput] = useState("");
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
-  const [testsPassed, setTestsPassed] = useState(false);
-  const [unlockedLevels, setUnlockedLevels] = useState(1);
-  const [showCompletionPopup, setShowCompletionPopup] = useState(false);
+   Sizes: platforms/<device>/game.css
 
-  const levelData = {
-    1: {
-      title: "Guess the Number Game",
-      description: "Create a function that generates a random number between 1 and 10 and lets the user guess it.",
-      solution: `function guessTheNumber() {
+   The visitor's code never runs in this page. It runs inside a sandboxed
+   <iframe> (allow-scripts only, so it has its own opaque origin): no cookies,
+   no access to this page or to /api/admin, and an endless loop only hangs
+   the iframe, which is thrown away after RUN_MS. The tests run in there too,
+   and the results come back over postMessage. */
+
+const RUN_MS = 2000;
+
+// the levels: what to build, the model answer, and the tests (each test is
+// sent into the sandbox as source text, so it must only use its argument)
+const levelData = {
+  1: {
+    title: "Guess the Number Game",
+    description: "Create a function that generates a random number between 1 and 10 and lets the user guess it.",
+    solution: `function guessTheNumber() {
   const secretNumber = Math.floor(Math.random() * 10) + 1;
   let attempts = 0;
   
@@ -52,26 +53,26 @@ const JavaScriptCodingGame = () => {
 }
 
 guessTheNumber();`,
-      challenge: "Write a JavaScript function called guessTheNumber that creates a number guessing game. The function should generate a random number between 1 and 10 and simulate a few guesses, providing feedback for each guess.",
-      testCases: [
-        {
-          test: (func) => {
-            if (typeof func !== "function") return false;
-            const result = func();
-            return typeof result === "object" && 
-                   typeof result.secretNumber === "number" && 
-                   typeof result.attempts === "number" &&
-                   result.secretNumber >= 1 && 
-                   result.secretNumber <= 10;
-          },
-          description: "Function generates a random number between 1-10 and tracks attempts"
-        }
-      ]
-    },
-    2: {
-      title: "Simple Calculator",
-      description: "Create a calculator that can add, subtract, multiply, divide, and find remainders.",
-      solution: `function calculator(num1, num2, operation) {
+    challenge: "Write a JavaScript function called guessTheNumber that creates a number guessing game. The function should generate a random number between 1 and 10 and simulate a few guesses, providing feedback for each guess.",
+    testCases: [
+      {
+        test: (func) => {
+          if (typeof func !== "function") return false;
+          const result = func();
+          return typeof result === "object" && 
+                 typeof result.secretNumber === "number" && 
+                 typeof result.attempts === "number" &&
+                 result.secretNumber >= 1 && 
+                 result.secretNumber <= 10;
+        },
+        description: "Function generates a random number between 1-10 and tracks attempts"
+      }
+    ]
+  },
+  2: {
+    title: "Simple Calculator",
+    description: "Create a calculator that can add, subtract, multiply, divide, and find remainders.",
+    solution: `function calculator(num1, num2, operation) {
   if (isNaN(num1) || isNaN(num2)) {
     console.log("Error: Please provide valid numbers");
     return null;
@@ -122,35 +123,35 @@ calculator(10, 5, "subtract");
 calculator(10, 5, "multiply");
 calculator(10, 5, "divide");
 calculator(10, 3, "remainder");`,
-      challenge: "Create a calculator function that takes two numbers and an operation string ('add', 'subtract', 'multiply', 'divide', or 'remainder') and performs the calculation. Include error handling for invalid inputs and division by zero.",
-      testCases: [
-        {
-          test: (func) => {
-            if (typeof func !== "function") return false;
-            return func(10, 5, "add") === 15;
-          },
-          description: "Addition works: 10 + 5 = 15"
+    challenge: "Create a calculator function that takes two numbers and an operation string ('add', 'subtract', 'multiply', 'divide', or 'remainder') and performs the calculation. Include error handling for invalid inputs and division by zero.",
+    testCases: [
+      {
+        test: (func) => {
+          if (typeof func !== "function") return false;
+          return func(10, 5, "add") === 15;
         },
-        {
-          test: (func) => {
-            if (typeof func !== "function") return false;
-            return func(10, 5, "subtract") === 5;
-          },
-          description: "Subtraction works: 10 - 5 = 5"
+        description: "Addition works: 10 + 5 = 15"
+      },
+      {
+        test: (func) => {
+          if (typeof func !== "function") return false;
+          return func(10, 5, "subtract") === 5;
         },
-        {
-          test: (func) => {
-            if (typeof func !== "function") return false;
-            return func(10, 0, "divide") === null;
-          },
-          description: "Division by zero handled correctly"
-        }
-      ]
-    },
-    3: {
-      title: "Password Strength Checker",
-      description: "Build a function that evaluates password strength based on multiple criteria.",
-      solution: `function checkPasswordStrength(password) {
+        description: "Subtraction works: 10 - 5 = 5"
+      },
+      {
+        test: (func) => {
+          if (typeof func !== "function") return false;
+          return func(10, 0, "divide") === null;
+        },
+        description: "Division by zero handled correctly"
+      }
+    ]
+  },
+  3: {
+    title: "Password Strength Checker",
+    description: "Build a function that evaluates password strength based on multiple criteria.",
+    solution: `function checkPasswordStrength(password) {
   if (typeof password !== 'string') {
     console.log("Error: Password must be a string");
     return 0;
@@ -224,32 +225,102 @@ calculator(10, 3, "remainder");`,
 checkPasswordStrength("password");
 checkPasswordStrength("Password1");
 checkPasswordStrength("StrongP@ssword123");`,
-      challenge: "Create a function that checks password strength based on these criteria: length (8+ chars), uppercase letters, lowercase letters, numbers, special characters, and absence of common password words. The function should return a score and provide feedback.",
-      testCases: [
-        {
-          test: (func) => {
-            if (typeof func !== "function") return false;
-            return func("abc") <= 2;
-          },
-          description: "Correctly identifies weak passwords"
+    challenge: "Create a function that checks password strength based on these criteria: length (8+ chars), uppercase letters, lowercase letters, numbers, special characters, and absence of common password words. The function should return a score and provide feedback.",
+    testCases: [
+      {
+        test: (func) => {
+          if (typeof func !== "function") return false;
+          return func("abc") <= 2;
         },
-        {
-          test: (func) => {
-            if (typeof func !== "function") return false;
-            return func("StrongP@ssword123") === 5;
-          },
-          description: "Correctly identifies strong passwords"
+        description: "Correctly identifies weak passwords"
+      },
+      {
+        test: (func) => {
+          if (typeof func !== "function") return false;
+          return func("StrongP@ssword123") === 5;
         },
-        {
-          test: (func) => {
-            if (typeof func !== "function") return false;
-            return func("password") <= 2;
-          },
-          description: "Penalizes common passwords"
-        }
-      ]
-    }
-  };
+        description: "Correctly identifies strong passwords"
+      },
+      {
+        test: (func) => {
+          if (typeof func !== "function") return false;
+          return func("password") <= 2;
+        },
+        description: "Penalizes common passwords"
+      }
+    ]
+  }
+};
+const FUNCTION_NAMES = { 1: "guessTheNumber", 2: "calculator", 3: "checkPasswordStrength" };
+const levelCount = Object.keys(levelData).length;
+
+// the page inside the sandbox - its own file, hashed into the CSP by vite.config.js
+const SANDBOX_HTML = `<!doctype html><script>${sandboxRunner}</script>`;
+
+/* run `code` in a fresh sandbox; resolves to the sandbox's message, or
+   { timeout: true } if it hasn't answered within RUN_MS */
+function runInSandbox(code, level) {
+  return new Promise((resolve) => {
+    const frame = document.createElement("iframe");
+    frame.setAttribute("sandbox", "allow-scripts");
+    frame.style.display = "none";
+    let done = false;
+    const finish = (result) => {
+      if (done) return;
+      done = true;
+      window.removeEventListener("message", onMessage);
+      clearTimeout(timer);
+      frame.remove();
+      resolve(result);
+    };
+    const onMessage = (e) => { if (e.source === frame.contentWindow) finish(e.data || {}); };
+    const timer = setTimeout(() => finish({ timeout: true }), RUN_MS);
+    window.addEventListener("message", onMessage);
+    frame.onload = () => frame.contentWindow.postMessage({
+      code,
+      fn: FUNCTION_NAMES[level],
+      tests: levelData[level].testCases.map((t) => t.test.toString()),
+    }, "*");
+    frame.srcdoc = SANDBOX_HTML;
+    document.body.appendChild(frame);
+  });
+}
+
+const CompletionPopup = ({ onReset }) => (
+  <div className="game-done">
+    <div className="game-done-box">
+      <div className="game-done-glow" />
+
+      <h2 className="game-done-title">✨ Magic Unlocked! ✨</h2>
+
+      <div className="game-done-text">
+        <p>Bravo, coding wizard! 🧙‍♂️</p>
+        <p>Conquered all 3 JavaScript realms!</p>
+      </div>
+
+      <button onClick={onReset} className="game-done-btn">
+        <span className="game-done-btn-inner">
+          <span>
+            <span className="game-done-btn-label">&lt;&lt; Dance Again 💃</span>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+);
+
+const JavaScriptCodingGame = () => {
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [codeValue, setCodeValue] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [output, setOutput] = useState("");
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [testsPassed, setTestsPassed] = useState(false);
+  const [unlockedLevels, setUnlockedLevels] = useState(1);
+  const [showCompletionPopup, setShowCompletionPopup] = useState(false);
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
 
   useEffect(() => {
     setCodeValue("");
@@ -275,148 +346,46 @@ checkPasswordStrength("StrongP@ssword123");`,
       : levelNumber === currentLevel ? "game-level is-current"
       : "game-level";
 
-  const isValidJavaScript = (code) => {
-    try {
-      new Function(code);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const extractFunction = (code, expectedFunctionName) => {
-    try {
-      const func = new Function(`
-        ${code}
-        return typeof ${expectedFunctionName} === 'function' ? ${expectedFunctionName} : null;
-      `);
-      return func();
-    } catch {
-      return null;
-    }
-  };
-
-  const runTests = (code) => {
-    let passedTests = 0;
-    let totalTests = levelData[currentLevel].testCases.length;
-    let testResults = [];
-    let mainFunction = null;
-    
-    try {
-      if (currentLevel === 1) {
-        mainFunction = extractFunction(code, "guessTheNumber");
-      } else if (currentLevel === 2) {
-        mainFunction = extractFunction(code, "calculator");
-      } else if (currentLevel === 3) {
-        mainFunction = extractFunction(code, "checkPasswordStrength");
-      }
-      
-      if (!mainFunction) {
-        testResults.push("❌ Function not found or defined correctly");
-      } else {
-        levelData[currentLevel].testCases.forEach((testCase, index) => {
-          const passed = testCase.test(mainFunction);
-          testResults.push(`${passed ? "✅" : "❌"} Test ${index + 1}: ${testCase.description}`);
-          if (passed) passedTests++;
-        });
-      }
-      
-      const allPassed = passedTests === totalTests;
-      setTestsPassed(allPassed);
-      
-      if (allPassed && currentLevel === unlockedLevels && currentLevel < Object.keys(levelData).length) {
-        setUnlockedLevels(prevLevel => Math.max(prevLevel, currentLevel + 1));
-      }
-      
-      if (allPassed && currentLevel === Object.keys(levelData).length) {
-        setTimeout(() => setShowCompletionPopup(true), 500);
-      }
-      
-      return {
-        success: allPassed,
-        message: `Passed ${passedTests}/${totalTests} tests\n${testResults.join('\n')}`
-      };
-    } catch (e) {
-      return {
-        success: false,
-        message: `Error running tests: ${e.message}`
-      };
-    }
-  };
-
-  const runCode = () => {
+  const runCode = useCallback(async () => {
     setErrorMessage("");
     setOutput("");
-    setIsRunning(true);
     setTestsPassed(false);
-    
     if (!codeValue.trim()) {
       setErrorMessage("Please write some code before running.");
-      setIsRunning(false);
       return;
     }
-
-    if (!isValidJavaScript(codeValue)) {
-      setErrorMessage("Invalid JavaScript syntax. Please check your code.");
-      setIsRunning(false);
-      return;
-    }
-
-    try {
-      const originalConsoleLog = console.log;
-      const logs = [];
-      
-      console.log = (...args) => {
-        logs.push(args.map(arg => 
-          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-        ).join(' '));
-      };
-      
-      try {
-        const executeFunction = new Function(codeValue);
-        executeFunction();
-        
-        const testResults = runTests(codeValue);
-        logs.push("\n=== Test Results ===");
-        logs.push(testResults.message);
-        
-        setOutput(logs.join('\n'));
-      } catch (e) {
-        setErrorMessage(`Runtime Error: ${e.message}`);
-      }
-      
-      console.log = originalConsoleLog;
-    } catch (e) {
-      setErrorMessage(`Syntax Error: ${e.message}`);
-    }
-    
+    setIsRunning(true);
+    const r = await runInSandbox(codeValue, currentLevel);
+    if (!alive.current) return;
     setIsRunning(false);
-  };
 
-  const CompletionPopup = () => (
-    <div className="game-done">
-      <div className="game-done-box">
-        <div className="game-done-glow" />
+    if (r.timeout) return setErrorMessage("Your code took too long to run - is there an endless loop?");
+    if (r.syntaxError) return setErrorMessage("Invalid JavaScript syntax. Please check your code.");
+    if (r.runtimeError) return setErrorMessage(`Runtime Error: ${r.runtimeError}`);
 
-        <h2 className="game-done-title">✨ Magic Unlocked! ✨</h2>
+    const logs = Array.isArray(r.logs) ? r.logs.map(String) : [];
+    const tests = levelData[currentLevel].testCases;
+    let summary;
+    if (r.testError) {
+      summary = `Error running tests: ${r.testError}`;
+    } else if (!r.results) {
+      summary = `Passed 0/${tests.length} tests\n❌ Function not found or defined correctly`;
+    } else {
+      const lines = tests.map((t, i) => `${r.results[i] ? "✅" : "❌"} Test ${i + 1}: ${t.description}`);
+      const passed = r.results.filter(Boolean).length;
+      const allPassed = passed === tests.length;
+      setTestsPassed(allPassed);
+      if (allPassed && currentLevel === unlockedLevels && currentLevel < levelCount) {
+        setUnlockedLevels((prev) => Math.max(prev, currentLevel + 1));
+      }
+      if (allPassed && currentLevel === levelCount) {
+        setTimeout(() => alive.current && setShowCompletionPopup(true), 500);
+      }
+      summary = `Passed ${passed}/${tests.length} tests\n${lines.join("\n")}`;
+    }
+    setOutput([...logs, "\n=== Test Results ===", summary].join("\n"));
+  }, [codeValue, currentLevel, unlockedLevels]);
 
-        <div className="game-done-text">
-          <p>Bravo, coding wizard! 🧙‍♂️</p>
-          <p>Conquered all 3 JavaScript realms!</p>
-        </div>
-
-        <button onClick={resetGame} className="game-done-btn">
-          <span className="game-done-btn-inner">
-            <span>
-              <span className="game-done-btn-label">&lt;&lt; Dance Again 💃</span>
-            </span>
-          </span>
-        </button>
-      </div>
-    </div>
-  );
-
-  const levelCount = Object.keys(levelData).length;
   const level = levelData[currentLevel];
 
   return (
@@ -496,7 +465,7 @@ checkPasswordStrength("StrongP@ssword123");`,
                   {showAnswer ? "Hide Answer" : "View Answer"}
                 </button>
 
-                {testsPassed && currentLevel < levelCount && currentLevel === unlockedLevels && (
+                {testsPassed && currentLevel < unlockedLevels && (
                   <button onClick={() => setCurrentLevel(currentLevel + 1)} className="game-btn is-next">
                     Next Level
                   </button>
@@ -514,7 +483,7 @@ checkPasswordStrength("StrongP@ssword123");`,
         </div>
       </div>
 
-      {showCompletionPopup && <CompletionPopup />}
+      {showCompletionPopup && <CompletionPopup onReset={resetGame} />}
     </PageShell>
   );
 };

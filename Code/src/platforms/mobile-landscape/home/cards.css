@@ -1,0 +1,23 @@
+/* platforms/mobile-landscape/home/cards.css - card layout tweaks, touch, held sideways. */
+
+/* ---- Discord / Articles: text gets the full width, the link sits in its
+   own strip underneath - on the right, like every other card's link ---- */
+.project-card,
+.blog-card { padding-bottom: calc(var(--pad) + var(--link) * 2.4); }
+
+/* ---- Research: the scientist gets a smaller share of a short card ----- */
+.research-card .sci { height: 58% !important; }
+
+/* ---- the scientist's "oops... big test" bubble ----
+   The desktop bubble starts at 72% of his width - past the edge of a narrow
+   phone card, where it got cut off. Here it starts further in, up by his
+   head, and stays on one line at a slightly smaller size so it fits. */
+.research-card .sci-bubble {
+  left: 30%;
+  bottom: 86%;
+  padding: 5px 9px;
+  white-space: nowrap;
+  font-size: 10.5px;
+  line-height: 1.2;
+}
+.research-card .sci-bubble::after { left: 12px; }

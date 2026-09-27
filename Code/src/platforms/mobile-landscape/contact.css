@@ -1,0 +1,22 @@
+/* platforms/mobile-landscape/contact.css - Contact form (/contact). Looks: common/styles/pages/contact.css
+   Sizes and layout for mobile landscape (touch, sideways). */
+
+
+/* a compact card like the other pages - desktop sizes filled the whole
+   short screen. Form on the left, a smaller picture on the right. */
+.contact-page { min-height: 100dvh; padding: 18px 0; }
+.contact-box {
+  width: min(760px, calc(100% - 2 * var(--gutter, 16px)));
+  padding: 20px 26px;
+  gap: 20px;
+}
+.contact-form { width: 60%; gap: 11px; }
+.contact-image { width: 34%; }
+.contact-title { margin-bottom: 0; font-size: 30px; white-space: nowrap; }
+.contact-rule { width: 80px; height: 4px; margin: 4px 0; }
+.contact-input { height: 42px; padding: 8px 16px; font-size: 15px; }
+.contact-message { height: 88px; padding: 10px 16px; font-size: 15px; }
+.contact-robot-q { font-size: 15px; }
+.contact-robot-a { width: 96px; }
+.contact-buttons { flex-wrap: nowrap; gap: 10px; }
+.contact-btn { min-width: 0; padding: 11px 18px; font-size: 15px; white-space: nowrap; }

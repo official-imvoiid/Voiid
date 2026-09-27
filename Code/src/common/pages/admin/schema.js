@@ -9,7 +9,8 @@ import { PLATFORMS, PLATFORM_OPTIONS } from "../../content/platforms";
  *
  * kind:  "fields" - a fixed set of named fields (an object)
  *        "list"   - a reorderable list of records with the same fields
- * field.type: text | url | textarea | number | select | color | colorAuto | image | pdf
+ * field.type: text | url | textarea | number | select | color | colorAuto
+ *             image | pdf | certificate | model | modelThumb
  *   select options may be a function of the current content (see Songs).
  */
 
@@ -46,7 +47,7 @@ export const SECTIONS = [
     label: "3D models",
     kind: "list",
     blurb: "The 3D & Editing page. Upload VRM (VRoid Studio), GLB / GLTF (Blender: File > Export > glTF 2.0), FBX, OBJ, STL, PLY or DAE. A .blend file can't be shown in a browser - export it as .glb.",
-    title: (it) => `${it.name || "Untitled model"}${it.downloadable === "yes" ? "  ·  downloadable" : "  ·  view only"}`,
+    title: (it) => `${it.name || "Untitled model"}${it.downloadable === "yes" ? "  ·  downloadable" : "  ·  no download button"}`,
     blank: { name: "", file: "", format: "", thumb: "", credit: "", description: "", downloadable: "no" },
     fields: [
       { name: "name", label: "Name", type: "text", width: "wide" },
@@ -59,9 +60,10 @@ export const SECTIONS = [
         label: "Download",
         type: "select",
         options: [
-          { value: "no", label: "View only" },
+          { value: "no", label: "No Download button" },
           { value: "yes", label: "Free download" },
         ],
+        hint: "The viewer has to fetch the file to show it, so this only hides the button - it can't stop a determined download.",
       },
     ],
   },

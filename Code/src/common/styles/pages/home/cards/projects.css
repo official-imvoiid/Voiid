@@ -1,0 +1,4 @@
+/* pages/home/cards/projects.css - Discord + Latest Articles cards. */
+
+.project-card,
+.blog-card { background: linear-gradient(135deg, #27272A, #43434C); }

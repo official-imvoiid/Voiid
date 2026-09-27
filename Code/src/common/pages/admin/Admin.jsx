@@ -94,7 +94,7 @@ const AdminPortal = ({ onLogout }) => {
         {active === "inbox" ? (
           <Inbox onLoggedOut={onLogout} />
         ) : active === "security" ? (
-          <Security />
+          <Security onLoggedOut={onLogout} />
         ) : active === "notes" ? (
           <section className="adm-panel adm-notes">
             <h2 className="adm-panel-title">Notes library</h2>
@@ -152,7 +152,7 @@ const Admin = () => {
       setNeedCode(false);
       setState("in");
     } catch (err) {
-      setError(err.message === "Failed to fetch" ? "Can't reach the server." : err.message);
+      setError(err instanceof TypeError ? "Can't reach the server." : err.message);   // a TypeError is a network failure in every browser
     }
   };
 

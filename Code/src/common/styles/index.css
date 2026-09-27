@@ -1,0 +1,42 @@
+/* ==========================================================================
+   common/styles - how the site LOOKS, on every device.
+
+   Colours, fonts, borders, animations. Anything that should change per
+   device (sizes, columns, layout) goes in src/platforms/<device>/ instead,
+   which loads after this and so always wins.
+
+   Order matters: it is the order the files have always loaded in.
+   ========================================================================== */
+
+/* ---- site-wide ---- */
+@import "./fonts.css";
+@import "./base.css";
+@import "./reset.css";
+
+/* ---- shared components ---- */
+@import "./components/mascot.css";
+@import "./components/mascot-scene.css";
+@import "./components/teamwork.css";
+@import "./components/scientist.css";
+@import "./components/profile-player.css";
+@import "./components/wasted.css";
+@import "./components/back-home.css";
+@import "./components/coming-soon.css";
+@import "./components/offline.css";
+
+/* ---- pages ---- */
+@import "./pages/home/index.css";
+@import "./pages/game.css";
+@import "./pages/games-played.css";
+@import "./pages/music.css";
+@import "./pages/skills.css";
+@import "./pages/develop.css";
+@import "./pages/art.css";
+@import "./pages/contact.css";
+@import "./pages/info-pages.css";      /* Certifications, Notes, Roadmap */
+@import "./pages/notes.css";           /* the notes library (Notes page + admin) */
+@import "./pages/literature.css";      /* the poems */
+@import "./pages/models.css";          /* 3D & Editing */
+@import "./pages/civitai.css";         /* where the Civitai icon goes */
+@import "./pages/admin.css";
+@import "./pages/mascot-demo.css";

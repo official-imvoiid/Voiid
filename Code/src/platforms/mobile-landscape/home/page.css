@@ -1,0 +1,25 @@
+/* platforms/mobile-landscape/home/page.css - header + footer sizes, touch, held sideways. */
+
+.portfolio {
+  --logo:        clamp(1.3rem, 3.4vw, 2.4rem);
+  --nav:         clamp(0.7rem, 1.5vw, 1.05rem);
+  --nav-gap:     clamp(10px, 2vw, 30px);
+  --cv:          clamp(0.7rem, 1.3vw, 0.95rem);
+  --head-x:      var(--gutter);
+  --head-top:    0.6rem;
+  --head-bottom: 0.6rem;
+
+  --board-top:    1rem;
+  --board-bottom: 1rem;
+
+  --foot-pad:   1.2rem;
+  --foot-link:  clamp(0.85rem, 1.4vw, 1.1rem);
+  --foot-gap:   clamp(14px, 2.4vw, 34px);
+  --quote:      clamp(1.2rem, 3vw, 2.4rem);
+  --social:     clamp(1.4rem, 3vw, 2.2rem);
+  --social-gap: clamp(14px, 2vw, 28px);
+  --copy:       0.75rem;
+}
+
+.nav { min-width: 0; }
+.get-in-touch { padding: 0.53em 0.97em; }

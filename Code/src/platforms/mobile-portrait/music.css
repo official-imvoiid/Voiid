@@ -1,0 +1,7 @@
+/* platforms/mobile-portrait/music.css - Music page (/musiclist). Looks: common/styles/pages/music.css
+   Sizes and layout for mobile portrait (touch, upright). */
+
+/* pop-up player: tighter bar on a narrow screen - the YouTube button keeps only its logo */
+.music-modal-bar { gap: 10px; padding: 12px; }
+.music-modal-yt span { display: none; }
+.music-modal-yt { padding: 10px 12px; }

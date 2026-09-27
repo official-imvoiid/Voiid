@@ -1,0 +1,6 @@
+/* platforms/mobile-portrait/civitai.css - /gone (the retired Civitai icon). Looks: common/styles/pages/civitai.css
+   Sizes and layout for mobile portrait: the art hangs smaller around the note. */
+
+.cv-hang { width: calc(var(--size) * 0.45); margin-left: calc(var(--size) * -0.225); opacity: 0.85; }
+.cv-talker { width: 170px; margin-top: 30px; }
+.cv-note { padding: 18px 16px 20px; }

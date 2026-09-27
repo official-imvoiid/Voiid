@@ -1,0 +1,88 @@
+/* pages/skills.css - the Skill Set page (/skills).
+   The frame comes from info-pages.css via PageShell; this adds the tiles.
+   Sizes that change per device: platforms/<device>/skills.css */
+
+/* tighter than the other pages: the intro sits close to the list */
+.skills-page .pg-intro {
+  max-width: none;            /* use the full width: two sentences, two lines */
+  margin-bottom: 18px;
+}
+.skills-intro-line { display: block; }
+.skills-page .pg-tools { margin-bottom: 14px; }
+
+.skills-heading {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.4vw, 1.3rem);
+  font-weight: 700;
+  color: var(--pg-accent);
+}
+
+.skills-grid-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 6px 48px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- one skill: no box - a big coloured icon and the name, with a fine
+   line underneath. --hue is the skill's colour (admin -> Skills, or auto) */
+.pg-card.skills-tile {     /* two classes: beats .pg-card in info-pages.css, which styles/index.css imports later */
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+  min-height: 84px;
+  padding: 16px 4px;
+  border: 0;
+  border-bottom: 1px solid #26262c;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  animation: skills-in 0.45s ease both;
+  animation-delay: calc(var(--i, 0) * 0.025s);
+}
+@keyframes skills-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pg-card.skills-tile:hover { background: none; border-bottom-color: var(--hue); }
+
+/* the icon, on its own - no badge behind it */
+.skills-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font-size: 2rem;
+  line-height: 1;
+  transition: transform 0.25s ease;
+}
+.skills-icon img { width: 100%; height: 100%; object-fit: contain; }
+/* an .svg logo, drawn as a silhouette in the skill's colour */
+.skills-glyph {
+  width: 40px;
+  height: 40px;
+  background: var(--hue);
+  -webkit-mask: var(--logo) center / contain no-repeat;
+          mask: var(--logo) center / contain no-repeat;
+}
+.pg-card.skills-tile:hover .skills-icon { transform: scale(1.12); }
+
+.skills-label {
+  font-family: var(--font-clean) !important;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #F2F2F5;
+  text-align: left;
+  text-wrap: balance;
+  transition: color 0.2s ease;
+}
+.pg-card.skills-tile:hover .skills-label { color: var(--hue); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-card.skills-tile { animation: none; }
+  .pg-card.skills-tile:hover .skills-icon { transform: none; }
+}

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, ExternalLink, Eye, FileImage, FileText, X } from "lucide-react";
 import PageShell from "../components/PageShell";
 import { useContent } from "../content/ContentContext";
+import useModal from "../hooks/useModal";
 import ZoomImage from "./notes/ZoomImage";
 
 /**
@@ -27,31 +28,16 @@ const TONE_LABEL = { done: "Earned", active: "In progress" };
 
 const kindOf = (file = "") => (/\.pdf$/i.test(file) ? "pdf" : "image");
 const tagsOf = (c) => (Array.isArray(c.tags) ? c.tags : String(c.tags || "").split(",")).map((t) => t.trim()).filter(Boolean);
-const fill = (text, counts) => String(text || "").replace(/\{(\w+)\}/g, (m, k) => (k in counts ? counts[k] : m));
+const fill = (text, counts) => String(text || "").replace(/\{(\w+)\}/g, (m, k) => (Object.hasOwn(counts, k) ? counts[k] : m));
 
 /* ---- the viewer: the certificate on the left, its details on the right ---- */
 const Viewer = ({ items, index, onIndex, onClose }) => {
   const cert = items[index];
   const closeRef = useRef(null);
   const kind = kindOf(cert.file);
-  const step = (d) => onIndex((index + d + items.length) % items.length);
+  const step = useCallback((d) => onIndex((index + d + items.length) % items.length), [index, items.length, onIndex]);
   const tags = tagsOf(cert);
-
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose();
-      else if (e.key === "ArrowRight") onIndex((index + 1) % items.length);
-      else if (e.key === "ArrowLeft") onIndex((index - 1 + items.length) % items.length);
-    };
-    window.addEventListener("keydown", onKey);
-    const { overflow } = document.body.style;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = overflow;
-    };
-  }, [index, items.length, onIndex, onClose]);
+  useModal({ onClose, onStep: step, focusRef: closeRef });
 
   const Icon = kind === "pdf" ? FileText : FileImage;
   return (

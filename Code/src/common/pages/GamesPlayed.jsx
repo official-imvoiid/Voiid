@@ -4,12 +4,9 @@ import { useContent } from "../content/ContentContext";
 import { imageColor } from "../content/media";
 
 /**
- * Games I've Conquered.
- *
- * Each tile links out to that game's official site. Two entries (MiSide and
- * Date A Live) point at a Steam search instead of a homepage, because those
- * two do not have a stable official URL I could rely on - swap them for the
- * real links whenever you like.
+ * Games I've Conquered. Each tile links out to that game's site; the tiles
+ * are edited at /admin -> Games (shipped set: content/defaults.js).
+ * Looks: common/styles/pages/games-played.css
  */
 
 /* glowColor "auto" (or empty) = take the colour from the cover image */

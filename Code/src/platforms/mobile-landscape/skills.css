@@ -1,0 +1,7 @@
+/* platforms/mobile-landscape/skills.css - Skill Set page (/skills). Looks: common/styles/pages/skills.css
+   Sizes and layout for mobile landscape. */
+
+
+/* the intro reads as one paragraph instead of two lines */
+.skills-intro-line { display: inline; }
+.skills-intro-line + .skills-intro-line::before { content: " "; }

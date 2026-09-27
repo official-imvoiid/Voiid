@@ -1,0 +1,20 @@
+/* pages/home/cards/github.css - GitHub card - the big mark. */
+
+.github-card {
+  justify-content: center;
+  align-items: center;
+}
+.github-card .card-title {
+  font-size: var(--github);
+  color: var(--color-github);
+  transition: transform 0.5s ease, filter 0.4s ease;
+}
+/* brightness, not a shadow - a shadow shines through the cat-shaped hole */
+.github-card:hover .card-title {
+  transform: scale(1.2) rotate(5deg);
+  filter: brightness(1.28) saturate(1.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .github-card:hover .card-title { transform: scale(1.06); }
+}

@@ -1,0 +1,8 @@
+/* platforms/desktop/game.css - Code Clash game (/game). Looks: common/styles/pages/game.css
+   Sizes and layout for desktop. */
+
+/* wide screens: challenge on the left, editor on the right.
+   Zoomed in past ~1000px wide, it stacks back into one column. */
+@media (min-width: 1000px) {
+  .game-layout { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+}

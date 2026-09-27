@@ -1,0 +1,42 @@
+/* platforms/mobile-landscape/home/board.css - grid + card sizes, touch, held sideways.
+   Card sizes are fractions of one column (--colw); the px floor in each
+   max()/clamp() keeps small labels readable on a real phone. */
+
+/* ---- board: columns -------------------------------------------------- */
+.cards-container {
+  --cols: 4;
+  --gap: clamp(8px, 1.1vw, 16px);
+}
+
+/* ---- board: card sizes, as fractions of one column ------------------- */
+.cards-container > * {
+  --pad:          max(10px, calc(var(--colw) * 0.075));
+  --title:        max(13px, calc(var(--colw) * 0.099));
+  --sub:          max(10px, calc(var(--colw) * 0.05));
+  --link:         max(11px, calc(var(--colw) * 0.06));
+  --text:         clamp(11px, calc(var(--colw) * 0.08), 17px);
+  --link-inset:   max(10px, calc(var(--colw) * 0.08));
+
+  --icon:         clamp(30px, calc(var(--colw) * 0.2), 64px);
+  --icon-inset:   max(10px, calc(var(--colw) * 0.08));
+  --icon-reserve: calc(var(--icon) + 1rem);   /* padding under the corner icon cards */
+  --collab-bottom: calc(var(--link-inset) + var(--link) * 2.2);
+  --avatar:       clamp(52px, calc(var(--colw) * 0.4), 88px);
+
+  --research:     max(12px, calc(var(--colw) * 0.1));
+  --research-sub: max(10px, calc(var(--colw) * 0.05));
+  --github:       calc(var(--colw) * 0.6);
+  --collab:       max(15px, calc(var(--colw) * 0.12));
+  --collab-sub:   clamp(11px, calc(var(--colw) * 0.075), 18px);
+  --tm:           clamp(12px, calc(var(--colw) * 0.085), 20px);
+
+  --skill-cols:   3;
+  --skill-gap:    clamp(8px, calc(var(--colw) * 0.06), 16px);
+  --skill-name:   clamp(10px, calc(var(--colw) * 0.07), 16px);
+  --skill-icon:   clamp(16px, calc(var(--colw) * 0.12), 28px);
+
+  --big-glyph:      calc(var(--colw) * 0.26);
+  --fun-min-height: max(130px, calc(var(--colw) * 0.75));
+  --mascot:         min(145px, calc(var(--colw) * 0.5));
+  --lyric:          clamp(12px, calc(var(--colw) * 0.09), 24px);
+}

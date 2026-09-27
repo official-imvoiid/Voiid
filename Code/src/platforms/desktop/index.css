@@ -1,0 +1,17 @@
+/* Desktop (mouse / trackpad, any zoom) - one file per page. */
+@import "./home/index.css";
+@import "./components.css";
+@import "./game.css";
+@import "./games-played.css";
+@import "./music.css";
+@import "./skills.css";
+@import "./develop.css";
+@import "./art.css";
+@import "./contact.css";
+@import "./info-pages.css";
+@import "./notes.css";
+@import "./literature.css";
+@import "./models.css";
+@import "./civitai.css";
+@import "./coming-soon.css";
+@import "./admin.css";

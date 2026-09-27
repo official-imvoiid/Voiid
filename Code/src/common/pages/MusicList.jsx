@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import PageShell from "../components/PageShell";
 import { useContent } from "../content/ContentContext";
+import useModal from "../hooks/useModal";
 import { youtubeId } from "../content/media";
 
 const watchUrl = (id) => `https://www.youtube.com/watch?v=${id}`;
@@ -51,22 +52,7 @@ const Song = ({ song, index, onPlay }) => {
 const SongPlayer = ({ song, onClose, onGo }) => {
   const id = youtubeId(song.youtube);
   const closeRef = useRef(null);
-
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose();
-      else if (e.key === "ArrowRight") onGo(1);
-      else if (e.key === "ArrowLeft") onGo(-1);
-    };
-    window.addEventListener("keydown", onKey);
-    const { overflow } = document.body.style;
-    document.body.style.overflow = "hidden";           // no page scroll behind the player
-    closeRef.current?.focus();
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = overflow;
-    };
-  }, [onClose, onGo]);
+  useModal({ onClose, onStep: onGo, focusRef: closeRef });
 
   return (
     <div
@@ -133,14 +119,23 @@ const MusicList = () => {
   const [playing, setPlaying] = useState(-1);   // index into `queue`, -1 = closed
 
   // only categories that actually have songs
-  const categories = musicCategories
+  const categories = useMemo(() => musicCategories
     .map((c) => ({ ...c, songs: songs.filter((s) => s.category === c.name && youtubeId(s.youtube)) }))
-    .filter((c) => c.songs.length);
-  const shown = filter === "all" ? categories : categories.filter((c) => c.name === filter);
+    .filter((c) => c.songs.length), [musicCategories, songs]);
+  const shown = useMemo(() => (filter === "all" ? categories : categories.filter((c) => c.name === filter)), [categories, filter]);
   const total = categories.reduce((n, c) => n + c.songs.length, 0);
 
-  // the songs on screen, in order - the player's arrows walk through these
-  const queue = shown.flatMap((c) => c.songs.map((song) => ({ ...song, color: c.color })));
+  // the songs on screen, in order - the player's arrows walk through these.
+  // `starts` is where each category begins in the queue.
+  const { queue, starts } = useMemo(() => {
+    const queue = [];
+    const starts = [];
+    for (const c of shown) {
+      starts.push(queue.length);
+      for (const song of c.songs) queue.push({ ...song, color: c.color });
+    }
+    return { queue, starts };
+  }, [shown]);
   const close = useCallback(() => setPlaying(-1), []);
   const go = useCallback((d) => {
     setPlaying((i) => (i < 0 ? i : (i + d + queue.length) % queue.length));
@@ -186,7 +181,7 @@ const MusicList = () => {
         <span className="pg-count">{total} songs</span>
       </div>
 
-      {shown.map((c) => (
+      {shown.map((c, ci) => (
         <section key={c.name} className="music-genre" style={{ "--cat": c.color }}>
           <h2 className="music-genre-title">
             {c.name}
@@ -198,7 +193,7 @@ const MusicList = () => {
                 key={`${song.youtube}-${i}`}
                 song={song}
                 index={i}
-                onPlay={() => setPlaying(queue.findIndex((q) => q.youtube === song.youtube))}
+                onPlay={() => setPlaying(starts[ci] + i)}
               />
             ))}
           </div>

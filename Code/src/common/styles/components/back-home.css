@@ -1,9 +1,9 @@
 /* ==========================================================================
    BackHome - the one back button, used on every page.
 
-   This is the music page's pill, unchanged: white, a green fill sitting at
-   35% that slides across on hover, Pacifico text. No glow, no lift, no
-   pulse - it was right as it was.
+   A white pill with a green fill sitting at 35% that slides across on hover.
+   The label asks for Pacifico, which the site doesn't ship (fonts.css), so it
+   renders in the browser's cursive fallback unless Pacifico is installed.
    ========================================================================== */
 
 .bh {
@@ -12,9 +12,7 @@
   overflow: hidden;
   padding: 0.4rem 1rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.96);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(2px);
+  background: rgba(255, 255, 255, 0.96);   /* near-opaque, so no backdrop blur is needed */
   color: #000;
   font-size: 0.85rem;
   font-weight: 500;
@@ -33,7 +31,7 @@
   height: 100%;
   border-radius: 9999px;
   background: rgba(0, 255, 170, 0.93);
-  transition: all 0.4s ease;
+  transition: width 0.4s ease;
 }
 .bh:hover .bh-fill,
 .bh:focus-visible .bh-fill { width: 100%; }
@@ -42,7 +40,7 @@
   position: relative;
   z-index: 1;
   white-space: nowrap;
-  /* the original forced Pacifico past the page fonts - keep that */
+  /* past reset.css's sketch font; Pacifico only if installed (see the top) */
   font-family: Pacifico, cursive !important;
   font-weight: 500;
   font-size: 0.85rem;
@@ -50,3 +48,9 @@
 }
 
 .bh:focus-visible { outline: 2px solid rgba(0, 255, 170, 0.9); outline-offset: 3px; }
+
+/* the smaller pill on narrow screens (any device) */
+@media (max-width: 640px) {
+  .bh { padding: 0.35rem 0.85rem; }
+  .bh-text { font-size: 0.75rem; }
+}

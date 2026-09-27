@@ -15,10 +15,6 @@
   width: auto;
   aspect-ratio: 200 / 330;
 }
-/* single source of truth for where he stands - this used to be declared
-   three times in this file at 5%, 3% and -5%, and only the last one had
-   any effect. Past the card edge so his body clears the centred heading. */
-
 .sci-art { display: block; width: 100%; height: auto; overflow: visible; }
 
 .sci-rig,
@@ -144,9 +140,13 @@
 .sci[data-phase="oops"] .sci-lens,
 .sci[data-phase="leaving"] .sci-lens { fill: #FFF4C2; }
 
-.sci[data-phase="boom"] .sci-mouth,
-.sci[data-phase="oops"] .sci-mouth,
-.sci[data-phase="leaving"] .sci-mouth { d: path("M91 100 q9 -7 18 0"); }
+.sci-mouth.is-oh { opacity: 0; }
+.sci[data-phase="boom"] .sci-mouth.is-calm,
+.sci[data-phase="oops"] .sci-mouth.is-calm,
+.sci[data-phase="leaving"] .sci-mouth.is-calm { opacity: 0; }
+.sci[data-phase="boom"] .sci-mouth.is-oh,
+.sci[data-phase="oops"] .sci-mouth.is-oh,
+.sci[data-phase="leaving"] .sci-mouth.is-oh { opacity: 1; }
 
 /* smoke drifting up afterwards */
 .sci-puff { opacity: 0; }
@@ -211,14 +211,7 @@
 /* He is sized as a percentage of the card height (see Scientist.jsx); the
    home page's device files trim that share on short phone cards. */
 
-/* ==========================================================================
-   The heading keeps its normal centred position - shoving it into the right
-   44% of the card to dodge him made the card look lopsided, which was worse
-   than the problem it solved. He stands at the outer edge instead, sized so
-   his body clears the centred text.
-   ========================================================================== */
-/* inside the card, not hanging off it - at -5% his arm and flask were
-   being clipped by the card edge, which is why he looked cut off rather
-   than standing there */
+/* where he stands: at the outer edge (inside it, so his arm and flask are
+   never clipped), sized so his body clears the centred heading */
 .sci[data-side="left"]  { left: 2%; }
 .sci[data-side="right"] { right: 2%; }

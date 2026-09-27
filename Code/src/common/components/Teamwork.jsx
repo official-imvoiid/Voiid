@@ -68,11 +68,6 @@ const Teamwork = ({ message = "Great things are never built alone." }) => {
     timer.current = setTimeout(() => setAwake(false), WAKE_MS);
   }, []);
 
-  const sleep = useCallback(() => {
-    clearTimeout(timer.current);
-    setAwake(false);
-  }, []);
-
   useEffect(() => {
     const card = hostRef.current?.closest(".card");
     if (!card) return undefined;
@@ -86,8 +81,7 @@ const Teamwork = ({ message = "Great things are never built alone." }) => {
       };
     }
 
-    // Without one: the card being on screen is the signal. This branch used
-    // to do nothing at all, so on a phone the packets stayed asleep forever.
+    // Without one (phones): the card being on screen is the signal.
     if (typeof IntersectionObserver === "undefined") {
       setAwake(true);
       return () => clearTimeout(timer.current);
@@ -104,7 +98,7 @@ const Teamwork = ({ message = "Great things are never built alone." }) => {
       io.disconnect();
       clearTimeout(timer.current);
     };
-  }, [wake, sleep]);
+  }, [wake]);
 
   return (
     <>

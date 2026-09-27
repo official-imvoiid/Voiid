@@ -1,0 +1,21 @@
+/* platforms/mobile-portrait/contact.css - Contact form (/contact). Looks: common/styles/pages/contact.css
+   Sizes and layout for mobile portrait (touch, upright). */
+
+/* one column: the form uses the full width, the picture steps aside */
+.contact-page { align-items: center; min-height: 100dvh; padding: 20px 0; }
+.contact-box {
+  flex-direction: column;
+  width: calc(100% - 2 * var(--gutter, 16px));
+  padding: 26px 20px;
+  gap: 0;
+}
+.contact-form { width: 100%; gap: 16px; }
+.contact-image { display: none; }
+.contact-title { font-size: clamp(1.9rem, 8.5vw, 2.6rem); white-space: nowrap; }
+.contact-input { height: 52px; padding: 10px 20px; font-size: 16px; }
+.contact-message { height: 150px; font-size: 16px; }
+.contact-robot { flex-wrap: wrap; }
+.contact-robot-q { font-size: 16px; }
+.contact-robot-a { width: 110px; }
+.contact-buttons { flex-wrap: nowrap; gap: 10px; }
+.contact-btn { min-width: 0; padding: 15px 12px; font-size: 16px; white-space: nowrap; }

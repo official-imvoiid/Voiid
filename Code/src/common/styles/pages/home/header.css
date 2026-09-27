@@ -1,0 +1,98 @@
+/* pages/home/header.css - logo, nav links, Download CV. Sizes: platforms/<device>/home/page.css */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.75rem;
+  column-gap: var(--nav-gap);
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--head-top) var(--head-x) var(--head-bottom);
+}
+
+.logo {
+  font-family: var(--font-clean) !important;
+  font-size: var(--logo);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-white);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--nav-gap);
+}
+
+.nav-link {
+  position: relative;
+  font-size: var(--nav);
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--color-white);
+  transition: color 0.3s ease;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent);
+  transition: width 0.3s ease;
+}
+.nav-link:hover { color: var(--accent); }
+.nav-link:hover::after { width: 100%; }
+
+/* Download CV - white pill with a slow rainbow halo */
+@keyframes rainbow-glow {
+  to { filter: blur(6px) hue-rotate(360deg); }
+}
+.get-in-touch {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  padding: 0.85em 1.7em;
+  border-radius: 50px;
+  background-color: #fff;
+  color: #000;
+  font-family: var(--font-alt) !important;
+  font-size: var(--cv);
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.get-in-touch::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff0000, #ff7300, #fffb00, #48ff00,
+              #00ffd5, #002bff, #ff00c8, #ff0000);
+  /* the colours cycle by rotating the hue of this blurred layer - the GPU
+     does that without repainting, unlike sliding the gradient underneath */
+  filter: blur(6px) hue-rotate(0deg);
+  animation: rainbow-glow 14s linear infinite;
+  opacity: 0.6;
+}
+.get-in-touch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #fff;
+}
+.get-in-touch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 115, 0, 0.3);
+}
+.get-in-touch:hover::before { opacity: 0.85; }

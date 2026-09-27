@@ -5,7 +5,7 @@ import NotesBrowser from "./notes/NotesBrowser";
 /**
  * My Study Notes - the notes library, browsed like folders on a computer.
  *
- * The files live in Code/data/notes on the server (folders inside folders,
+ * The files live in data/notes on the server (folders inside folders,
  * exactly as on disk). Add or change them at /admin -> Notes, or just copy
  * files into that folder - the page reads it live.
  *

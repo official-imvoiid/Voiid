@@ -1,0 +1,53 @@
+/* pages/home/cards/research.css - Research card - blurred photo, scrim, scientist (components/scientist.css). */
+
+.research-card {
+  min-height: var(--research-min-height, 0px);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.research-card::before {             /* blurred photo, slowly breathing */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url('/images/Research.jpg') no-repeat center center/cover;
+  filter: blur(10px);
+  animation: subtle-pulse 8s infinite ease-in-out;
+}
+@keyframes subtle-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+.research-card::after {              /* scrim so the heading reads */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(10, 10, 14, 0.10) 0%,
+    rgba(10, 10, 14, 0.30) 40%,
+    rgba(10, 10, 14, 0.74) 78%,
+    rgba(10, 10, 14, 0.84) 100%);
+}
+.research-card .card-subtitle,
+.research-card .card-title {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+.research-card .card-title {
+  font-size: var(--research);
+  white-space: nowrap;               /* one line, so the scientist clears it */
+  color: #fff;
+}
+.research-card .card-subtitle {
+  font-size: var(--research-sub);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #E4E4E8;
+}
+.research-card .card-link { z-index: 3; }

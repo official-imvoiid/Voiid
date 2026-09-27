@@ -1,0 +1,7 @@
+/* platforms/mobile-portrait/skills.css - Skill Set page (/skills). Looks: common/styles/pages/skills.css
+   Sizes and layout for mobile portrait. */
+
+/* the intro reads as one paragraph - the two sentences on separate lines
+   left ragged, awkward breaks on a tablet */
+.skills-intro-line { display: inline; }
+.skills-intro-line + .skills-intro-line::before { content: " "; }

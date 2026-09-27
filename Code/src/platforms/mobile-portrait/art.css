@@ -1,0 +1,25 @@
+/* platforms/mobile-portrait/art.css - AI Canvas gallery (/art). Looks: common/styles/pages/art.css
+   Sizes and layout for mobile portrait (touch, upright). */
+
+/* gallery columns by width */
+@media (min-width: 1401px) {
+  .gallery-container { column-count: 4; }
+}
+@media (min-width: 1001px) and (max-width: 1400px) {
+  .gallery-container { column-count: 3; }
+}
+@media (min-width: 601px) and (max-width: 1000px) {
+  .gallery-container { column-count: 2; }
+}
+@media (max-width: 600px) {
+  .gallery-container { column-count: 1; }
+}
+
+/* the title no longer runs into Back home */
+.art-head { gap: 14px; }
+.art-title { min-width: 0; font-size: clamp(1.4rem, 6.6vw, 2.1rem); }
+.art-head .bh { flex: none; }
+
+/* the lightbox's thumbnail strip: fixed-size thumbnails, swiped sideways */
+.lightbox-thumb { flex: none; }
+.lightbox-thumb img { width: 56px; height: 56px; }

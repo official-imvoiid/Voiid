@@ -20,6 +20,18 @@
 
 .adm * { font-family: inherit !important; }
 
+/* narrow screens (any device): the section rail becomes a scrolling row above the panel */
+@media (max-width: 760px) {
+  .adm-body { grid-template-columns: 1fr; }
+  .adm-nav {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .adm-tab { flex: 0 0 auto; }
+}
+
 /* ---- top bar ---- */
 .adm-top {
   display: flex;
@@ -127,10 +139,8 @@
   border-color: var(--line);
   color: var(--ink);
 }
-.adm-tab.is-reset { margin-top: 10px; color: #F87171; font-weight: 600; }
-.adm-tab.is-reset:hover { background: rgba(248,113,113,.09); color: #FCA5A5; }
 
-/* an edited section is marked, so you can see what differs from the build */
+/* the section with unsaved changes gets a dot on its tab */
 .adm-dot {
   width: 7px; height: 7px;
   border-radius: 50%;
@@ -310,11 +320,6 @@
 .adm-gate-back:hover { color: var(--ink-dim); }
 
 /* ---- inbox (contact form messages) ---- */
-.inbox-login {
-  display: grid;
-  gap: 10px;
-  max-width: 340px;
-}
 .inbox-note { display: grid; gap: 10px; justify-items: start; color: var(--ink-dim); }
 .inbox-count { margin-bottom: 10px; font-size: 0.83rem; color: var(--ink-dim); }
 .inbox-row.is-unread .adm-row-title strong { color: var(--accent); }

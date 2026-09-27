@@ -14,11 +14,19 @@ import {
   EyeOff
 } from 'lucide-react';
 
-// Define ImageLightbox first so it’s ready when Art calls it.
+/* The gallery: public/images/1.png … <IMAGE_COUNT>.png. The same file is used
+   as its own thumbnail - see the note on P-01 in the audit. */
+const IMAGE_COUNT = 47;
+const IMAGES = Array.from({ length: IMAGE_COUNT }, (_, i) => ({
+  id: i + 1,
+  url: `/images/${i + 1}.png`,
+  thumbnail: `/images/${i + 1}.png`,
+  alt: `AI Artwork ${i + 1}`,
+}));
+
 const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(initialImageIndex);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [, setIsFullscreen] = useState(false);
   const [showTimeline, setShowTimeline] = useState(true);
   // zoom + pan: scale 1 = fit to screen; x/y = offset of the image centre
   const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
@@ -99,13 +107,8 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
   const toggleFullscreen = useCallback(async () => {
     if (!containerRef.current) return;
     try {
-      if (!document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-      }
+      if (!document.fullscreenElement) await containerRef.current.requestFullscreen();
+      else await document.exitFullscreen();
     } catch (err) {
       console.error('Fullscreen error:', err);
     }
@@ -217,15 +220,6 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
   ]);
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () =>
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  useEffect(() => {
     if (thumbnailStripRef.current && showTimeline) {
       const activeThumbnail = thumbnailStripRef.current.querySelector(
         `[data-index="${currentImageIndex}"]`
@@ -299,10 +293,11 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
           onDoubleClick={(e) => (isZoomed ? resetZoomAndPosition() : zoomTo(2.5, e.clientX, e.clientY))}
         >
           <img
-                draggable={false}
+            draggable={false}
             src={images[currentImageIndex].url}
             alt={images[currentImageIndex].alt}
             className="lightbox-image"
+            decoding="async"
           />
         </div>
         <button
@@ -331,6 +326,8 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
                 draggable={false}
                 src={image.thumbnail}
                 alt={`Thumbnail ${index + 1}`}
+                loading="lazy"
+                decoding="async"
               />
             </button>
           ))}
@@ -345,14 +342,7 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
 const Art = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-
-  // Create an array of 47 images.
-  const images = Array.from({ length: 47 }, (_, i) => ({
-    id: i + 1,
-    url: `/images/${i + 1}.png`,
-    thumbnail: `/images/${i + 1}.png`,
-    alt: `AI Artwork ${i + 1}`,
-  }));
+  const images = IMAGES;
 
   const openLightbox = (index) => {
     setSelectedIndex(index);
@@ -385,11 +375,12 @@ const Art = () => {
             <div className="gallery-image-container">
               <div className="gallery-image-wrapper">
                 <img
-                draggable={false}
+                  draggable={false}
                   className="gallery-image"
                   src={image.thumbnail}
                   alt={image.alt}
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>

@@ -1,0 +1,15 @@
+/* platforms/mobile-portrait/games-played.css - Games list (/gamesplayed). Looks: common/styles/pages/games-played.css
+   Sizes and layout for mobile portrait (touch, upright). */
+
+/* title and Back home on one line */
+.gp-head { flex-wrap: nowrap; gap: 12px; }
+.gp-title {
+  min-width: 0;
+  font-size: clamp(0.95rem, 4.5vw, 2rem);   /* a little smaller, so it fits on one line */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gp-head .bh { flex: none; }
+
+/* the 320-360px title size is set with .pg-title in info-pages.css */

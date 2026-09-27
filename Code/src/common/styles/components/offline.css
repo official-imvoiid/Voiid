@@ -1,0 +1,18 @@
+/* components/offline.css - the "you appear to be offline" banner (click to hide). */
+
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100%;
+  padding: 4px 20px;
+  background: #f44336;
+  color: white;
+  font-size: 0.9em;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+.offline-banner.is-online { background: #2e7d32; }

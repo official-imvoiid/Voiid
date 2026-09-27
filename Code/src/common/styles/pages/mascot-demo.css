@@ -1,0 +1,83 @@
+/* pages/mascot-demo.css - the mascot test bench (/mascot). */
+
+.md-page {
+  min-height: 100dvh;
+  padding: 2rem 1rem;
+  background: var(--app-bg);
+  color: var(--ink);
+}
+.md-shell {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.md-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #EAB308;
+}
+.md-title {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.md-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 420px;
+  overflow: hidden;
+  padding: 2rem 1rem 1rem;
+  border: 1px solid #3F3F46;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #27272A 0%, #1A1A1D 100%);
+}
+.md-stage.is-across { justify-content: flex-start; }
+
+.md-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1.5rem 0 1rem;
+}
+.md-btn {
+  padding: 0.5rem 1.1rem;
+  border: 2px solid #3F3F46;
+  border-radius: 9999px;
+  background: var(--surface);
+  color: #D1D5DB;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.md-btn.is-active {
+  border-color: #EAB308;
+  background: var(--accent);
+  color: #1A1A1D;
+}
+
+.md-hint {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: #9CA3AF;
+}
+
+.md-sliders {
+  display: grid;
+  gap: 1rem;
+  max-width: 420px;
+}
+.md-label {
+  font-size: 0.9rem;
+  color: #D1D5DB;
+}
+.md-range {
+  width: 100%;
+  accent-color: #EAB308;
+}

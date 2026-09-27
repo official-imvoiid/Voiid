@@ -1,0 +1,5 @@
+/* platforms/mobile-landscape/literature.css - the poems (/literature). Looks: common/styles/pages/literature.css
+   Sizes and layout for mobile landscape. */
+
+.lit-books { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+.lit-reader { padding-top: 60px; }

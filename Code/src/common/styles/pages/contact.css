@@ -1,0 +1,210 @@
+/* pages/contact.css - the contact form (/contact).
+   Sizes that change per device: platforms/<device>/contact.css */
+
+.contact-page {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #ffdad5, #fff7f9);
+  animation: contact-fade-in 1.5s ease-in-out;
+}
+
+/* ---- the card: form on the left, picture on the right ---- */
+.contact-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  width: 80%;
+  max-width: 1180px;
+  padding: 40px;
+  border-radius: 15px;
+  background-color: rgba(255, 255, 255, 0.8);   /* over a plain gradient - a backdrop blur changed nothing */
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+  animation: contact-fade-in-up 1.5s ease-in-out;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 22px;
+  width: 55%;
+}
+
+.contact-image {
+  width: min(450px, 40%);
+  height: auto;
+  border-radius: 10px;
+  animation: contact-fade-in 2s ease-in-out;
+}
+
+.contact-title {
+  margin-bottom: 5px;
+  font-size: 46px;
+  font-weight: 600;
+  color: #a363aa;
+}
+.contact-rule {
+  width: 120px;
+  height: 5px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  background-color: #a363aa;
+}
+
+/* ---- fields ---- */
+.contact-input,
+.contact-message {
+  width: 100%;
+  border: 2px solid rgba(200, 200, 200, 0.6);
+  outline: none;
+  background: rgba(255, 255, 255, 0.8);
+  color: #555;
+  font-size: 18px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.contact-input:focus,
+.contact-message:focus {
+  border-color: #c89ad1;
+  box-shadow: 0 0 0 4px rgba(163, 99, 170, 0.12);
+}
+.contact-input {
+  height: 60px;
+  padding: 12px 22px;
+  border-radius: 30px;
+}
+.contact-message {
+  height: 180px;
+  padding: 18px 22px;
+  border-radius: 24px;
+  resize: none;
+}
+
+/* ---- robot check ---- */
+.contact-robot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.contact-robot-q {
+  flex: 0 0 auto;
+  font-size: 18px;
+  color: #666;
+}
+.contact-robot-a {
+  width: 120px;
+  text-align: center;
+}
+
+/* the trap field: off-screen for people, still in the form for bots.
+   Not display:none - some bots skip hidden fields. */
+.contact-trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact-error {
+  margin-top: -10px;
+  font-size: 14px;
+  color: red;
+}
+.contact-warning {
+  font-size: 14px;
+  color: #ff6b6b;
+}
+
+/* ---- buttons: Submit + Return Home, side by side ---- */
+.contact-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  width: 100%;
+}
+.contact-btn {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  padding: 19px 34px;
+  border: none;
+  border-radius: 50px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, background 0.3s, box-shadow 0.3s;
+}
+.contact-btn.is-submit { background: linear-gradient(270deg, #ff994f, #fa6d86); }
+/* matte: one flat colour, no gradient, no shine */
+.contact-btn.is-home {
+  background: #7B4F86;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+}
+.contact-btn.is-home:hover { background: #6E4579; }
+.contact-btn:hover:not(:disabled) { transform: scale(1.05); }
+.contact-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+/* ---- "message sent" popup ---- */
+.contact-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+.contact-popup-box {
+  width: 90%;
+  max-width: 500px;
+  padding: 30px;
+  border-radius: 15px;
+  background-color: white;
+  text-align: center;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+  animation: contact-fade-in-down 0.5s ease-in-out;
+}
+.contact-popup-icon {
+  margin-bottom: 20px;
+  font-size: 50px;
+  color: #4CAF50;
+}
+.contact-popup-title {
+  margin-bottom: 10px;
+  font-size: 24px;
+  color: #333;
+}
+.contact-popup-text {
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #666;
+}
+.contact-countdown {
+  font-weight: bold;
+  color: #a363aa;
+}
+
+@keyframes contact-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes contact-fade-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes contact-fade-in-down {
+  from { opacity: 0; transform: translateY(-30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
