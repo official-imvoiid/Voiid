@@ -2,8 +2,8 @@
    BackHome - the one back button, used on every page.
 
    A white pill with a green fill sitting at 35% that slides across on hover.
-   The label asks for Pacifico, which the site doesn't ship (fonts.css), so it
-   renders in the browser's cursive fallback unless Pacifico is installed.
+   The label is in Comic Sans MS where the system has it (Windows), and in
+   the look-alike Comic Neue from fonts.css everywhere else (phones).
    ========================================================================== */
 
 .bh {
@@ -40,8 +40,8 @@
   position: relative;
   z-index: 1;
   white-space: nowrap;
-  /* past reset.css's sketch font; Pacifico only if installed (see the top) */
-  font-family: Pacifico, cursive !important;
+  /* past reset.css's sketch font (see the top) */
+  font-family: "Comic Sans MS", "Comic Neue", cursive !important;
   font-weight: 500;
   font-size: 0.85rem;
   font-feature-settings: "liga" 0;
