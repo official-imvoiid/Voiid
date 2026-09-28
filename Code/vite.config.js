@@ -28,7 +28,7 @@ const csp = () => ({
       "img-src 'self' data: blob: https://i.ytimg.com",
       "media-src 'self' blob:",
       "font-src 'self'",
-      "connect-src 'self' https://api.github.com",
+      "connect-src 'self' blob: https://api.github.com",
       "worker-src 'self' blob:",
       "frame-src 'self' https://www.youtube-nocookie.com",
       "object-src 'none'",
