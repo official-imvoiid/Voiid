@@ -25,7 +25,8 @@ const REFRESH_MS = 10 * 60 * 1000;
 const ACTIVE_DAYS = 30;            // pushed this recently = a lit campfire
 const DAY = 24 * 60 * 60 * 1000;
 const SAMPLE = 4;                  // px between the ship's pre-measured trail points
-const PER_MAP = 30;                // projects on one map; the rest go on the next map
+const PER_MAP = 30;                // projects on a full-size map; the rest go on the next map
+const FULL_MAP_W = 1100;           // px: a map this wide (or wider) holds PER_MAP projects
 const RESIZE_MS = 150;             // the map re-lays out once a resize has settled, not per pixel
 
 // the continents only depend on the scale, so a re-render of the map (a new
@@ -172,26 +173,11 @@ const Ship = () => (
   </g>
 );
 
-/* ---- the map itself ---- */
-const ProjectMap = ({ repos, selected, onSelect, more }) => {
-  const boxRef = useRef(null);
+/* ---- the map itself ----
+   `width` is measured by the page (it decides how many projects fit on one
+   map); `boxRef` hands the page the frame to measure. */
+const ProjectMap = ({ repos, selected, onSelect, more, width, boxRef }) => {
   const markRefs = useRef([]);
-  const [width, setWidth] = useState(1000);
-
-  useEffect(() => {
-    const el = boxRef.current;
-    if (!el) return undefined;
-    // never narrower than 720: on a phone the map scrolls sideways instead of
-    // being squashed until nothing can be read (desktop is always wider)
-    let timer = 0;
-    const ro = new ResizeObserver(([entry]) => {
-      const next = Math.max(720, Math.round(entry.contentRect.width));
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => setWidth(next), RESIZE_MS);
-    });
-    ro.observe(el);
-    return () => { window.clearTimeout(timer); ro.disconnect(); };
-  }, []);
 
   const names = useMemo(() => repos.map((r) => r.name), [repos]);
   // a flag where each new year begins - and on the first stop of every map
@@ -509,13 +495,36 @@ const Develop = () => {
 
   const current = repos[selected];
 
-  // the voyage is split into maps of PER_MAP projects; the map shown is the
+  // the map's frame and its drawn width
+  const [mapBox, setMapBox] = useState(null);
+  const [width, setWidth] = useState(FULL_MAP_W);
+  useLayoutEffect(() => {
+    if (!mapBox) return undefined;
+    // never narrower than 720: on a phone the map scrolls sideways instead of
+    // being squashed until nothing can be read (desktop is always wider)
+    const measure = () => Math.max(720, Math.round(mapBox.clientWidth));
+    setWidth(measure());                   // before the first paint - no jump from a guessed size
+    let timer = 0;
+    const ro = new ResizeObserver(() => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setWidth(measure()), RESIZE_MS);
+    });
+    ro.observe(mapBox);
+    return () => { window.clearTimeout(timer); ro.disconnect(); };
+  }, [mapBox]);
+
+  // a smaller map holds fewer projects, so its stops sit as far apart as on a
+  // full-size one: they spread over its area, so the count follows width².
+  // A phone's 720px map holds 12 of the 30.
+  const perMap = Math.min(PER_MAP, Math.floor(PER_MAP * (width / FULL_MAP_W) ** 2));
+
+  // the voyage is split into maps of perMap projects; the map shown is the
   // one holding the chosen project, so ← → carry on onto the next map
-  const maps = Math.max(1, Math.ceil(repos.length / PER_MAP));
-  const page = selected >= 0 ? Math.floor(selected / PER_MAP) : 0;
-  const first = page * PER_MAP;
-  const pageRepos = useMemo(() => repos.slice(first, first + PER_MAP), [repos, first]);
-  const toMap = (n) => setSelected(Math.min(repos.length - 1, n * PER_MAP));
+  const maps = Math.max(1, Math.ceil(repos.length / perMap));
+  const page = selected >= 0 ? Math.floor(selected / perMap) : 0;
+  const first = page * perMap;
+  const pageRepos = useMemo(() => repos.slice(first, first + perMap), [repos, first, perMap]);
+  const toMap = (n) => setSelected(Math.min(repos.length - 1, n * perMap));
 
   // keyboard travel
   useEffect(() => {
@@ -592,11 +601,13 @@ const Develop = () => {
                 </div>
               ) : null}
               <ProjectMap
-                key={page}
+                key={`${page}-${perMap}`}
                 repos={pageRepos}
                 selected={selected - first}
                 onSelect={(i) => setSelected(first + i)}
                 more={page < maps - 1}
+                width={width}
+                boxRef={setMapBox}
               />
             </div>
 
