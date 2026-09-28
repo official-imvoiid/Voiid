@@ -3,6 +3,10 @@
    Self-hosted so text renders offline and without extra connections.
    Latin subsets only. Dancing Script and Space Grotesk point every weight at
    one file (they must be variable fonts for the bold weights to show).
+
+   Comic Neue and Montserrat are here for devices that don't have them:
+   Windows ships Comic Sans MS (the back button and game labels ask for it
+   first), phones don't; Montserrat is only on machines where it's installed.
    ========================================================================== */
 
 @font-face {
@@ -65,5 +69,24 @@
   font-weight: 700;
   font-display: swap;
   src: url(/fonts/space-grotesk-500.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* only the bold file is shipped - it stands in for every weight up to 700 */
+@font-face {
+  font-family: 'Comic Neue';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url(/fonts/comic-neue-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/fonts/montserrat-var.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
