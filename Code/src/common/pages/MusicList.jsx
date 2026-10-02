@@ -87,7 +87,7 @@ const SongPlayer = ({ song, onClose, onGo }) => {
         </div>
 
         <div className="music-modal-bar">
-          <button type="button" className="music-modal-nav" onClick={() => onGo(-1)} aria-label="Previous song">
+          <button type="button" className="music-modal-nav is-prev" onClick={() => onGo(-1)} aria-label="Previous song">
             <svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" /></svg>
           </button>
           <div className="music-modal-meta">
@@ -98,7 +98,7 @@ const SongPlayer = ({ song, onClose, onGo }) => {
           <a className="music-modal-yt" href={watchUrl(id)} target="_blank" rel="noopener noreferrer">
             <YtIcon /> <span>YouTube</span>
           </a>
-          <button type="button" className="music-modal-nav" onClick={() => onGo(1)} aria-label="Next song">
+          <button type="button" className="music-modal-nav is-next" onClick={() => onGo(1)} aria-label="Next song">
             <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg>
           </button>
           <button type="button" ref={closeRef} className="music-modal-close" onClick={onClose} aria-label="Close player">
