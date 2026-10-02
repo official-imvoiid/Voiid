@@ -167,12 +167,17 @@
 .music-modal-bar {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  grid-template-areas: "prev meta yt next close";   /* named, so a device can rearrange the bar */
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
   border-top: 3px solid var(--cat);
 }
-.music-modal-meta { min-width: 0; }
+.music-modal-nav.is-prev { grid-area: prev; }
+.music-modal-nav.is-next { grid-area: next; }
+.music-modal-bar .music-modal-yt { grid-area: yt; }
+.music-modal-close { grid-area: close; }
+.music-modal-meta { grid-area: meta; min-width: 0; }
 .music-modal-cat {
   margin: 0;
   color: var(--cat);
@@ -231,6 +236,52 @@
 .music-modal-yt:hover { filter: brightness(1.12); transform: translateY(-1px); }
 .music-modal-yt.is-big { padding: 14px 24px; font-size: 1.1rem; }
 .music-modal-yt.is-big .music-yt-icon { width: 26px; height: 26px; }
+
+/* ---- short, wide screens: a phone held sideways, a zoomed-in desktop ----
+   Too short to keep the bar under the video: the box is sized from the height
+   left over, so the video came out as a ~300px strip and the bar no longer
+   fitted in it - the title was squeezed to nothing and the close button was
+   cut off. Here the bar stands beside the video, which takes the full height. */
+@media (max-height: 500px) and (min-aspect-ratio: 3/2) {
+  .music-modal { padding: 10px; }
+
+  .music-modal-box {
+    --side: clamp(176px, 26vw, 240px);
+    /* the whole width, or a full-height video plus the bar
+       (22px = the padding above + the box's border) */
+    width: min(100%, calc((100dvh - 22px) * 16 / 9 + var(--side)));
+  }
+  .music-modal-screen { margin-right: var(--side); }
+
+  /* out of the flow, so the video alone sets the box's height */
+  .music-modal-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--side);
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "prev next close"
+      "meta meta meta"
+      "yt   yt   yt";
+    gap: 10px 8px;
+    padding: 12px;
+    border-top: 0;
+    border-left: 3px solid var(--cat);
+  }
+  .music-modal-close { justify-self: end; margin-left: 0; }
+  .music-modal-meta { align-self: stretch; overflow: hidden; }
+  /* the column is narrow: the name wraps instead of being cut after one line */
+  .music-modal-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    white-space: normal;
+  }
+  .music-modal-bar .music-modal-yt { justify-content: center; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .music-modal, .music-modal-box { animation: none; }
