@@ -9,6 +9,13 @@
 }
 .gaming-card { background: linear-gradient(135deg, #312E81, #4F46E5); }
 .music-card  { background: linear-gradient(135deg, #7F1D1D, #EF4444); }
+/* The mascot is taller than this card on the desktop layout and her lyrics
+   run past its edge; overflow: hidden trims them. Safari's engine (also behind
+   Chrome on iPhone and iPad) can skip that trim for parts it animates on their
+   own layer, so this clip - the card's rounded outline (17.6px, as in
+   board.css), 1px outside it so the card's own smoothed edge is drawn exactly
+   as before - holds them in everywhere. Chrome already trims the same way. */
+.music-card  { clip-path: inset(-1px round 18.6px); }
 
 .gaming-card .card-title,
 .music-card .card-title {
