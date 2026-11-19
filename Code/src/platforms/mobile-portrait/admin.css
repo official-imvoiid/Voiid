@@ -2,3 +2,13 @@
    Sizes and layout for mobile portrait. */
 
 /* nothing mobile portrait-specific yet - add rules here */
+
+/* narrow screens: the section rail becomes a scrolling row above the panel.
+ The same rule in common/styles/pages/admin.css sits above the base .adm-body
+ / .adm-nav rules, so they win and the rail stayed beside the panel, pushing
+ the editor off the side of a phone. Repeated here, where it loads later. */
+@media (max-width: 760px) {
+  .adm-body { grid-template-columns: minmax(0, 1fr); }
+  .adm-nav { position: static; flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+  .adm-tab { flex: 0 0 auto; }
+}

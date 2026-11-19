@@ -5,6 +5,7 @@ import SECTIONS from "./schema";
 import SectionEditor from "./SectionEditor";
 import Inbox from "./Inbox";
 import Security from "./Security";
+import Backup from "./Backup";
 import NotesBrowser from "../notes/NotesBrowser";
 
 /**
@@ -19,6 +20,7 @@ import NotesBrowser from "../notes/NotesBrowser";
  *   Fields.jsx         the input controls (text, colour, image upload…)
  *   Inbox.jsx          contact form messages
  *   Security.jsx       the optional authenticator app (Google Authenticator)
+ *   Backup.jsx         download the whole site, or just its content, as a zip
  *   ../notes/NotesBrowser.jsx  the notes library (folders + file uploads)
  *   schema.js          which sections exist and what fields they have
  */
@@ -28,6 +30,7 @@ const NAV = [
   { key: "notes", label: "Notes (files)" },
   { key: "inbox", label: "Inbox" },
   { key: "security", label: "Security" },
+  { key: "backup", label: "Backup" },
 ];
 
 const AdminPortal = ({ onLogout }) => {
@@ -43,6 +46,8 @@ const AdminPortal = ({ onLogout }) => {
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setFlash(null), 3600);
   }, []);
+
+  useEffect(() => () => window.clearTimeout(timer.current), []);
 
   // don't lose an unsaved draft by switching section or closing the tab
   const go = (key) => {
@@ -73,7 +78,7 @@ const AdminPortal = ({ onLogout }) => {
         </div>
       </header>
 
-      {flash ? <p className={`adm-flash is-${flash.tone}`}>{flash.text}</p> : null}
+      {flash ? <p className={`adm-flash is-${flash.tone}`} role="status">{flash.text}</p> : null}
 
       <div className="adm-body">
         <nav className="adm-nav" aria-label="Admin sections">
@@ -95,7 +100,9 @@ const AdminPortal = ({ onLogout }) => {
           <Inbox onLoggedOut={onLogout} />
         ) : active === "security" ? (
           <Security onLoggedOut={onLogout} />
-        ) : active === "notes" ? (
+        ) : active === "backup" ? (
+          <Backup onLoggedOut={onLogout} />
+        ) :active === "notes" ? (
           <section className="adm-panel adm-notes">
             <h2 className="adm-panel-title">Notes library</h2>
             <p className="adm-panel-blurb">
@@ -135,8 +142,16 @@ const Admin = () => {
       .catch(() => setState("offline"));
   }, []);
 
+  // the box is disabled while the session is checked, so autoFocus can't take:
+  // put the cursor in it once it can be typed into
+  const passwordRef = useRef(null);
+  useEffect(() => { if (state === "login") passwordRef.current?.focus(); }, [state]);
+
+  const sending = useRef(false);   // a second press while the first is on its way sends nothing
   const login = async (e) => {
     e.preventDefault();
+    if (sending.current) return;
+    sending.current = true;
     setError("");
     try {
       const res = await fetch("/api/admin/login", {
@@ -153,6 +168,8 @@ const Admin = () => {
       setState("in");
     } catch (err) {
       setError(err instanceof TypeError ? "Can't reach the server." : err.message);   // a TypeError is a network failure in every browser
+    } finally {
+      sending.current = false;
     }
   };
 
@@ -175,6 +192,7 @@ const Admin = () => {
           <>
             <p className="adm-gate-sub">Enter the admin password.</p>
             <input
+              ref={passwordRef}
               className="adm-input"
               type="password"
               value={password}

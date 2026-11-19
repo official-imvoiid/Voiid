@@ -85,12 +85,12 @@ const Security = ({ onLoggedOut }) => {
             <li>Type the 6-digit code the app shows, then press <strong>Turn on</strong>.</li>
           </ol>
           <img src={setup.qr} alt="QR code for your authenticator app" className="adm-sec-qr" />
-          <code className="adm-sec-key">{setup.secret.match(/.{1,4}/g).join(" ")}</code>
+          <code className="adm-sec-key">{String(setup.secret || "").match(/.{1,4}/g)?.join(" ")}</code>
           <div className="adm-sec-row">
             <input className="adm-input adm-sec-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6}
               placeholder="123456" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
             <button type="submit" className="adm-btn is-primary" disabled={busy || code.length !== 6}>Turn on</button>
-            <button type="button" className="adm-btn is-ghost" onClick={() => setSetup(null)}>Cancel</button>
+            <button type="button" className="adm-btn is-ghost" onClick={() => { setSetup(null); setCode(""); setMsg({ text: "", tone: "" }); }}>Cancel</button>
           </div>
         </form>
       ) : null}

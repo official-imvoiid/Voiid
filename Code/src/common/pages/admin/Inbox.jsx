@@ -21,7 +21,7 @@ const Inbox = ({ onLoggedOut }) => {
   const load = useCallback(async () => {
     try {
       const { messages: list } = await api("/api/admin/messages");
-      setMessages(list);
+      setMessages(Array.isArray(list) ? list : []);
       setState("ready");
     } catch (err) {
       if (err.status === 401) onLoggedOut();
