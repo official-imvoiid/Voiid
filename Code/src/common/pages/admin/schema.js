@@ -9,8 +9,11 @@ import { PLATFORMS, PLATFORM_OPTIONS } from "../../content/platforms";
  *
  * kind:  "fields" - a fixed set of named fields (an object)
  *        "list"   - a reorderable list of records with the same fields
- * field.type: text | url | textarea | number | select | color | colorAuto
+ * field.type: text | url | textarea | number | date | select | color | colorAuto
  *             image | pdf | certificate | model | modelThumb
+ *   text / textarea / date may set maxLength (the server has the final word).
+ *   A list may set addLabel (the Add button's text), and its `blank` may be a
+ *   function when a new record needs something fresh (see Quotes: today's date).
  *   select options may be a function of the current content (see Songs).
  */
 
@@ -36,9 +39,10 @@ export const SECTIONS = [
     key: "develop",
     label: "Develop map",
     kind: "fields",
-    blurb: "Which GitHub repos stay off the map. Your profile README repo is always left off.",
+    blurb: "Which GitHub repos stay off the map, and how often the server re-checks GitHub. Your profile README repo is always left off.",
     fields: [
       { name: "hidden", label: "Hidden repos", type: "textarea", width: "wide", hint: "One repo name per line (or comma-separated), e.g. CivitFetch" },
+      { name: "checkEvery", label: "Check GitHub every (minutes)", type: "number", min: 10, max: 10080, width: "narrow", hint: "10 or more (default 10). The server checks GitHub this often and every visitor gets the same copy." },
     ],
   },
 
@@ -82,6 +86,24 @@ export const SECTIONS = [
       { name: "color", label: "Book colour", type: "colorAuto", autoLabel: "Auto (shelf palette)" },
       { name: "text", label: "Poem", type: "textarea", rows: 16, width: "wide", hint: "Leave an empty line between stanzas." },
       { name: "quotes", label: "Quotes", type: "textarea", rows: 4, width: "wide", hint: "One quote per line, without quote marks - shown under the poem." },
+    ],
+  },
+
+  {
+    key: "quotes",
+    label: "Quotes",
+    kind: "list",
+    addLabel: "+ Add quote",
+    blurb: "The Quotes bubble on the Literature page - separate from the poems (a poem's own lines stay under that poem). The Quotes page opens on the FIRST one (move another up with the arrows to change it); visitors step through the rest in this order or jump to any from All quotes. Each quote shows on a frosted card with flowers drifting behind it, in its own colour (Auto = blossom pink). Wrap words in *stars* to make them bold. Up to 600 characters each, shown as plain text.",
+    title: (it) => `${it.text ? `“${it.text.length > 70 ? `${it.text.slice(0, 70)}…` : it.text}”` : "New quote"}${it.author ? `  —  ${it.author}` : ""}`,
+    swatch: (it) => (it.color && it.color !== "auto" ? it.color : null),
+    // a function, so a quote added tomorrow gets tomorrow's date
+    blank: () => ({ text: "", author: "", date: new Date().toLocaleDateString("en-CA"), color: "auto" }),
+    fields: [
+      { name: "text", label: "Quote", type: "textarea", rows: 4, width: "wide", maxLength: 600, hint: "Without quote marks - the page adds them. Wrap the words to set in bold in *stars*, e.g. Believe *you* *can* and you're halfway there." },
+      { name: "author", label: "Author / source", type: "text", maxLength: 120, hint: "Optional. Left empty, it is signed \"voiid\"." },
+      { name: "date", label: "Date added", type: "date", width: "narrow", hint: "Filled in for you." },
+      { name: "color", label: "Wash colour", type: "colorAuto", autoLabel: "Auto (blossom pink)", hint: "The colour of this quote's marks, bold words, glow and flowers. Light, warm colours read best on the dark page." },
     ],
   },
 

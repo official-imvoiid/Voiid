@@ -36,6 +36,7 @@
 @import "./pages/info-pages.css";      /* Certifications, Notes, Roadmap */
 @import "./pages/notes.css";           /* the notes library (Notes page + admin) */
 @import "./pages/literature.css";      /* the poems */
+@import "./pages/quotes.css";          /* Quotes: the bubble and its own page */
 @import "./pages/models.css";          /* 3D & Editing */
 @import "./pages/civitai.css";         /* where the Civitai icon goes */
 @import "./pages/admin.css";

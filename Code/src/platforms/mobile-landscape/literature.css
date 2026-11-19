@@ -3,3 +3,5 @@
 
 .lit-books { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 .lit-reader { padding-top: 60px; }
+
+/* Quotes (common/styles/pages/quotes.css): sized by screen size there, for every device - nothing device-specific here */

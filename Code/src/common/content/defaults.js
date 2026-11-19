@@ -1,4 +1,4 @@
-import POEMS from "./poems";
+import QUOTES from "./quotes";
 
 /**
  * defaults.js - every editable piece of the site, in one place.
@@ -34,6 +34,7 @@ const defaults = {
      README repo (named after the account) is always left off. */
   develop: {
     hidden: "CivitFetch\nTEXT2IMG",
+    checkEvery: 10,   // minutes between the server's GitHub checks (10 or more)
   },
 
   /* Footer icons, in order. platform = one of the keys in
@@ -253,9 +254,20 @@ const defaults = {
   ],
 
   /* ---------------------------------------------------------------------
-     Literature: the poems (admin -> Poems). The shipped set is in poems.js.
+     Literature: the poems (admin -> Poems). The shipped set is in poems.js;
+     it is fetched with the pages that use it (shippedPoems.js) and layered
+     in here by ContentContext, so it stays out of the first download.
      --------------------------------------------------------------------- */
-  poems: POEMS,
+  poems: [],
+
+  /* ---------------------------------------------------------------------
+     Quotes: the Quotes bubble on the Literature page (admin -> Quotes).
+     Separate from the poems. The shipped set is in quotes.js; the first
+     one is the one the Quotes page opens on. *Starred* words are set large
+     and gold.
+     text, author (optional), date added.
+     --------------------------------------------------------------------- */
+  quotes: QUOTES,
 
   /* ---------------------------------------------------------------------
      3D & Editing: the models (admin -> 3D models). file is served by

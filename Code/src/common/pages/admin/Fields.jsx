@@ -3,12 +3,14 @@ import { asJson, uploadWithProgress } from "../../content/api";
 
 /* The input controls the admin knows how to draw. schema.js picks one per
    field with `type`:
-     text | url | textarea | number | select | color | colorAuto
+     text | url | textarea | number | date | select | color | colorAuto
      image | pdf | certificate | model | modelThumb */
 
 /* Upload a file to server.js; resolves to its URL. */
 const upload = (file, endpoint = "/api/admin/upload") =>
-  fetch(endpoint, { method: "POST", body: file }).then((r) => asJson(r, "Upload failed.")).then((d) => d.url);
+  fetch(endpoint, { method: "POST", body: file })
+    .catch(() => { throw new Error("Upload failed - can't reach the server."); })   // not the browser's raw "Failed to fetch"
+    .then((r) => asJson(r, "Upload failed.")).then((d) => d.url);
 
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/gif,image/webp";
 const PDF_ACCEPT = "application/pdf,.pdf";
@@ -200,7 +202,8 @@ const ColorInput = ({ id, value, onChange, disabled }) => (
 );
 
 export const Field = ({ field, value, onChange, content, item, patch }) => {
-  const id = `f-${field.name}`;
+  // unique per row: with two rows open, a label must focus its own row's box
+  const id = `f-${item?._key ? `${item._key}-` : ""}${field.name}`;
   const common = {
     id,
     className: "adm-input",
@@ -211,7 +214,10 @@ export const Field = ({ field, value, onChange, content, item, patch }) => {
   let control;
   switch (field.type) {
     case "textarea":
-      control = <textarea {...common} className="adm-input adm-textarea" rows={field.rows || 3} />;
+      control = <textarea {...common} className="adm-input adm-textarea" rows={field.rows || 3} maxLength={field.maxLength} />;
+      break;
+    case "date":
+      control = <input {...common} type="date" />;
       break;
     case "select": {
       const options = typeof field.options === "function" ? field.options(content) : field.options;
@@ -270,7 +276,7 @@ export const Field = ({ field, value, onChange, content, item, patch }) => {
       control = <ModelThumbField id={id} value={value} onChange={onChange} item={item} />;
       break;
     default:
-      control = <input {...common} type={field.type === "url" ? "url" : "text"} />;
+      control = <input {...common} type={field.type === "url" ? "url" : "text"} maxLength={field.maxLength} />;
   }
 
   return (

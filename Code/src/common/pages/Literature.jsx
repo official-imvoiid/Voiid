@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import PageShell from "../components/PageShell";
 import { useContent } from "../content/ContentContext";
 import useModal from "../hooks/useModal";
+import { QuotesBubble, QuotesView } from "./literature/Quotes";
+import { toQuotes } from "./literature/toQuotes";
 
 /**
  * Literature - my poems, as a shelf of books.
@@ -11,12 +13,19 @@ import useModal from "../hooks/useModal";
  * a dark see-through backdrop, with its quotes pulled out underneath.
  * The open poem is kept in the address (#poem-id) so it can be shared.
  *
- * The poems are edited at /admin -> Poems (shipped set: content/poems.js).
+ * Quotes are separate from the poems: a bubble floating in the corner opens
+ * their own page (#quotes in the address) - see literature/Quotes.jsx.
+ *
+ * The poems are edited at /admin -> Poems (shipped set: content/poems.js),
+ * the quotes at /admin -> Quotes (shipped set: content/quotes.js).
  * Looks: common/styles/pages/literature.css
  */
 
 // leather tones for "auto" covers, taken in turn
 const COVERS = ["#6b2230", "#1f3a5f", "#2f4a34", "#5a3a22", "#3b2f4f", "#4a4a4f", "#6a4a1f", "#233f47"];
+
+// the address of the quotes view (/literature#quotes)
+const QUOTES_ID = "quotes";
 
 const slug = (t) => t.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "poem";
 
@@ -24,6 +33,8 @@ const slug = (t) => t.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, 
 function toBooks(poems) {
   const used = new Map();
   return poems
+    // the server lets a field be a number - everything here is read as text
+    .map((p) => ({ ...p, title: String(p?.title ?? "").trim(), text: String(p?.text ?? "") }))
     .filter((p) => p.title || p.text)
     .map((p, i) => {
       let id = slug(p.title || `poem-${i + 1}`);
@@ -50,7 +61,8 @@ const Reader = ({ books, index, onIndex, onClose }) => {
   const count = books.length;
   const scrollRef = useRef(null);
   const step = useCallback((d) => onIndex((index + d + count) % count), [index, count, onIndex]);
-  useModal({ onClose, onStep: step });
+  const closeRef = useRef(null);
+  useModal({ onClose, onStep: step, focusRef: closeRef });
 
   // each poem starts at the top
   useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [index]);
@@ -72,7 +84,7 @@ const Reader = ({ books, index, onIndex, onClose }) => {
         <button type="button" className="lit-round" onClick={() => step(1)} aria-label="Next poem">
           <ChevronRight aria-hidden="true" />
         </button>
-        <button type="button" className="lit-round is-close" onClick={onClose} aria-label="Close">
+        <button type="button" ref={closeRef} className="lit-round is-close" onClick={onClose} aria-label="Close">
           <X aria-hidden="true" />
         </button>
       </div>
@@ -98,21 +110,24 @@ const Reader = ({ books, index, onIndex, onClose }) => {
 };
 
 const Literature = () => {
-  const { poems } = useContent();
+  const { poems, quotes: savedQuotes } = useContent();
   const books = useMemo(() => toBooks(poems), [poems]);
+  const quotes = useMemo(() => toQuotes(savedQuotes), [savedQuotes]);
   const [year, setYear] = useState("all");
   const [openId, setOpenId] = useState(() => {
     try { return decodeURIComponent(window.location.hash.slice(1)); } catch { return ""; }   // a malformed #hash opens nothing
   });
-  const open = books.findIndex((b) => b.id === openId);
+  const quotesOpen = openId === QUOTES_ID;
+  const open = quotesOpen ? -1 : books.findIndex((b) => b.id === openId);
 
   // keep the open poem in the address, without adding history entries
-  const openAt = useCallback((i) => {
-    const id = i >= 0 ? books[i].id : "";
+  const goTo = useCallback((id) => {
     setOpenId(id);
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}${id ? `#${id}` : ""}`);
-  }, [books]);
-  const close = useCallback(() => openAt(-1), [openAt]);
+  }, []);
+  const openAt = useCallback((i) => goTo(i >= 0 ? books[i].id : ""), [books, goTo]);
+  const close = useCallback(() => goTo(""), [goTo]);
+  const openQuotes = useCallback(() => goTo(QUOTES_ID), [goTo]);
 
   // newest year first; poems without a year at the end
   const years = useMemo(() => [...new Set(books.map((b) => b.year).filter(Boolean))].sort((a, b) => b - a), [books]);
@@ -140,7 +155,7 @@ const Literature = () => {
             <button key={y} type="button" className="pg-chip" aria-pressed={year === y} onClick={() => setYear(y)}>{y}</button>
           ))}
         </div>
-        <span className="pg-count">{books.length} poems</span>
+        <span className="pg-count">{books.length} poem{books.length === 1 ? "" : "s"}</span>
       </div>
 
       {groups.map((g) => (
@@ -169,6 +184,10 @@ const Literature = () => {
       ))}
 
       {open >= 0 ? <Reader books={books} index={open} onIndex={openAt} onClose={close} /> : null}
+
+      {/* Quotes: its own thing - a bubble in the corner, and a page of its own */}
+      <QuotesBubble onOpen={openQuotes} />
+      {quotesOpen ? <QuotesView quotes={quotes} onClose={close} /> : null}
     </PageShell>
   );
 };

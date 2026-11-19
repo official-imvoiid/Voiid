@@ -1,0 +1,622 @@
+/* pages/quotes.css - Quotes (literature/Quotes.jsx): the bubble that floats in
+   the corner of the Literature page, and the page it opens.
+
+   The site's own colours: its dark page (#1A1A1D) and the Literature gold
+   (each quote may pick its own colour in /admin -> Quotes; Auto = blossom pink). Over the dark,
+   soft glows, blossoms that sway, petals that drift and sparks that rise; on
+   top, a frosted, semi-transparent white glass card with a thin line frame -
+   a heavy opening mark top-left, a closing mark bottom-right - and the quote
+   centred in Montserrat, its key words bold.
+
+   The card fills the space between the bars, edge to edge with only a narrow
+   margin, so there is never a big gap between the card and the page. Sized
+   from the screen itself (no device guessing); no scrollbar is ever drawn. */
+
+.qt-bubble,
+.qk {
+  --qk-bg: #1A1A1D;
+  --qk-ink: #F2F2F4;
+  --qk-soft: #B4B4BE;
+  --qk-line: rgba(255, 255, 255, 0.78);
+  --qk-glass: rgba(255, 255, 255, 0.09);
+  --qk-glass-edge: rgba(255, 255, 255, 0.22);
+  --qk-button: rgba(255, 255, 255, 0.08);
+  --qk-accent: #F2A7C3;
+  --qk-sans: "Montserrat", "Space Grotesk", system-ui, sans-serif;
+}
+/* the Quotes page itself is light: pale pink paper, dark ink - the card is the
+   same pink-white as the page, so there is no colour jump between them */
+.qk {
+  --qk-bg: #fdf0f5;
+  --qk-ink: #1f1b1d;
+  --qk-soft: #5d5458;
+  --qk-line: #1f1b1d;
+  --qk-glass-edge: rgba(31, 27, 29, 0.14);
+  --qk-button: rgba(255, 255, 255, 0.62);
+}
+/* the site puts its sketch font on everything; Quotes uses Montserrat */
+.qt-bubble, .qt-bubble *,
+.qk, .qk * { font-family: var(--qk-sans) !important; }
+
+.qk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.qk-marks, .qk-mark { display: block; fill: currentColor; }
+
+/* no scrollbar is ever drawn inside Quotes */
+.qk, .qk * { scrollbar-width: none; -ms-overflow-style: none; }
+.qk::-webkit-scrollbar, .qk *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* ---- the bubble: a dark pill, a dark ball with a gold blossom turning in it ---- */
+.qt-bubble {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 22px 6px 6px;
+  border: 1px solid rgba(242, 167, 195, 0.45);
+  border-radius: 999px;
+  background: rgba(39, 39, 42, 0.94);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.85), 0 0 26px -6px rgba(242, 167, 195, 0.4);
+  color: var(--qk-ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: qt-arrive 0.7s cubic-bezier(.2, .7, .2, 1) 0.3s both, qt-float 7s ease-in-out 1s infinite;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.qt-bubble-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(242, 167, 195, 0.6);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #3a3328, #1A1A1D 70%);
+  color: var(--qk-accent);
+  transition: transform 0.45s cubic-bezier(.2, .8, .3, 1.3);
+}
+.qt-bubble-flower { width: 32px; height: 32px; animation: qt-turn 14s linear infinite; }
+.qt-bubble-orb::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--qk-accent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: qt-ring 3.6s ease-out 1.4s infinite;
+}
+.qt-bubble-label { font-size: 0.95rem; font-weight: 600; letter-spacing: 0.02em; }
+.qt-bubble:hover,
+.qt-bubble:focus-visible { border-color: var(--qk-accent); box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.9), 0 0 34px -4px rgba(242, 167, 195, 0.65); outline: none; }
+.qt-bubble:hover .qt-bubble-orb,
+.qt-bubble:focus-visible .qt-bubble-orb { transform: scale(1.08); }
+.qt-bubble:active .qt-bubble-orb { transform: scale(0.94); }
+@keyframes qt-arrive { from { opacity: 0; translate: 0 16px; } }
+@keyframes qt-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes qt-ring { 0% { opacity: 0.7; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.55); } }
+@keyframes qt-turn { to { transform: rotate(360deg); } }
+
+/* ---- the page: the site's dark, pinned to the screen's edges ---- */
+.qk {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  background-color: var(--qk-bg);
+  color: var(--qk-ink);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  animation: qk-open 0.45s ease both;
+}
+@keyframes qk-open { from { opacity: 0; } }
+
+/* soft glows of the quote's colour, slowly drifting */
+.qk-wash { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.qk-blob {
+  position: absolute;
+  border-radius: 46% 54% 58% 42% / 44% 46% 54% 56%;
+  background: radial-gradient(closest-side, currentColor 0%, transparent 100%);
+  transition: color 1s ease;
+  will-change: transform;
+}
+.qk-blob.is-a { left: 10%; top: 4%;  width: 60%; height: 70%; animation: qk-drift-a 22s ease-in-out infinite; }
+.qk-blob.is-b { left: 40%; top: 30%; width: 58%; height: 66%; animation: qk-drift-b 26s ease-in-out infinite; }
+.qk-blob.is-c { left: 24%; top: 40%; width: 36%; height: 42%; animation: qk-drift-c 19s ease-in-out infinite; }
+.qk-blob.is-d { left: -6%; top: 50%; width: 42%; height: 50%; animation: qk-drift-b 30s ease-in-out infinite reverse; }
+@keyframes qk-drift-a { 0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); } 50% { transform: translate(4%, 3%) rotate(10deg) scale(1.08); } }
+@keyframes qk-drift-b { 0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); } 50% { transform: translate(-5%, -4%) rotate(-12deg) scale(1.1); } }
+@keyframes qk-drift-c { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(6%, -5%) scale(1.14); } }
+
+/* cherry branches reach in from three corners and sway as the wind gusts */
+.qk-branch {
+  position: absolute;
+  display: block;
+  width: min(48vw, 600px);
+  aspect-ratio: 420 / 200;
+  animation: qk-gust 7s ease-in-out infinite;
+}
+.qk-branch svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 3px 4px rgba(120, 40, 70, 0.18)); }
+.qk-branch.is-tl { left: -2%; top: -4%; transform-origin: 0 10%; }
+.qk-branch.is-tr { right: -2%; top: -2%; transform-origin: 100% 8%; }
+.qk-branch.is-tr svg { transform: scaleX(-1) rotate(-6deg); }
+.qk-branch.is-br { right: -4%; bottom: -6%; transform-origin: 100% 90%; }
+.qk-branch.is-br svg { transform: scale(-1, -1) rotate(-4deg); }
+@keyframes qk-gust {
+  0%, 100% { rotate: 0deg; }
+  18% { rotate: 2.2deg; }
+  30% { rotate: -0.8deg; }
+  46% { rotate: 3deg; }
+  62% { rotate: 0.6deg; }
+  80% { rotate: 1.8deg; }
+}
+
+/* the garden: blossoms sway and slowly turn, petals drift down, sparks rise */
+.qk-garden { position: absolute; inset: 0; overflow: hidden; pointer-events: none; transition: color 1s ease; }
+.qk-bloom { position: absolute; display: block; transform: rotate(var(--r, 0deg)); animation: qk-sway 9s ease-in-out infinite; }
+.qk-bloom svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 2px 3px rgba(120, 40, 70, 0.16)); animation: qk-spin-slow 40s linear infinite; }
+.qk-bloom.is-sprig { animation-duration: 11s; }
+.qk-bloom.is-sprig svg { animation: qk-breathe 6s ease-in-out infinite; }
+@keyframes qk-sway {
+  0%, 100% { transform: rotate(var(--r, 0deg)) translate(0, 0); }
+  50% { transform: rotate(calc(var(--r, 0deg) + 10deg)) translate(8px, -12px); }
+}
+@keyframes qk-spin-slow { to { rotate: 360deg; } }
+@keyframes qk-breathe { 0%, 100% { scale: 1; } 50% { scale: 1.07; } }
+
+/* petals carried across by the wind: in from the left, out on the right,
+   rising and dipping with the gusts, tumbling as they go */
+.qk-petal {
+  position: absolute;
+  left: -6%;
+  width: calc(16px * var(--s, 1));
+  height: calc(20px * var(--s, 1));
+  opacity: 0;
+  animation: qk-wind linear infinite;
+}
+.qk-petal span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse 80% 90% at 50% 100%, #c2507c 0%, currentColor 38%, #ffd0e0 82%, #ffe6ef 100%);
+  clip-path: path('M7 18 C 1 15, -1 6, 3 1 C 4.5 -0.2, 6 0.6, 7 2.4 C 8 0.6, 9.5 -0.2, 11 1 C 15 6, 13 15, 7 18 Z');
+  transform-origin: 50% 40%;
+  animation: qk-tumble 3.2s ease-in-out infinite;
+}
+.qk-petal:nth-child(3n) span { animation-duration: 2.4s; }
+.qk-petal:nth-child(4n) span { animation-duration: 4.1s; animation-direction: reverse; }
+@keyframes qk-wind {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  6%   { opacity: 0.95; }
+  25%  { transform: translate(30vw, 7vh); }
+  45%  { transform: translate(52vw, -3vh); }
+  70%  { transform: translate(82vw, 9vh); }
+  94%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(118vw, 15vh); }
+}
+@keyframes qk-tumble {
+  0%   { transform: rotate(0deg) rotateX(0deg) rotateY(0deg); }
+  33%  { transform: rotate(120deg) rotateX(60deg) rotateY(20deg); }
+  66%  { transform: rotate(240deg) rotateX(-40deg) rotateY(70deg); }
+  100% { transform: rotate(360deg) rotateX(0deg) rotateY(0deg); }
+}
+
+.qk-spark {
+  position: absolute;
+  bottom: -4%;
+  border-radius: 50%;
+  background: var(--qk-accent);
+  box-shadow: 0 0 8px 2px var(--qk-accent);
+  opacity: 0;
+  animation: qk-rise linear infinite;
+}
+@keyframes qk-rise {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  15%  { opacity: 0.9; }
+  50%  { opacity: 0.4; transform: translate(14px, -50vh) scale(1); }
+  70%  { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(-10px, -104vh) scale(0.7); }
+}
+
+/* ---- top bar ---- */
+.qk-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px clamp(12px, 2vw, 24px) 6px;
+}
+.qk-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--qk-ink); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; }
+.qk-brand::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--qk-accent); box-shadow: 0 0 10px var(--qk-accent); }
+.qk-top-tools { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.qk-count { margin-right: 4px; font-size: 0.9rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.qk-count span { color: var(--qk-soft); font-weight: 500; }
+
+.qk-round {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--qk-glass-edge);
+  border-radius: 50%;
+  background: var(--qk-button);
+  color: var(--qk-ink);
+  cursor: pointer;
+  transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+}
+.qk-round svg { width: 18px; height: 18px; }
+.qk-round:active { transform: scale(0.94); }
+.qk-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--qk-glass-edge);
+  border-radius: 999px;
+  background: var(--qk-button);
+  color: var(--qk-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+}
+.qk-pill svg { flex: none; width: 16px; height: 16px; color: var(--qk-ink); }
+@media (hover: hover) {
+  .qk-round:hover { border-color: var(--qk-ink); background: var(--qk-ink); color: #fff; }
+  .qk-pill:hover { border-color: var(--qk-accent); }
+}
+.qk-round:focus-visible, .qk-pill:focus-visible, .qk-seg:focus-visible,
+.qk-index-list button:focus-visible { outline: 2px solid var(--qk-ink); outline-offset: 3px; }
+
+/* ---- the stage and the glass card: the card takes all the room it is given ---- */
+.qk-stage {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  padding: 4px clamp(10px, 1.6vw, 24px);
+  touch-action: pan-y;
+}
+.qk-card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  margin: 0;
+  padding: clamp(10px, min(1.6vw, 2.4vh), 22px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 30px 60px -40px rgba(120, 40, 70, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  animation: qk-glow 7s ease-in-out infinite;
+}
+/* a slow shine that crosses the glass now and then */
+.qk-card::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -40%;
+  width: 30%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: skewX(-18deg) translateX(-120%);
+  animation: qk-shine 9s ease-in-out 2s infinite;
+  pointer-events: none;
+}
+@keyframes qk-glow {
+  0%, 100% { box-shadow: 0 30px 60px -40px rgba(120, 40, 70, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 0 0 rgba(242, 167, 195, 0); }
+  50% { box-shadow: 0 30px 60px -40px rgba(120, 40, 70, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 44px -8px rgba(242, 167, 195, 0.55); }
+}
+@keyframes qk-shine { 0%, 70% { transform: skewX(-18deg) translateX(-120%); } 100% { transform: skewX(-18deg) translateX(560%); } }
+
+/* the line frame: the marks sit in two corners, the four rules stop short of
+   them; --m is the size of a mark. Each new quote slides in from the side it
+   came from. */
+.qk-frame {
+  --m: clamp(26px, min(4.2vw, 6.2vh), 56px);
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  color: var(--qk-line);
+}
+.qk-frame.from-right .qk-body { animation: qk-in-right 0.6s cubic-bezier(.2, .7, .2, 1) both; }
+.qk-frame.from-left .qk-body { animation: qk-in-left 0.6s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes qk-in-right { from { opacity: 0; transform: translateX(48px); } }
+@keyframes qk-in-left { from { opacity: 0; transform: translateX(-48px); } }
+.qk-mark { position: absolute; width: var(--m); height: auto; color: var(--qk-ink); animation: qk-mark 0.6s cubic-bezier(.2, .8, .3, 1.25) both, qk-bob 5s ease-in-out 1s infinite; }
+.qk-mark.is-open { top: 0; left: 0; }
+.qk-mark.is-close { right: 0; bottom: 0; animation-delay: 0.55s, 3.5s; }
+@keyframes qk-mark { from { opacity: 0; transform: scale(0.5) rotate(-20deg); } }
+@keyframes qk-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+.qk-rule { position: absolute; background: var(--qk-line); }
+.qk-rule.is-top    { top: calc(var(--m) * 0.33); left: calc(var(--m) + 12px); right: calc(var(--m) * 0.33); height: 1.5px; transform-origin: left; animation: qk-draw-x 0.8s 0.15s cubic-bezier(.6, 0, .2, 1) both; }
+.qk-rule.is-bottom { bottom: calc(var(--m) * 0.33); right: calc(var(--m) + 12px); left: calc(var(--m) * 0.33); height: 1.5px; transform-origin: right; animation: qk-draw-x 0.8s 0.3s cubic-bezier(.6, 0, .2, 1) both; }
+.qk-rule.is-left   { left: calc(var(--m) * 0.33); top: calc(var(--m) + 12px); bottom: calc(var(--m) + 12px); width: 1.5px; transform-origin: top; animation: qk-draw-y 0.8s 0.2s cubic-bezier(.6, 0, .2, 1) both; }
+.qk-rule.is-right  { right: calc(var(--m) * 0.33); top: calc(var(--m) + 12px); bottom: calc(var(--m) + 12px); width: 1.5px; transform-origin: bottom; animation: qk-draw-y 0.8s 0.25s cubic-bezier(.6, 0, .2, 1) both; }
+@keyframes qk-draw-x { from { transform: scaleX(0); } }
+@keyframes qk-draw-y { from { transform: scaleY(0); } }
+
+.qk-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: calc(var(--m) + 8px) calc(var(--m) * 0.33 + clamp(14px, 3vw, 44px));
+  text-align: center;
+}
+.qk-quote { margin: 0; font-weight: 400; line-height: 1.22; letter-spacing: -0.01em; color: var(--qk-ink); }
+.qk-quote[data-len="short"] { max-width: 13em; font-size: clamp(1.9rem, min(6vw, 9.4vh), 6rem); }
+.qk-quote[data-len="mid"]   { max-width: 17em; font-size: clamp(1.55rem, min(4.3vw, 6.8vh), 4.2rem); }
+.qk-quote[data-len="long"]  { max-width: 24em; font-size: clamp(1.2rem, min(2.9vw, 4.8vh), 2.8rem); line-height: 1.3; }
+.qk-quote[data-len="xlong"] { max-width: 34em; font-size: clamp(1rem, min(2vw, 3.3vh), 1.8rem); line-height: 1.4; letter-spacing: 0; }
+.qk-line { display: flex; flex-wrap: wrap; justify-content: center; column-gap: 0.26em; }
+.qk-word {
+  display: inline-block;
+  font-weight: 400;
+  animation: qk-word 0.7s cubic-bezier(.2, .7, .2, 1) both;
+  animation-delay: calc(0.35s + var(--k) * 0.045s);
+}
+strong.qk-word { font-weight: 700; color: var(--qk-ink); }
+@keyframes qk-word { from { opacity: 0; transform: translateY(0.4em); filter: blur(4px); } }
+.qk-by {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: clamp(12px, 3vh, 28px);
+  color: var(--qk-soft);
+  font-size: clamp(0.7rem, 1.4vh, 0.82rem);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  animation: qk-open 0.8s ease 0.8s both;
+}
+.qk-by::before, .qk-by::after { content: ""; width: 28px; height: 1px; background: var(--qk-accent); }
+
+/* the main quote: a label with sprigs, blossoms in two corners, and a brush
+   stroke of its colour drawn in under its bold words */
+.qk-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 clamp(12px, 3vh, 26px);
+  font-size: clamp(0.66rem, 1.4vh, 0.8rem);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: qk-open 0.8s ease 0.3s both;
+}
+.qk-kicker span { color: var(--qk-ink); }
+.qk-kicker-sprig { width: clamp(34px, 5vh, 52px); height: auto; }
+.qk-kicker-sprig.is-flip { transform: scaleX(-1); }
+.qk-corner {
+  position: absolute;
+  width: calc(var(--m) * 1.5);
+  height: calc(var(--m) * 1.5);
+  animation: qk-bloom-in 1s cubic-bezier(.2, .8, .3, 1.3) 0.7s both, qk-spin-slow 30s linear 1.7s infinite;
+}
+.qk-corner.is-tr { top: calc(var(--m) * -0.35); right: calc(var(--m) * -0.35); }
+.qk-corner.is-bl { bottom: calc(var(--m) * -0.35); left: calc(var(--m) * -0.35); animation-delay: 0.9s, 1.9s; }
+@keyframes qk-bloom-in { from { opacity: 0; transform: scale(0.2) rotate(-90deg); } }
+.qk-frame.is-main strong.qk-word { position: relative; z-index: 0; }
+.qk-frame.is-main strong.qk-word::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -0.14em;
+  right: -0.14em;
+  top: 0.14em;
+  bottom: 0.02em;
+  border-radius: 0.28em 0.12em 0.32em 0.1em;
+  background: var(--qk-hl);
+  transform: skewX(-6deg);
+  transform-origin: left;
+  animation: qk-mark-in 0.7s cubic-bezier(.6, 0, .2, 1) both;
+  animation-delay: calc(1s + var(--k) * 0.06s);
+}
+@keyframes qk-mark-in { from { transform: skewX(-6deg) scaleX(0); } }
+.qk-frame:not(.is-main) strong.qk-word {
+  text-decoration: underline;
+  text-decoration-color: var(--qk-accent);
+  text-decoration-thickness: 0.09em;
+  text-underline-offset: 0.16em;
+  text-decoration-skip-ink: none;
+}
+
+/* ---- the bar at the bottom ---- */
+.qk-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 20px);
+  padding: 8px clamp(12px, 2vw, 24px) 14px;
+}
+.qk-segs { flex: 1; display: flex; gap: 4px; min-width: 0; }
+.qk-seg { flex: 1; min-width: 0; height: 32px; padding: 0; border: 0; background: none; cursor: pointer; display: flex; align-items: center; }
+.qk-seg span { display: block; width: 100%; height: 2px; border-radius: 2px; background: rgba(31, 27, 29, 0.16); transition: height 0.2s ease, background-color 0.2s ease; }
+.qk-seg:hover span { height: 4px; background: rgba(31, 27, 29, 0.45); }
+.qk-seg[aria-current="true"] span { height: 4px; background: var(--qk-ink); }
+.qk-meter { display: none; flex: 1; min-width: 0; align-items: center; gap: 12px; }
+.qk-meter-line { flex: 1; height: 2px; border-radius: 2px; background: rgba(31, 27, 29, 0.16); overflow: hidden; }
+.qk-meter-line span { display: block; height: 100%; background: var(--qk-ink); transition: width 0.35s ease; }
+.qk-meter-count { flex: none; font-size: 0.85rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.qk-meter-count span { color: var(--qk-soft); font-weight: 500; }
+
+/* ---- All quotes: a searchable list that jumps to any of them ---- */
+.qk-index-wrap { position: absolute; inset: 0; z-index: 5; background: rgba(60, 30, 42, 0.28); animation: qk-open 0.25s ease both; }
+.qk-index {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, 100%);
+  border-left: 1px solid var(--qk-glass-edge);
+  background: rgba(255, 250, 252, 0.97);
+  box-shadow: -30px 0 60px -30px rgba(80, 30, 50, 0.45);
+  animation: qk-slide 0.35s cubic-bezier(.2, .7, .2, 1) both;
+}
+@keyframes qk-slide { from { transform: translateX(40px); opacity: 0; } }
+.qk-index-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px 8px 22px; }
+.qk-index-title { display: flex; align-items: baseline; gap: 10px; margin: 0; font-size: 1.3rem; font-weight: 700; }
+.qk-index-title span { color: var(--qk-soft); font-size: 0.85rem; font-weight: 600; }
+.qk-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 18px 10px 22px;
+  padding: 0 14px;
+  border: 1px solid var(--qk-glass-edge);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--qk-soft);
+}
+.qk-search:focus-within { border-color: var(--qk-accent); }
+.qk-search svg { flex: none; width: 16px; height: 16px; }
+.qk-search input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  background: none;
+  color: var(--qk-ink);
+  font-size: 16px;               /* 16px: phones don't zoom in when it is tapped */
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.qk-search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.qk-index-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: 2px 10px 24px; list-style: none; }
+.qk-index-list button {
+  display: grid;
+  grid-template-columns: 2.4em minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--qk-ink);
+  text-align: left;
+  cursor: pointer;
+}
+.qk-index-list button:hover { background: rgba(242, 167, 195, 0.18); }
+.qk-index-list button[aria-current="true"] { background: rgba(242, 167, 195, 0.34); }
+.qk-index-no { display: grid; place-items: center; height: 1.9em; border-radius: 6px; color: #1A1A1D; font-size: 0.72rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.qk-index-text { font-size: 0.95rem; line-height: 1.4; overflow-wrap: anywhere; }
+.qk-index-none { margin: 10px 22px; color: var(--qk-soft); }
+
+/* ---- nothing saved yet ---- */
+.qk-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.qk-empty-marks { width: 64px; height: auto; margin-bottom: 18px; color: var(--qk-accent); }
+.qk-empty-title { margin: 0; font-size: clamp(1.4rem, 4vw, 2.2rem); font-weight: 600; }
+
+/* =========================================================================
+   Sizes - from the screen itself, the same on every kind of device
+   ========================================================================= */
+
+/* < 1024 px wide: one bar and a count instead of a mark per quote */
+@media (max-width: 1023px) {
+  .qk-segs { display: none; }
+  .qk-meter { display: flex; }
+  .qk-count { display: none; }
+}
+
+/* < 600 px wide: phones held upright - the card hugs the quote (never tiny) */
+@media (max-width: 599px) {
+  .qt-bubble { right: 14px; bottom: 14px; gap: 9px; padding: 5px 16px 5px 5px; }
+  .qt-bubble-orb { width: 42px; height: 42px; }
+  .qt-bubble-flower { width: 28px; height: 28px; }
+  .qt-bubble-label { font-size: 0.88rem; }
+
+  .qk-top { padding: 10px 12px 4px; gap: 8px; }
+  .qk-stage { padding: 4px 8px; }
+  .qk-card { padding: 12px; align-self: center; min-height: 72%; max-height: 100%; }
+  .qk-frame { --m: 30px; }
+  .qk-body { padding: calc(var(--m) + 8px) 20px; }
+  .qk-kicker { gap: 8px; letter-spacing: 0.2em; }
+  .qk-kicker-sprig { width: 30px; }
+  .qk-quote[data-len="short"] { font-size: clamp(1.75rem, min(9.6vw, 6vh), 2.8rem); }
+  .qk-quote[data-len="mid"]   { font-size: clamp(1.4rem, min(7vw, 4.4vh), 2.1rem); }
+  .qk-quote[data-len="long"]  { font-size: clamp(1.12rem, min(5.2vw, 3.3vh), 1.55rem); }
+  .qk-quote[data-len="xlong"] { font-size: clamp(0.95rem, min(4vw, 2.5vh), 1.12rem); }
+  .qk-bar { padding: 6px 12px 12px; gap: 12px; }
+  .qk-index { width: 100%; border-left: 0; }
+}
+@media (max-width: 359px) {
+  .qk-pill { width: 42px; padding: 0; justify-content: center; }
+  .qk-pill span { display: none; }
+}
+
+/* < 521 px tall: phones on their side - a wide card, text sized to the height */
+@media (max-height: 520px) {
+  .qt-bubble { right: 14px; bottom: 12px; gap: 9px; padding: 5px 16px 5px 5px; }
+  .qt-bubble-orb { width: 42px; height: 42px; }
+  .qt-bubble-flower { width: 28px; height: 28px; }
+  .qt-bubble-label { font-size: 0.88rem; }
+
+  .qk-top { padding: 6px 14px 2px; }
+  .qk-top .qk-round, .qk-pill { height: 36px; }
+  .qk-top .qk-round { width: 36px; }
+  .qk-stage { padding: 2px 12px; }
+  .qk-card { padding: 8px; }
+  .qk-frame { --m: 24px; }
+  .qk-body { padding: calc(var(--m) + 2px) calc(var(--m) + 30px); }
+  .qk-quote[data-len="short"] { max-width: 18em; font-size: clamp(1.3rem, 8.4vh, 2.4rem); }
+  .qk-quote[data-len="mid"]   { max-width: 26em; font-size: clamp(1.1rem, 6.4vh, 1.9rem); }
+  .qk-quote[data-len="long"]  { max-width: 34em; font-size: clamp(0.95rem, 4.8vh, 1.4rem); }
+  .qk-quote[data-len="xlong"] { max-width: 44em; font-size: clamp(0.85rem, 3.6vh, 1.1rem); }
+  .qk-by { margin-top: 8px; }
+  .qk-segs { display: none; }
+  .qk-meter { display: flex; }
+  .qk-count { display: none; }
+  .qk-bar { padding: 4px 14px 8px; }
+  .qk-bar .qk-round { width: 36px; height: 36px; }
+  .qk-index-head { padding: 10px 16px 4px 20px; }
+  .qk-search input { height: 36px; }
+}
+
+/* still, for anyone who asked for less motion */
+@media (prefers-reduced-motion: reduce) {
+  .qt-bubble, .qt-bubble-flower, .qk, .qk-blob, .qk-bloom, .qk-bloom svg, .qk-card, .qk-card::after,
+  .qk-frame .qk-body, .qk-mark, .qk-rule, .qk-word, .qk-by, .qk-kicker, .qk-corner,
+  .qk-frame.is-main strong.qk-word::before, .qk-index-wrap, .qk-index { animation: none; }
+  /* the same, for rules above that name two classes (".qk-blob.is-a") - they
+     outrank a single class, so without these the wash kept drifting */
+  .qk-blob.is-a, .qk-blob.is-b, .qk-blob.is-c, .qk-blob.is-d, .qk-bloom.is-sprig svg,
+  .qk-frame.from-right .qk-body, .qk-frame.from-left .qk-body,
+  .qk-rule.is-top, .qk-rule.is-bottom, .qk-rule.is-left, .qk-rule.is-right { animation: none; }
+  .qk-petal, .qk-spark, .qt-bubble-orb::after { display: none; }
+  .qk-branch { animation: none; }
+  .qt-bubble-orb, .qk-round, .qk-seg span, .qk-meter-line span { transition: none; }
+  .qt-bubble:hover .qt-bubble-orb, .qt-bubble:focus-visible .qt-bubble-orb, .qt-bubble:active .qt-bubble-orb, .qk-round:active { transform: none; }
+}
