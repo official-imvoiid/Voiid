@@ -1,7 +1,11 @@
 /* platforms/desktop/home/hover.css - mouse-only effects: lift + cursor-driven tilt
    (the tilt values come from useCardTilt.js). */
 
-.card { transform-style: preserve-3d; }
+/* No transform-style: preserve-3d on .card. The tilt needs only the board's
+   perspective; nothing inside a card moves in 3D. Chrome ignores preserve-3d
+   on a card anyway (overflow: hidden flattens it), but Safari's engine - which
+   Chrome on iPhone and iPad also uses - kept it, and then stopped clipping
+   what sits outside the card: the music card's mascot showed above it. */
 .card:hover { will-change: transform; }   /* a GPU layer only while it tilts, not one per card all the time */
 .card:hover { background-color: #3F3F46; }
 .cards-container .card:hover {
