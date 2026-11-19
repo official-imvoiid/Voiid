@@ -28,7 +28,7 @@ const csp = () => ({
       "img-src 'self' data: blob: https://i.ytimg.com",
       "media-src 'self' blob:",
       "font-src 'self'",
-      "connect-src 'self' blob: https://api.github.com",
+      "connect-src 'self' blob:",
       "worker-src 'self' blob:",
       "frame-src 'self' https://www.youtube-nocookie.com",
       "object-src 'none'",
@@ -46,7 +46,22 @@ export default defineConfig({
     // the dev server stays on this machine unless asked for: VITE_HOST=1 npm run dev
     // opens it to the LAN (to test on a phone)
     host: process.env.VITE_HOST === '1',
+    // the dev server hands out any file in the project folder; never the env
+    // file or the encrypted stores in data/ (Vite's own list, plus *.enc)
+    fs: { deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '*.enc'] },
     proxy,
   },
   preview: { proxy },   // npm run preview works against the same server.js
+  build: {
+    rollupOptions: {
+      output: {
+        // libraries that change only on an upgrade get files of their own, so
+        // a deploy that only changes the site's own code leaves them cached
+        manualChunks(id) {
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom|cookie|set-cookie-parser)[\\/]/.test(id)) return 'react'
+          if (/[\\/]node_modules[\\/]@fortawesome[\\/]/.test(id)) return 'icons'
+        },
+      },
+    },
+  },
 })

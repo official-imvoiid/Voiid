@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import PageShell from "../components/PageShell";
 import { useContent } from "../content/ContentContext";
-import { fetchRepos, githubUser, LANGUAGE_COLORS } from "../content/github";
+import { cachedRepos, fetchRepos, githubUser, LANGUAGE_COLORS, readCopy, storageKey } from "../content/github";
 import WorldLands from "./DevelopLands";
 import { placeStops, project } from "../content/worldTour";
 import { WORLD_H, WORLD_W } from "../content/worldLand";
@@ -12,8 +12,9 @@ import Creatures from "./DevelopCreatures";
  *
  * The trail runs from the first repo I created to the newest, so a new
  * project simply becomes the next stop. Data comes live from GitHub (the
- * username is taken from admin -> Links -> GitHub) and refreshes every
- * 10 minutes while the page is open.
+ * username is taken from admin -> Links -> GitHub) by way of this site's
+ * server, which re-checks GitHub on the schedule set in /admin -> Develop
+ * map (every 10 minutes by default). Refresh fetches the server's copy again.
  *
  *   ← →  (or ↑ ↓)  travel between projects      Enter  open it on GitHub
  *
@@ -21,7 +22,11 @@ import Creatures from "./DevelopCreatures";
  * Layout: platforms/<device>/develop.css
  */
 
-const REFRESH_MS = 10 * 60 * 1000;
+const CLOCK_SLACK_MS = 5 * 1000;   // server check times from two answers may differ this much and still be the same check
+const COLLECT_MS = 4 * 1000;       // the server is fetching a newer copy: collect it this long after
+const RETRY_MS = 60 * 1000;        // the server's copy was overdue and still is: ask again this long after
+const REFRESH_MIN_MS = 1000;       // "Refreshing…" stays on the button at least this long, so it can be read
+const REFRESHED_MS = 1800;         // then "Refreshed ✓" for this long
 const ACTIVE_DAYS = 30;            // pushed this recently = a lit campfire
 const DAY = 24 * 60 * 60 * 1000;
 const SAMPLE = 4;                  // px between the ship's pre-measured trail points
@@ -41,9 +46,49 @@ const ago = (iso) => {
   if (days < 365) return `${Math.floor(days / 30)} month${days < 60 ? "" : "s"} ago`;
   return `${Math.floor(days / 365)} year${days < 730 ? "" : "s"} ago`;
 };
+/* the page's state, from a copy of the repo list (or none yet) */
+/* live: the times come from this visit's answer from the server - a copy kept
+   from an earlier visit draws the map at once, but its times are old news, so
+   they aren't shown until the server has answered (a fraction of a second) */
+const fromCopy = (user, copy, live = false) => (copy
+  ? { status: "ready", user, version: copy.version || "", repos: copy.repos, fetchedAt: copy.fetchedAt, gotAt: copy.gotAt, checkEvery: copy.checkEvery || 0, error: "", live }
+  : { status: "loading", user, version: "", repos: [], fetchedAt: 0, gotAt: 0, checkEvery: 0, error: "", live });
+
+/* The two times beside Refresh. They count on by themselves (every 15 s, and
+   at once when the tab comes back to the front), so the clock ticking never
+   makes the whole page - and its big map - render again. */
+const CopyTimes = ({ live, gotAt, fetchedAt, checkEvery }) => {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const tick = () => { if (!document.hidden) setTick((n) => n + 1); };
+    const clock = window.setInterval(tick, 15 * 1000);
+    document.addEventListener("visibilitychange", tick);
+    return () => { window.clearInterval(clock); document.removeEventListener("visibilitychange", tick); };
+  }, []);
+  // a copy kept from an earlier visit is older than the server's schedule
+  // allows and the page hasn't heard back from the server since: say so
+  // instead of showing "3 h ago" and then jumping
+  const everyMs = (checkEvery || 10) * 60 * 1000;
+  const overdue = fetchedAt > 0 && Date.now() - fetchedAt > everyMs + RETRY_MS && Date.now() - gotAt > RETRY_MS;
+  return (
+    <span className="pg-count dv-count">
+      <span title="When your browser last got the list from this site's server (on opening, on schedule, or Refresh).">
+        Your session: {live ? sinceFetch(gotAt) : "…"}
+      </span>
+      <span title={`When this site's server last got the list from GitHub${checkEvery ? ` (it does so every ${checkEvery} min)` : ""}. Every visitor gets this same copy.`}>
+        Server: {!live ? "…" : overdue ? "updating…" : sinceFetch(fetchedAt)}
+      </span>
+    </span>
+  );
+};
+
 const sinceFetch = (t) => {
-  const min = Math.floor((Date.now() - t) / 60000);
-  return min < 1 ? "just now" : `${min} min ago`;
+  if (!t) return "not yet";
+  const min = Math.floor(Math.max(0, Date.now() - t) / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  if (min < 48 * 60) return `${Math.floor(min / 60)} h ago`;
+  return `${Math.floor(min / 1440)} days ago`;
 };
 const monthYear = (iso) => new Date(iso).toLocaleDateString(undefined, { month: "short", year: "numeric" });
 
@@ -111,6 +156,52 @@ function trail(pts) {
   return d;
 }
 
+/* The trail as a point every SAMPLE px along it, worked out from the very
+   curves trail() draws. Asking the browser instead (getPointAtLength, a
+   thousand times or more) froze the page for a quarter of a second - longer
+   on a phone - before the map could appear; this takes about a millisecond.
+   Each curve is followed in small straight steps, then read off at even
+   distances. */
+const CURVE_STEPS = 48;
+function sampleTrail(pts) {
+  if (!pts.length) return [];
+  const line = [[pts[0].x, pts[0].y]];
+  const dist = [0];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    for (let s = 1; s <= CURVE_STEPS; s++) {
+      const t = s / CURVE_STEPS;
+      const u = 1 - t;
+      const x = u * u * u * p1.x + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * p2.x;
+      const y = u * u * u * p1.y + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * p2.y;
+      const [px, py] = line[line.length - 1];
+      dist.push(dist[dist.length - 1] + Math.hypot(x - px, y - py));
+      line.push([x, y]);
+    }
+  }
+  const total = dist[dist.length - 1];
+  const out = [];
+  let j = 1;
+  for (let l = 0; l <= total + SAMPLE; l += SAMPLE) {
+    const want = Math.min(total, l);
+    while (j < dist.length - 1 && dist[j] < want) j++;
+    if (j >= line.length) { out.push(line[line.length - 1]); continue; }
+    const span = dist[j] - dist[j - 1];
+    const f = span > 0 ? Math.min(1, Math.max(0, (want - dist[j - 1]) / span)) : 0;
+    const [ax, ay] = line[j - 1];
+    const [bx, by] = line[j];
+    out.push([ax + (bx - ax) * f, ay + (by - ay) * f]);
+  }
+  return out;
+}
+
 /* a compass rose: eight points, each half light and half shaded */
 const Compass = ({ x, y, size = 1 }) => {
   const point = (angle, len, w) => {
@@ -176,7 +267,9 @@ const Ship = () => (
 /* ---- the map itself ----
    `width` is measured by the page (it decides how many projects fit on one
    map); `boxRef` hands the page the frame to measure. */
-const ProjectMap = ({ repos, selected, onSelect, more, width, boxRef }) => {
+// memo: the map only draws again when its own props change - not when the
+// Refresh button toggles or a copy with the same list arrives
+const ProjectMap = memo(({ repos, selected, onSelect, more, width, boxRef, quiet }) => {
   const markRefs = useRef([]);
 
   const names = useMemo(() => repos.map((r) => r.name), [repos]);
@@ -202,14 +295,8 @@ const ProjectMap = ({ repos, selected, onSelect, more, width, boxRef }) => {
   const samples = useRef([]);            // the trail as a point every SAMPLE px
 
   useLayoutEffect(() => {
-    const path = trailRef.current;
-    if (!path || !points.length) return;
-    const total = path.getTotalLength();
-    const pts = [];
-    for (let l = 0; l <= total + SAMPLE; l += SAMPLE) {
-      const q = path.getPointAtLength(Math.min(total, l));
-      pts.push([q.x, q.y]);
-    }
+    if (!trailRef.current || !points.length) return;
+    const pts = sampleTrail(points);
     // each stop's distance along the trail: the nearest sample, walking forward
     let k = 0;
     const lengths = points.map((p) => {
@@ -275,10 +362,12 @@ const ProjectMap = ({ repos, selected, onSelect, more, width, boxRef }) => {
     return () => cancelAnimationFrame(raf);
   }, [selected, stopLengths]);
 
-  // bring the selected stop into view when it changes
+  // bring the selected stop into view when it changes (not in the hidden preview,
+  // which must never move the page the visitor is actually on)
   useEffect(() => {
+    if (quiet) return;
     markRefs.current[selected]?.scrollIntoView?.({ block: "nearest", inline: "nearest", behavior: "smooth" });
-  }, [selected]);
+  }, [selected, quiet]);
 
   const now = Date.now();
 
@@ -371,7 +460,8 @@ const ProjectMap = ({ repos, selected, onSelect, more, width, boxRef }) => {
       </svg>
     </div>
   );
-};
+});
+ProjectMap.displayName = "ProjectMap";
 
 /* small drawn icons - the ↗ / ← → text glyphs render lopsided in the hand font */
 const Icon = ({ d }) => (
@@ -387,10 +477,10 @@ const ICON = {
 
 /* repo names from the admin box: one per line or comma-separated */
 const nameSet = (text = "") =>
-  new Set(text.split(/[\n,]/).map((n) => n.trim().toLowerCase()).filter(Boolean));
+  new Set(String(text ?? "").split(/[\n,]/).map((n) => n.trim().toLowerCase()).filter(Boolean));
 
 /* the ship's log beside the intro: the whole voyage in numbers */
-const VoyageLog = ({ repos }) => {
+const VoyageLog = memo(({ repos }) => {
   const stars = repos.reduce((n, r) => n + r.stars, 0);
   const byLang = {};
   repos.forEach((r) => { if (r.language) byLang[r.language] = (byLang[r.language] || 0) + 1; });
@@ -428,36 +518,149 @@ const VoyageLog = ({ repos }) => {
       </ul>
     </aside>
   );
-};
+});
+VoyageLog.displayName = "VoyageLog";
 
 /* I, II, III ... for the map numbers */
 const roman = (n) => ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][n] || String(n);
 
-/* ---- the page ---- */
-const Develop = () => {
+/* ---- the page ----
+   preview: drawn once, invisibly, while the visitor is still on another page
+   (WarmDevelop in App.jsx), so the browser has already prepared this page's
+   fonts at their exact sizes when it is really opened. A preview draws from
+   the copy already in hand and does nothing else: no requests, no keys, no
+   scrolling, no timers of its own. */
+const Develop = ({ preview = false }) => {
   const { links, develop } = useContent();
   const user = githubUser(links.github);
 
-  const [state, setState] = useState({ status: "loading", repos: [], fetchedAt: 0, error: "" });
+  // drawn at once from the copy already in hand (fetched when the site opened,
+  // or kept from the last visit); load() below swaps in a newer one
+  const [state, setState] = useState(() => fromCopy(user, user ? cachedRepos(user) : null));
   const [showForks, setShowForks] = useState(true);   // forks show, ringed twice
   const [selected, setSelected] = useState(-1);
 
-  const load = useCallback(async (fresh = false) => {
+  const [busy, setBusy] = useState(false);            // the Refresh button is at work
+  const [refreshed, setRefreshed] = useState(false);  // ...and just finished: "Refreshed ✓" for a moment
+  const labelTimer = useRef(0);
+
+  // a copy arrives (from the server, or saved by another tab): take it unless
+  // it is from an older server check than the one already shown - then only
+  // "your copy" moves on (that copy was just confirmed). When its list is the
+  // one already on screen (same version), the very same list is kept, so the
+  // map isn't laid out and measured all over again for nothing.
+  const take = useCallback((copy, error = "") => {
+    setState((s) => {
+      const sameUser = s.user === copy.user && s.status === "ready";
+      if (sameUser && s.live && copy.fetchedAt < s.fetchedAt - CLOCK_SLACK_MS) {
+        return { ...s, gotAt: Math.max(s.gotAt, copy.gotAt), error };
+      }
+      const next = { ...fromCopy(copy.user, copy, true), error };
+      if (sameUser && copy.version && copy.version === s.version) next.repos = s.repos;
+      return next;
+    });
+  }, []);
+
+  // Gets the server's copy into this page ("Your session"). It never makes the
+  // server ask GitHub - only the server's own schedule does that ("Server").
+  //   fresh   ask the server even if this browser's copy looks current
+  //           (opening the page, Refresh, and the scheduled pick-up)
+  //   manual  the Refresh button - shows "Refreshing…" while it waits
+  // When a copy is already shown, a failed ask is simply ignored: visitors keep
+  // the map, never an error.
+  const retry = useRef(0);
+  const [attempts, setAttempts] = useState(0);         // bumps after every ask, so the next one is always scheduled
+  const load = useCallback(async ({ fresh = false, manual = false } = {}) => {
     if (!user) return;
+    window.clearTimeout(retry.current);
+    const started = Date.now();
+    if (manual) { window.clearTimeout(labelTimer.current); setRefreshed(false); setBusy(true); }
+    let collecting = false;
+    let ok = false;
     try {
-      const { repos, fetchedAt } = await fetchRepos(user, { fresh });
-      setState({ status: "ready", repos, fetchedAt, error: "" });
+      const copy = await fetchRepos(user, { fresh });
+      take(copy, "");
+      ok = true;
+      // The server is in the middle of its scheduled GitHub check: it answered
+      // at once with the copy it has; collect the new one a few seconds later.
+      if (copy.checking) {
+        collecting = true;
+        retry.current = window.setTimeout(() => {
+          fetchRepos(user, { fresh: true })
+            .then((c) => take(c, ""))
+            .catch(() => {})
+            .finally(() => setAttempts((n) => n + 1));
+        }, COLLECT_MS);
+      }
     } catch (err) {
-      setState((s) => ({ ...s, status: s.repos.length ? "ready" : "error", error: err.message }));
+      // server unreachable: keep the map, and show the saved copy's own times
+      setState((s) => (s.repos.length ? { ...s, status: "ready", error: "", live: true } : { ...s, status: "error", error: err.message }));
+    } finally {
+      if (manual) {
+        // the server answers in a few milliseconds: the new copy is shown at
+        // once, but "Refreshing…" stays up long enough to read, then
+        // "Refreshed ✓" for a moment, so the click visibly did something
+        const left = Math.max(0, REFRESH_MIN_MS - (Date.now() - started));
+        labelTimer.current = window.setTimeout(() => {
+          setBusy(false);
+          if (ok) {
+            setRefreshed(true);
+            labelTimer.current = window.setTimeout(() => setRefreshed(false), REFRESHED_MS);
+          }
+        }, left);
+      }
+      if (!collecting) setAttempts((n) => n + 1);
     }
+  }, [user, take]);
+  useEffect(() => () => { window.clearTimeout(retry.current); window.clearTimeout(labelTimer.current); }, []);
+
+  // While the page is open, pick up the server's next copy when it is due:
+  // its last check + the interval set in the admin (+ a moment for the check
+  // itself). One request per interval per open page - no polling in between.
+  // Re-planned after every ask: if the server couldn't renew its copy (GitHub
+  // down), the page tries again a minute later instead of going quiet.
+  useEffect(() => {
+    if (preview || state.status !== "ready" || !state.fetchedAt) return undefined;
+    const every = (state.checkEvery || 10) * 60 * 1000;
+    const due = state.fetchedAt + every + COLLECT_MS - Date.now();
+    const wait = Math.min(Math.max(RETRY_MS, due), every + COLLECT_MS);
+    const t = window.setTimeout(() => { if (!document.hidden) load({ fresh: true }); }, wait);
+    return () => window.clearTimeout(t);
+  }, [preview, state.status, state.fetchedAt, state.checkEvery, attempts, load]);
+
+  // the admin changed the GitHub link while the page was open: start over from that user's copy
+  useEffect(() => {
+    setState((s) => (s.user === user ? s : fromCopy(user, user ? cachedRepos(user) : null)));
   }, [user]);
 
-  // on arrival, then every 10 minutes while the page is open and visible
+  // The map is already drawn from the copy in hand; on arrival the server's
+  // current copy is fetched at once, so both times are right straight away.
+  // When the tab comes back to the front, it is fetched only if it is due.
   useEffect(() => {
-    load();
-    const t = window.setInterval(() => { if (!document.hidden) load(true); }, REFRESH_MS);
-    return () => window.clearInterval(t);
-  }, [load]);
+    if (preview) return undefined;
+    load({ fresh: true });
+    const onShow = () => { if (!document.hidden) load(); };
+    document.addEventListener("visibilitychange", onShow);
+    window.addEventListener("pageshow", onShow);       // back/forward cache (Safari, Android Chrome)
+    window.addEventListener("online", onShow);
+    return () => {
+      document.removeEventListener("visibilitychange", onShow);
+      window.removeEventListener("pageshow", onShow);
+      window.removeEventListener("online", onShow);
+    };
+  }, [load, preview]);
+
+  // another tab got a newer copy: show it here too, without asking again
+  useEffect(() => {
+    if (!user || preview) return undefined;
+    const onStorage = (e) => {
+      if (e.key !== storageKey(user)) return;
+      const copy = readCopy(user, e.newValue);
+      if (copy) take(copy);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [user, take, preview]);
 
   // left off: the profile README repo, and whatever the admin hid
   const hidden = useMemo(() => {
@@ -478,11 +681,22 @@ const Develop = () => {
     [charted, showForks]
   );
 
-  // start at whatever I touched most recently
+  // start at whatever I touched most recently. When a newer list arrives, stay
+  // on the same project (found by name) - its number may have moved, and
+  // keeping the number would quietly jump to a different project.
+  const prevRepos = useRef(repos);
   useEffect(() => {
+    const before = prevRepos.current;
+    prevRepos.current = repos;
     if (!repos.length) return;
     setSelected((cur) => {
-      if (cur >= 0 && cur < repos.length) return cur;
+      if (cur >= 0 && before !== repos) {
+        const name = before[cur]?.name;
+        const at = name ? repos.findIndex((r) => r.name === name) : -1;
+        if (at >= 0) return at;
+      } else if (cur >= 0 && cur < repos.length) {
+        return cur;
+      }
       let latest = 0;
       repos.forEach((r, i) => { if (r.pushedAt > repos[latest].pushedAt) latest = i; });
       return latest;
@@ -525,9 +739,13 @@ const Develop = () => {
   const first = page * perMap;
   const pageRepos = useMemo(() => repos.slice(first, first + perMap), [repos, first, perMap]);
   const toMap = (n) => setSelected(Math.min(repos.length - 1, n * perMap));
+  // the same function from one render to the next, so the (memoised) map
+  // only draws again when something on it changed
+  const selectOnMap = useCallback((i) => setSelected(first + i), [first]);
 
   // keyboard travel
   useEffect(() => {
+    if (preview) return undefined;
     const onKey = (e) => {
       if (e.altKey || e.ctrlKey || e.metaKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); go(1); }
@@ -538,9 +756,9 @@ const Develop = () => {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [go, current]);
+  }, [go, current, preview]);
 
-  const forkCount = charted.filter((r) => r.fork).length;
+  const forkCount = useMemo(() => charted.filter((r) => r.fork).length, [charted]);
 
   return (
     <PageShell
@@ -561,7 +779,7 @@ const Develop = () => {
       ) : state.status === "error" ? (
         <div className="dv-error">
           <p>{state.error}</p>
-          <button type="button" className="pg-chip" onClick={() => { setState((s) => ({ ...s, status: "loading" })); load(true); }}>
+          <button type="button" className="pg-chip" onClick={() => { setState((s) => ({ ...s, status: "loading" })); load({ fresh: true, manual: true }); }}>
             Try again
           </button>
         </div>
@@ -578,10 +796,10 @@ const Develop = () => {
                 {showForks ? "Hide" : "Show"} forks ({forkCount})
               </button>
             ) : null}
-            <button type="button" className="pg-chip" onClick={() => load(true)}>Refresh</button>
-            <span className="pg-count">
-              {repos.length} projects · checked {sinceFetch(state.fetchedAt)}
-            </span>
+            <button type="button" className="pg-chip" disabled={busy} aria-live="polite" onClick={() => load({ fresh: true, manual: true })}>
+              {busy ? "Refreshing…" : refreshed ? "Refreshed ✓" : "Refresh"}
+            </button>
+            <CopyTimes live={state.live} gotAt={state.gotAt} fetchedAt={state.fetchedAt} checkEvery={state.checkEvery} />
           </div>
 
           <div className="dv-layout">
@@ -604,10 +822,11 @@ const Develop = () => {
                 key={`${page}-${perMap}`}
                 repos={pageRepos}
                 selected={selected - first}
-                onSelect={(i) => setSelected(first + i)}
+                onSelect={selectOnMap}
                 more={page < maps - 1}
                 width={width}
                 boxRef={setMapBox}
+                quiet={preview}
               />
             </div>
 
