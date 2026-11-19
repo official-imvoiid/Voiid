@@ -40,5 +40,11 @@ If you deploy a fork, you are responsible for its security. At minimum:
 
 - keep `.env` and `Code/data/` out of git, and use long random secrets;
 - serve the site over **HTTPS** with `NODE_ENV=production`;
+- set `TRUST_PROXY_HOPS` to the real number of proxies in front of the
+  server, so login and contact-form limits count real visitors;
+- have your web server add `Strict-Transport-Security`,
+  `X-Content-Type-Options: nosniff` and a `frame-ancestors` policy to the pages;
 - enable two-factor authentication in the admin panel;
+- store backup zips from the admin privately: they hold all your content
+  (never `.env` or the authenticator secret), so keep your own copy of `.env`;
 - keep dependencies updated (`npm audit`, `npm outdated`).
