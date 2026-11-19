@@ -178,7 +178,7 @@ const MusicList = () => {
             </button>
           ))}
         </div>
-        <span className="pg-count">{total} songs</span>
+        <span className="pg-count">{total} song{total === 1 ? "" : "s"}</span>
       </div>
 
       {shown.map((c, ci) => (

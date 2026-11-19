@@ -7,14 +7,17 @@ window.addEventListener("message", (e) => {
   const { code, fn, tests } = e.data || {};
   const logs = [];
   const show = (a) => { try { return typeof a === "object" ? JSON.stringify(a) : String(a); } catch { return String(a); } };
-  console.log = (...args) => logs.push(args.map(show).join(" "));
+  // a runaway loop of console.log must not hand the page millions of lines
+  console.log = (...args) => { if (logs.length < 500) logs.push(args.map(show).join(" ")); };
   try { new Function(code); } catch (err) { parent.postMessage({ syntaxError: String(err.message) }, "*"); return; }
+  // the code runs once (it used to run twice, so everything it printed showed twice)
+  let target = null;
   try {
-    new Function(code)();
+    target = new Function(code + "\nreturn typeof " + fn + " === 'function' ? " + fn + " : null;")();
   } catch (err) { parent.postMessage({ logs, runtimeError: String(err && err.message || err) }, "*"); return; }
+  const printed = logs.slice();   // what the code itself printed - not what the tests make it print again
   try {
-    const target = new Function(code + "\nreturn typeof " + fn + " === 'function' ? " + fn + " : null;")();
     const results = target ? tests.map((src) => Boolean(new Function("return (" + src + ")")()(target))) : null;
-    parent.postMessage({ logs, results }, "*");
-  } catch (err) { parent.postMessage({ logs, testError: String(err && err.message || err) }, "*"); }
+    parent.postMessage({ logs: printed, results }, "*");
+  } catch (err) { parent.postMessage({ logs: printed, testError: String(err && err.message || err) }, "*"); }
 });

@@ -273,7 +273,13 @@ function runInSandbox(code, level) {
       frame.remove();
       resolve(result);
     };
-    const onMessage = (e) => { if (e.source === frame.contentWindow) finish(e.data || {}); };
+    // only this run's own sandbox is listened to; its origin is always "null"
+    // (opaque), so the source is the check. What it sends is the visitor's to
+    // forge, so anything that isn't a plain object is treated as no answer.
+    const onMessage = (e) => {
+      if (e.source !== frame.contentWindow) return;
+      finish(e.data && typeof e.data === "object" && !Array.isArray(e.data) ? e.data : {});
+    };
     const timer = setTimeout(() => finish({ timeout: true }), RUN_MS);
     window.addEventListener("message", onMessage);
     frame.onload = () => frame.contentWindow.postMessage({
@@ -361,14 +367,16 @@ const JavaScriptCodingGame = () => {
 
     if (r.timeout) return setErrorMessage("Your code took too long to run - is there an endless loop?");
     if (r.syntaxError) return setErrorMessage("Invalid JavaScript syntax. Please check your code.");
-    if (r.runtimeError) return setErrorMessage(`Runtime Error: ${r.runtimeError}`);
+    if (r.runtimeError) return setErrorMessage(`Runtime Error: ${String(r.runtimeError).slice(0, 500)}`);
 
-    const logs = Array.isArray(r.logs) ? r.logs.map(String) : [];
+    // the sandbox's answer is whatever the visitor's code chose to send, so
+    // every part is checked before use and long output is cut short
+    const logs = Array.isArray(r.logs) ? r.logs.slice(0, 500).map((l) => String(l).slice(0, 2000)) : [];
     const tests = levelData[currentLevel].testCases;
     let summary;
     if (r.testError) {
-      summary = `Error running tests: ${r.testError}`;
-    } else if (!r.results) {
+      summary = `Error running tests: ${String(r.testError).slice(0, 500)}`;
+    } else if (!Array.isArray(r.results)) {
       summary = `Passed 0/${tests.length} tests\n❌ Function not found or defined correctly`;
     } else {
       const lines = tests.map((t, i) => `${r.results[i] ? "✅" : "❌"} Test ${i + 1}: ${t.description}`);
@@ -402,7 +410,7 @@ const JavaScriptCodingGame = () => {
               key={levelNum}
               onClick={() => levelNumber <= unlockedLevels && setCurrentLevel(levelNumber)}
               className={levelButtonClass(levelNumber)}
-              disabled={levelNumber > unlockedLevels}
+              disabled={levelNumber > unlockedLevels || isRunning}   /* a run's result belongs to the level it started on */
             >
               <span className="game-level-label">
                 {levelNumber > unlockedLevels ? `🔒 Level ${levelNum}` : `Level ${levelNum}`}

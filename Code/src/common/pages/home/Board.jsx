@@ -36,7 +36,8 @@ const SKILLS = [
 ];
 
 const SkillTile = ([icon, label, target], links) => {
-  const to = target?.startsWith("@") ? links[target.slice(1)] : target;
+  const found = target?.startsWith("@") ? links[target.slice(1)] : target;
+  const to = typeof found === "string" ? found : "";   // a saved link that isn't text must not take the home page down
   const inner = (
     <>
       <FontAwesomeIcon icon={icon} className="skill-icon" />

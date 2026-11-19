@@ -1,7 +1,7 @@
 // An external link when there is somewhere to go, plain text when the URL is
 // still blank in /admin - never a link to nowhere.
 const Out = ({ href, children, ...rest }) =>
-  href ? (
+  href && typeof href === "string" ? (
     <a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
       {children}
     </a>

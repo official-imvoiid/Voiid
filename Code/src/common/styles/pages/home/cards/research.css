@@ -51,3 +51,7 @@
   color: #E4E4E8;
 }
 .research-card .card-link { z-index: 3; }
+
+@media (prefers-reduced-motion: reduce) {
+  .research-card::before { animation: none; }
+}
