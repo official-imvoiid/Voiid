@@ -85,18 +85,30 @@
 }
 .adm-btn.is-primary:hover { background: #F5C451; border-color: #F5C451; }
 
-/* ---- flash ---- */
+/* ---- flash ----
+   Floats at the bottom of the screen instead of sitting above the panel: in
+   the page flow, its coming and going (3.6 s after a save) moved every button
+   below it, so a click at that moment landed on whatever slid into place. */
 .adm-flash {
-  max-width: 1240px;
-  margin: 0 auto 14px;
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: max-content;
+  max-width: min(560px, calc(100vw - 32px));
+  box-sizing: border-box;
+  margin: 0;
   padding: 9px 13px;
   border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 600;
   border: 1px solid;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .45);
+  pointer-events: none;
 }
-.adm-flash.is-ok  { color: #4ADE80; border-color: rgba(74,222,128,.35); background: rgba(74,222,128,.07); }
-.adm-flash.is-bad { color: #F87171; border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.07); }
+.adm-flash.is-ok  { color: #4ADE80; border-color: rgba(74,222,128,.35); background: linear-gradient(rgba(74,222,128,.07), rgba(74,222,128,.07)), var(--surface); }
+.adm-flash.is-bad { color: #F87171; border-color: rgba(248,113,113,.35); background: linear-gradient(rgba(248,113,113,.07), rgba(248,113,113,.07)), var(--surface); }
 
 /* ---- layout: rail + panel, stacking on narrow screens ---- */
 .adm-body {
@@ -424,3 +436,16 @@ a.adm-btn { text-decoration: none; display: inline-flex; align-items: center; }
 .adm-sec-code { width: 190px; letter-spacing: 0.3em; text-align: center; font-variant-numeric: tabular-nums; }
 .adm-sec-ok { margin: 0; color: #2fbf71; font-weight: 600; }
 .adm-sec-note { margin: 0; color: var(--ink-dim); font-size: 0.8rem; }
+
+/* ---- Backup: the two downloads, side by side ---- */
+.adm-backup-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; width: 100%; max-width: 760px; }
+.adm-backup-option {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  justify-items: start;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.adm-backup-option .adm-hint { margin: 0; }

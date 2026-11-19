@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Field, Row } from "./Fields";
 
 /* Edits one section as a draft; nothing reaches the site until Save.
@@ -15,6 +15,19 @@ const load = (section, value, prev = []) =>
 const strip = (section, draft) =>
   section.kind === "list" ? draft.map(({ _was, _key, ...it }) => it) : draft;
 
+// A path typed the Windows way (\images\cover.jpg) shows fine in a browser, but the
+// server only accepts /images/cover.jpg - and then refuses to save the whole
+// section. Such paths are turned round on the way out.
+const PATH_TYPES = new Set(["image", "pdf", "certificate", "model", "modelThumb", "url"]);
+const tidyPaths = (section, record) => {
+  const out = { ...record };
+  for (const f of section.fields) {
+    const v = out[f.name];
+    if (PATH_TYPES.has(f.type) && typeof v === "string" && v.startsWith("\\")) out[f.name] = v.replace(/\\/g, "/");
+  }
+  return out;
+};
+
 const SectionEditor = ({ section, content, save, onDirty, say }) => {
   const saved = content[section.key];
   const [draft, setDraft] = useState(() => load(section, saved));
@@ -29,9 +42,13 @@ const SectionEditor = ({ section, content, save, onDirty, say }) => {
   // the server copy changed (e.g. just saved) - start again from it
   useEffect(() => { setDraft((d) => load(section, saved, Array.isArray(d) ? d : [])); }, [section, saved]);
 
+  const saving = useRef(false);   // a second press while the first is on its way sends nothing
   const doSave = async () => {
+    if (saving.current) return;
+    saving.current = true;
     setBusy(true);
-    const out = { [section.key]: strip(section, draft) };
+    const clean = strip(section, draft);
+    const out = { [section.key]: section.kind === "list" ? clean.map((it) => tidyPaths(section, it)) : tidyPaths(section, clean) };
 
     // renamed categories: move their songs to the new name
     if (section.key === "musicCategories") {
@@ -42,6 +59,7 @@ const SectionEditor = ({ section, content, save, onDirty, say }) => {
     }
 
     const err = await save(out);
+    saving.current = false;
     setBusy(false);
     say(err ?? `${section.label} saved - live on the site now.`, err ? "bad" : "ok");
   };
@@ -58,7 +76,8 @@ const SectionEditor = ({ section, content, save, onDirty, say }) => {
   const removeItem = (i) => setDraft((d) => d.filter((_, j) => j !== i));
   const addItem = () => {
     const key = newKey();
-    setDraft((d) => [{ ...section.blank, _key: key }, ...d]);
+    const blank = typeof section.blank === "function" ? section.blank() : section.blank;
+    setDraft((d) => [{ ...blank, _key: key }, ...d]);
     setOpenKey(key);
   };
 
@@ -71,7 +90,7 @@ const SectionEditor = ({ section, content, save, onDirty, say }) => {
         </div>
         <div className="adm-panel-tools">
           {section.kind === "list" ? (
-            <button type="button" className="adm-btn" onClick={addItem}>+ Add</button>
+            <button type="button" className="adm-btn" onClick={addItem}>{section.addLabel || "+ Add"}</button>
           ) : null}
           <button
             type="button"
