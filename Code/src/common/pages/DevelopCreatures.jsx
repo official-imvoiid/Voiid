@@ -188,7 +188,7 @@ const Creature = ({ kind, line, x, y, open, onToggle, mapWidth }) => {
       className={`dv-creature is-${kind}${open ? " is-open" : ""}`}
       transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}
       onClick={onToggle}
-      onKeyDown={(e) => { if (e.key === " ") { e.preventDefault(); onToggle(); } }}
+      onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); onToggle(); } }}
       role="button"
       tabIndex={0}
       aria-label={`${kind} says: ${line}`}
