@@ -17,6 +17,9 @@
      /files/notes/<path>       a notes file - viewed in the page or downloaded
      /api/admin/models/upload  upload a 3D model (vrm, glb, fbx, obj...)  (admin)
      /files/models/<file>      a 3D model for the viewer (?download=1 only if the admin allows it)
+     /api/github/repos         the Develop map's GitHub projects, from the server's own copy
+     /api/admin/backup/...     download the whole site or only its content as a zip (admin,
+                               server/backup.js)
 
    Robot check on the contact form (all four must pass):
      1. honeypot   - a hidden "website" field people never see; bots fill it
@@ -27,7 +30,8 @@
 
    Storage, all under data/ (git-ignored):
      messages.enc  visitors' messages, AES-256-GCM encrypted with MESSAGES_KEY
-     content.json  what the admin changed (layered over defaults.js)
+     content.json  what the admin changed (layered over defaults.js), quotes included
+     github-cache.json  the last copy of the GitHub project list (kept across restarts)
      security.enc  the authenticator secret, encrypted with MESSAGES_KEY
      uploads/      images uploaded in the admin
      notes/        the notes library: folders and files, exactly as on disk
@@ -44,11 +48,15 @@ import { createWriteStream } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import net from "node:net";
 import path from "node:path";
+import { promisify } from "node:util";
+import zlib from "node:zlib";
 import express from "express";
 import QRCode from "qrcode";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { body, validationResult } from "express-validator";
+import { cleanQuotes } from "./server/quotes.js";
+import { registerBackup } from "./server/backup.js";
 
 /* ---- config ------------------------------------------------------------- */
 const PORT = process.env.PORT || 5001;
@@ -101,7 +109,7 @@ const isProd = process.env.NODE_ENV === "production";
 // (one per entry in src/common/pages/admin/schema.js)
 const CONTENT_SECTIONS = [
   "links", "develop", "social", "skills", "games", "musicCategories", "songs",
-  "certificationsPage", "certifications", "poems", "models",
+  "certificationsPage", "certifications", "poems", "models", "quotes",
 ];
 
 const app = express();
@@ -111,9 +119,60 @@ app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS || 0));
 app.use(helmet());
 const smallJson = express.json({ limit: "20kb" });
 
+/* How long a request may take to arrive. Node's own rule (5 minutes for any
+   request, server.requestTimeout) cut off every big notes or model upload on
+   an ordinary connection, so it is switched off at the bottom of this file and
+   kept here instead, with one exception:
+     - a logged-in admin's notes / model upload may take as long as it needs,
+       and is only dropped when no bytes at all arrive for 2 minutes;
+     - every other request with a body still has to arrive within 5 minutes,
+       so nobody can hold connections open by sending a body a byte at a time.
+   One sweep every 15 s over the requests still arriving - no timer each. */
+const BODY_MS = 5 * 60 * 1000;
+const UPLOAD_STALL_MS = 2 * 60 * 1000;
+const BIG_UPLOAD = /^\/api\/admin\/(notes|models)\/upload\/?$/;
+const arriving = new Set();   // { req, at, big, read, since }
+app.use((req, _res, next) => {
+  if (req.headers["transfer-encoding"] !== undefined || Number(req.headers["content-length"]) > 0) {
+    const big = req.method === "POST" && BIG_UPLOAD.test(req.path) && hasAdminSession(req);
+    arriving.add({ req, at: Date.now(), big, read: -1, since: Date.now() });
+  }
+  next();
+});
+setInterval(() => {
+  const now = Date.now();
+  for (const entry of arriving) {
+    const { req } = entry;
+    if (req.complete || req.destroyed || !req.socket || req.socket.destroyed) { arriving.delete(entry); continue; }
+    if (entry.big) {
+      const read = req.socket.bytesRead;
+      if (read !== entry.read) { entry.read = read; entry.since = now; }
+      else if (now - entry.since > UPLOAD_STALL_MS) { arriving.delete(entry); req.socket.destroy(); }
+    } else if (now - entry.at > BODY_MS) {
+      arriving.delete(entry);
+      req.socket.destroy();
+    }
+  }
+}, 15 * 1000).unref();
+
 // nothing the admin sees, and no robot question, may land in a browser's disk cache
 app.use(["/api/admin", "/api/challenge"], (_req, res, next) => {
   res.set("Cache-Control", "no-store");
+  next();
+});
+
+// the admin cookie is SameSite=Strict, which already keeps other sites out. This
+// is a second lock: browsers say where a request came from (Sec-Fetch-Site), and
+// anything that changes data must come from this site's own pages - not from
+// another site, and not from a sister subdomain either.
+app.use("/api/admin", (req, res, next) => {
+  const from = req.headers["sec-fetch-site"];
+  // a backup is a GET, but it reads the whole disk and hands over the site: same rule
+  // (routes match any letter case, so /BACKUP/full reaches the backup too)
+  const guarded = !["GET", "HEAD", "OPTIONS"].includes(req.method) || req.path.toLowerCase().startsWith("/backup/");
+  if (guarded && from && from !== "same-origin" && from !== "none") {
+    return res.status(403).json({ error: "Cross-site request refused." });
+  }
   next();
 });
 
@@ -205,6 +264,9 @@ const safeEqual = (a, b) => {
 };
 
 const usedNonces = new Map();   // nonce -> expiry, so a question can't be replayed
+// that list lives in memory, so a question from before this start can't be
+// checked against it: it counts as expired (the page just asks for a new one)
+const STARTED_AT = Date.now();
 
 app.get("/api/challenge", (_req, res) => {
   const a = crypto.randomInt(1, 10);
@@ -220,10 +282,14 @@ function checkHuman({ website, challenge, answer }) {
   if (!challenge || typeof challenge !== "object") return "Robot check missing.";
 
   const { nonce, issuedAt, sig } = challenge;
+  // plain values only: a nonce sent as ["abc"] signs like "abc" but would never
+  // match the used-nonce list, so one question could be replayed
+  if (typeof nonce !== "string" || typeof sig !== "string" || nonce.length > 64 || sig.length > 128
+    || !["number", "string"].includes(typeof issuedAt)) return "Robot check missing.";
   const age = Date.now() - Number(issuedAt);
   if (!nonce || !sig || !Number.isFinite(age)) return "Robot check missing.";
   if (age < MIN_FILL_MS) return "That was a little too fast - please try again.";
-  if (age > MAX_AGE_MS) return "The robot check expired - please answer the new one.";
+  if (age > MAX_AGE_MS || Number(issuedAt) < STARTED_AT) return "The robot check expired - please answer the new one.";
 
   const now = Date.now();
   for (const [n, exp] of usedNonces) if (exp < now) usedNonces.delete(n);
@@ -252,9 +318,20 @@ app.post(
     windowMs: 60 * 60 * 1000,
     limit: 100,
     keyGenerator: () => "all",
+    // only messages that were stored count: refused requests (junk, failed robot
+    // checks) must not use up everyone's allowance and shut the form for an hour
+    skipFailedRequests: true,
     message: { error: "The inbox is busy right now. Please try again later." },
   }),
   smallJson,
+  // text only - a list or an object in place of a field is never a real visitor.
+  // Checked before the rules below, which would turn { } or 5 into text first.
+  (req, res, next) => {
+    if (!["name", "email", "subject", "message"].every((k) => typeof req.body?.[k] === "string")) {
+      return res.status(400).json({ error: "Please fill in every field." });
+    }
+    next();
+  },
   [
     body("name").trim().isLength({ min: 1, max: 100 }).withMessage("Please enter your name."),
     body("email")
@@ -266,6 +343,10 @@ app.post(
     body("message").trim().isLength({ min: 1, max: 5000 }).withMessage("Please enter a message."),
   ],
   async (req, res) => {
+    // text only - a list or an object in place of a field is never a real visitor
+    if (!["name", "email", "subject", "message"].every((k) => typeof req.body?.[k] === "string")) {
+      return res.status(400).json({ error: "Please fill in every field." });
+    }
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
@@ -378,6 +459,13 @@ function pruneSessions(keep) {
   }
 }
 
+// is this request from a logged-in admin? (asks only - never answers the request)
+function hasAdminSession(req) {
+  const token = readCookie(req, COOKIE);
+  const expires = token && sessions.get(token);
+  return Boolean(expires && expires >= Date.now());
+}
+
 function requireAdmin(req, res, next) {
   const token = readCookie(req, COOKIE);
   const expires = token && sessions.get(token);
@@ -390,14 +478,15 @@ function requireAdmin(req, res, next) {
 
 // hashing both sides first makes the comparison constant-time at any length
 const passwordMatches = (given) =>
-  crypto.timingSafeEqual(
+  typeof given === "string" && crypto.timingSafeEqual(
     crypto.createHash("sha256").update(String(given ?? "")).digest(),
     crypto.createHash("sha256").update(ADMIN_PASSWORD).digest()
   );
 
 app.post(
   "/api/admin/login",
-  limiter({ windowMs: 15 * 60 * 1000, limit: 10, message: { error: "Too many tries. Wait 15 minutes." } }),
+  // only failed tries count: logging in (and out) ten times must not lock the owner out
+  limiter({ windowMs: 15 * 60 * 1000, limit: 10, skipSuccessfulRequests: true, message: { error: "Too many tries. Wait 15 minutes." } }),
   smallJson,
   wrap(async (req, res) => {
     if (!passwordMatches(req.body?.password)) return res.status(401).json({ error: "Wrong password." });
@@ -446,8 +535,13 @@ app.post("/api/admin/2fa/setup", requireAdmin, wrap(async (_req, res) => {
   res.json({ secret, qr: await QRCode.toDataURL(uri, { margin: 1, width: 240 }) });
 }));
 
+// a 6-digit code can be guessed, so tries are counted here as at the login:
+// 10 per 15 minutes (someone holding a stolen session must not be able to
+// guess their way to switching the authenticator off)
+const codeLimiter = limiter({ windowMs: 15 * 60 * 1000, limit: 10, message: { error: "Too many tries. Wait 15 minutes." } });
+
 // step 2: prove the app works by typing its code - only then is it switched on
-app.post("/api/admin/2fa/enable", requireAdmin, smallJson, wrap(async (req, res) => {
+app.post("/api/admin/2fa/enable", requireAdmin, codeLimiter, smallJson, wrap(async (req, res) => {
   if (!pendingSecret || pendingSecret.expires < Date.now()) {
     return res.status(400).json({ error: "The setup timed out - start again." });
   }
@@ -459,7 +553,7 @@ app.post("/api/admin/2fa/enable", requireAdmin, smallJson, wrap(async (req, res)
 }));
 
 // turning it off needs a current code too
-app.post("/api/admin/2fa/disable", requireAdmin, smallJson, wrap(async (req, res) => {
+app.post("/api/admin/2fa/disable", requireAdmin, codeLimiter, smallJson, wrap(async (req, res) => {
   const secret = await readTotpSecret();
   if (!secret) return res.json({ enabled: false });
   if (!codeMatches(secret, req.body?.code)) return res.status(400).json({ error: "That code is wrong or expired." });
@@ -496,24 +590,343 @@ app.delete("/api/admin/messages/:id", requireAdmin, wrap(async (req, res) => {
 
 // read once, kept in memory; every page load asks for it
 let contentCache = null;   // { data, etag }
+let contentSaves = 0;      // goes up with every save
 async function readContent() {
   if (contentCache) return contentCache.data;
+  const saves = contentSaves;
   let data = {};
   try {
     data = JSON.parse(await fs.readFile(CONTENT_FILE, "utf8"));
   } catch (err) {
     if (err.code !== "ENOENT") throw err;
   }
+  // a save landed while the file was being read: what was read may be the old
+  // copy, and keeping it would make the next save undo that one - read again
+  if (saves !== contentSaves) return readContent();
   contentCache = { data, etag: `"${crypto.createHash("sha1").update(JSON.stringify(data)).digest("hex")}"` };
   return data;
 }
 
+const packContent = promisify(zlib.gzip);
 app.get("/api/content", wrap(async (req, res) => {
   const data = await readContent();
   res.set("Cache-Control", "no-cache");
   res.set("ETag", contentCache.etag);
+  res.set("Vary", "Accept-Encoding");
   if (req.headers["if-none-match"] === contentCache.etag) return res.status(304).end();
-  res.json({ data });
+  // every visitor gets the same reply until the next save (which drops the
+  // cache): encoded, and compressed, once rather than per request
+  const cache = contentCache?.data === data ? contentCache : { data };
+  cache.body ??= JSON.stringify({ data });
+  res.type("application/json");
+  if (/\bgzip\b/.test(req.get("accept-encoding") || "")) {
+    cache.packed ??= packContent(cache.body);
+    const packed = await cache.packed.catch(() => null);
+    if (packed) {
+      res.set("Content-Encoding", "gzip");
+      return res.send(packed);
+    }
+  }
+  res.send(cache.body);
+}));
+
+/* ---- GitHub repos for the Develop map ---------------------------------------
+   Browsers never talk to GitHub themselves: an anonymous visitor only gets 60
+   GitHub requests an hour. The server asks instead, and keeps the answer (in
+   memory and in data/github-cache.json) for the check interval set in
+   /admin -> Develop map (10 minutes or more, default 10) - so GitHub is asked
+   at most once per interval however many visitors open the map. Re-checks send the
+   saved ETag, a failed check falls back to the last good answer, and
+   GITHUB_TOKEN in .env (optional) raises GitHub's limit from 60 to 5000/hour. */
+const GITHUB_FILE = path.join(DATA_DIR, "github-cache.json");
+const GITHUB_API = (process.env.GITHUB_API_URL || "https://api.github.com").replace(/\/+$/, "");
+const GITHUB_EVERY_MIN = 10;               // default check interval, minutes (admin -> Develop map -> checkEvery)
+const GITHUB_EVERY_MIN_LOWEST = 10;        // never more often than this, whatever is saved
+const GITHUB_EVERY_MIN_HIGHEST = 7 * 24 * 60;   // a week
+const GITHUB_RETRY_MS = 60 * 1000;         // after a failed check, leave GitHub alone this long
+const GITHUB_RETRY_MAX_MS = 30 * 60 * 1000;   // ...doubling with each failure in a row, up to this
+const GITHUB_PAGES = 5;                   // 100 repos a page: up to 500
+const GITHUB_DEFAULT_USER = "official-imvoiid";   // also in src/common/content/defaults.js
+
+// "https://github.com/name" (or just "name") -> "name"; same as src/common/content/github.js
+function githubUserOf(link) {
+  const s = String(link || "").trim();
+  const m = s.match(/github\.com\/([A-Za-z0-9-]+)/i);
+  if (m) return m[1];
+  return /^[A-Za-z0-9-]+$/.test(s) ? s : "";
+}
+
+const newGithubState = (user) => ({ user, pages: [], checkedAt: 0, retryAt: 0, failures: 0, lastError: null, refreshing: null });
+let githubState = null;      // the one user being charted
+let githubTokenOk = true;    // false once GitHub refuses GITHUB_TOKEN: the server carries on without it
+
+function githubError(message, status, retryAt = 0) {
+  return Object.assign(new Error(message), { status, retryAt });
+}
+
+/* Everything shown on the map passes through here - from GitHub, and again
+   when data/github-cache.json is read back - so a repo's website field (set by
+   whoever owns the repo) or a damaged cache file can never put a javascript:
+   link or a huge text on the page. Links must be plain http(s) addresses. */
+const webLink = (v) => {
+  const s = typeof v === "string" ? v.trim() : "";
+  if (!s || s.length > 500 || !/^https?:\/\/[^\s<>"']+$/i.test(s)) return "";
+  try { return ["http:", "https:"].includes(new URL(s).protocol) ? s : ""; } catch { return ""; }
+};
+const text = (v, max) => (typeof v === "string" ? v.slice(0, max) : "");
+const isoDate = (v) => (typeof v === "string" && !Number.isNaN(Date.parse(v)) ? v.slice(0, 40) : "");
+const count = (v) => (Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0);
+function cleanRepo(r) {
+  if (!r || typeof r !== "object") return null;
+  const name = text(r.name, 100);
+  const url = webLink(r.url ?? r.html_url);
+  if (!name || !url) return null;
+  return {
+    id: count(r.id),
+    name,
+    description: text(r.description, 500),
+    url,
+    homepage: webLink(r.homepage),
+    language: text(r.language, 40),
+    stars: count(r.stars ?? r.stargazers_count),
+    forks: count(r.forks ?? r.forks_count),
+    topics: Array.isArray(r.topics) ? r.topics.filter((t) => typeof t === "string").slice(0, 20).map((t) => t.slice(0, 50)) : [],
+    fork: r.fork === true,
+    archived: r.archived === true,
+    createdAt: isoDate(r.createdAt ?? r.created_at),
+    pushedAt: isoDate(r.pushedAt ?? r.pushed_at),
+  };
+}
+// an ETag is sent back to GitHub as a header: only the characters an ETag can have
+const cleanEtag = (v) => (typeof v === "string" && /^(W\/)?"[\x21\x23-\x7e]{1,200}"$/.test(v) ? v : "");
+const cleanPage = (p) => (p && Array.isArray(p.repos)
+  ? { etag: cleanEtag(p.etag), repos: p.repos.slice(0, 100).map(cleanRepo).filter(Boolean), raw: p.raw ?? p.repos.length }
+  : null);
+
+// every page of the user's repos; a page GitHub says is unchanged (304) is reused
+async function fetchGithubPages(user, old) {
+  const pages = [];
+  for (let page = 1; page <= GITHUB_PAGES; page++) {
+    const before = old[page - 1];
+    const useToken = Boolean(process.env.GITHUB_TOKEN) && githubTokenOk;
+    const headers = { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "develop-map" };
+    if (useToken) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+    if (before?.etag) headers["If-None-Match"] = before.etag;
+    const res = await fetch(
+      `${GITHUB_API}/users/${encodeURIComponent(user)}/repos?per_page=100&page=${page}&sort=pushed`,
+      { headers, signal: AbortSignal.timeout(10 * 1000) }
+    );
+    // an answer whose body isn't read (304, errors, limits) must still be let go
+    // of, or its connection stays tied up until garbage collection
+    if (res.status !== 200) await res.body?.cancel().catch(() => {});
+    if (res.status === 401 && useToken) {
+      // a wrong or expired token must not take the map down: ask again without it
+      githubTokenOk = false;
+      console.error("github: GITHUB_TOKEN was refused - carrying on without it. Fix or remove it in .env.");
+      page--;
+      continue;
+    }
+    let entry;
+    if (res.status === 304 && before) {
+      entry = before;
+    } else if (res.status === 404) {
+      throw githubError(`GitHub has no user called "${user}".`, 404);
+    } else if (res.status === 403 || res.status === 429) {
+      // GitHub says when it will answer again - don't ask before then (an hour at most)
+      const reset = Number(res.headers.get("x-ratelimit-reset")) * 1000;
+      const after = Date.now() + Number(res.headers.get("retry-after")) * 1000;
+      const until = Math.min(Math.max(reset || 0, after || 0), Date.now() + 60 * 60 * 1000);
+      throw githubError("GitHub's hourly limit was reached - try again in a little while.", 503, until);
+    } else if (!res.ok) {
+      throw githubError("Could not reach GitHub.", 502);
+    } else if (res.status !== 200) {
+      throw githubError("Could not reach GitHub.", 502);   // 2xx without a list (204, 206...) is not an answer we can use
+    } else {
+      const batch = await res.json();
+      if (!Array.isArray(batch)) throw githubError("Could not reach GitHub.", 502);
+      // raw: how many GitHub sent (a full page of 100 means there may be another page)
+      entry = { etag: cleanEtag(res.headers.get("etag")), repos: batch.slice(0, 100).map(cleanRepo).filter(Boolean), raw: batch.length };
+    }
+    pages.push(entry);
+    if ((entry.raw ?? entry.repos.length) < 100) break;
+  }
+  return pages;
+}
+
+// Resolves to the state holding the repos, or throws when there is nothing to
+// show. Nobody ever waits for GitHub once a copy exists: the saved copy goes
+// out at once and a due check runs alongside, replacing the copy when it lands.
+// Only the schedule decides when GitHub is asked - no visitor (and no Refresh
+// button) can make the server ask it sooner.
+async function getGithubRepos(user, ttl) {
+  if (!githubState) {
+    // first use since the server started: pick up what the last run saved
+    let saved = null;
+    try { saved = JSON.parse(await fs.readFile(GITHUB_FILE, "utf8")); } catch { /* none yet, or unreadable */ }
+    if (!githubState) {
+      githubState = newGithubState(saved?.user || user);
+      if (saved && Array.isArray(saved.pages) && Number.isFinite(saved.checkedAt)) {
+        githubState.pages = saved.pages.slice(0, GITHUB_PAGES).map(cleanPage).filter(Boolean);
+        // a saved time in the future (clock moved back, or an edited file) would freeze the copy: treat it as due now
+        githubState.checkedAt = saved.checkedAt > 0 && saved.checkedAt <= Date.now() ? saved.checkedAt : (githubState.pages.length ? 1 : 0);
+      }
+    }
+  }
+  if (githubState.user !== user) githubState = newGithubState(user);   // the admin changed the GitHub link
+  const st = githubState;
+  const have = st.checkedAt > 0;
+  const now = Date.now();
+  const due = !have || now - st.checkedAt >= ttl;
+  if (!due) return st;                                                 // fresh: GitHub isn't asked
+  if (now < st.retryAt) {                                              // GitHub just failed: don't ask again yet
+    if (have) return st;
+    throw st.lastError;
+  }
+  if (!st.refreshing) {                                                // one check at a time, shared by everyone waiting
+    st.refreshing = fetchGithubPages(user, st.pages)
+      .then((pages) => {
+        st.pages = pages;
+        st.checkedAt = Date.now();
+        st.lastError = null;
+        st.failures = 0;
+        const text = JSON.stringify({ user, checkedAt: st.checkedAt, pages });
+        serial(GITHUB_FILE, () => writeAtomic(GITHUB_FILE, text)).catch((err) => console.error("github cache:", err.message));
+      })
+      .catch((err) => {
+        st.lastError = err.status ? err : githubError("Could not reach GitHub.", 502);
+        // each failure in a row doubles the wait (1, 2, 4... up to 30 minutes): a wrong
+        // user name or a GitHub outage must not use up the hourly allowance on retries
+        st.failures = (st.failures || 0) + 1;
+        const wait = Math.min(GITHUB_RETRY_MS * 2 ** Math.min(st.failures - 1, 10), GITHUB_RETRY_MAX_MS);
+        st.retryAt = Math.max(err.retryAt || 0, Date.now() + wait);
+        console.error("github:", err.message);
+      })
+      .finally(() => { st.refreshing = null; });
+  }
+  if (have) return st;   // nobody waits on GitHub: the saved answer goes out now, the newer one to whoever asks next
+  await st.refreshing;
+  if (st.checkedAt > 0) return st;
+  throw st.lastError;
+}
+
+const githubLimiter = limiter({ windowMs: 60 * 1000, limit: 60, message: { error: "Too many requests - slow down a little." } });
+
+// minutes as saved in /admin -> Develop map, kept within the allowed range
+function githubEveryMin(saved) {
+  const n = Number(saved);
+  if (saved === "" || saved === undefined || saved === null || !Number.isFinite(n)) return GITHUB_EVERY_MIN;
+  return Math.min(GITHUB_EVERY_MIN_HIGHEST, Math.max(GITHUB_EVERY_MIN_LOWEST, Math.round(n)));
+}
+
+// whose repos (the GitHub link saved in /admin -> Links) and how often to check
+async function githubSettings() {
+  const content = await readContent();
+  const link = content.links?.github;
+  const everyMin = githubEveryMin(content.develop?.checkEvery);
+  return { user: link === undefined ? GITHUB_DEFAULT_USER : githubUserOf(link), everyMin, ttl: everyMin * 60 * 1000 };
+}
+
+// The server keeps the copy up to date on its own, on the schedule set in
+// /admin -> Develop map: ready when it starts (from data/github-cache.json, or
+// GitHub if that is missing or old), then a new check as soon as the copy is
+// an interval old, replacing it - visitors or not, so whoever comes next gets
+// a recent copy instantly. The timer wakes exactly when the copy becomes due
+// (so "Server: … ago" never runs past the interval), and at least once a
+// minute so a changed interval in the admin takes effect; a wake with nothing
+// due only reads two numbers from memory - no GitHub request, no disk.
+// Only ever one timer: a wake while another is still running (say, the admin
+// saved while a GitHub check was under way) just asks that one to go round
+// again when it finishes, instead of starting a second chain of timers.
+let githubTimer = null;
+let githubWarming = false;
+let githubWarmAgain = false;
+const warmGithub = async () => {
+  if (githubWarming) { githubWarmAgain = true; return; }
+  githubWarming = true;
+  clearTimeout(githubTimer);
+  let wait = 60 * 1000;
+  try {
+    const { user, ttl } = await githubSettings();
+    if (user) {
+      const st = await getGithubRepos(user, ttl);
+      if (st.refreshing) await st.refreshing;                   // a due check: plan the next one from its result
+      const dueIn = Math.max(st.checkedAt + ttl, st.retryAt) - Date.now();
+      wait = Math.min(60 * 1000, Math.max(1000, dueIn));
+    }
+  } catch { /* nothing to show yet - try again in a minute */ }
+  githubWarming = false;
+  if (githubWarmAgain) { githubWarmAgain = false; wait = 0; }
+  githubTimer = setTimeout(warmGithub, wait);
+  githubTimer.unref();
+};
+warmGithub();
+
+// One copy, prepared once for every visitor: the list (duplicates dropped - a
+// repo pushed to while GitHub was being paged through can turn up on two
+// pages), its JSON, and a short version tag that changes only when the list
+// does. A browser that already holds that version is told "same" and gets no
+// list at all (about 200 bytes instead of ~28 KB).
+function githubCopyOf(st) {
+  if (st.copyFor !== st.pages) {
+    const seen = new Set();
+    const list = [];
+    for (const r of st.pages.flatMap((p) => p.repos)) {
+      const key = r.id || r.url;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      list.push(r);
+    }
+    const json = JSON.stringify(list);
+    st.copy = { json, count: list.length, version: crypto.createHash("sha1").update(`${st.user}\n${json}`).digest("hex").slice(0, 16) };
+    st.copyFor = st.pages;
+  }
+  return st.copy;
+}
+const gzip = promisify(zlib.gzip);
+
+// GET /api/github/repos[?have=<version>] - the public repos of the GitHub link
+// saved in /admin -> Links. Always answered from the server's copy; the server
+// alone decides when to ask GitHub. `have`: the version this browser already
+// holds - if it is still the current one, the list itself is left out.
+app.get("/api/github/repos", githubLimiter, wrap(async (req, res) => {
+  const { user, ttl, everyMin } = await githubSettings();
+  res.set("Cache-Control", "no-store");
+  res.set("Vary", "Accept-Encoding");
+  if (!user) return res.status(404).json({ error: "No GitHub link is set." });
+  let st;
+  try {
+    st = await getGithubRepos(user, ttl);
+  } catch (err) {
+    return res.status(err.status || 502).json({ error: err.message });
+  }
+  const copy = githubCopyOf(st);
+  const age = Math.max(0, Date.now() - st.checkedAt);   // the browser's clock may be wrong: it gets an age, not a time
+  const stale = age >= ttl + 2 * 60 * 1000;
+  const meta = {
+    user,
+    version: copy.version,            // changes only when the list does
+    fetchedAt: st.checkedAt,          // when the server last checked GitHub
+    age,                              // ...as an age in ms
+    checkEvery: everyMin,             // the server checks GitHub this often (minutes)
+    checking: Boolean(st.refreshing), // a check is under way: ask again in a few seconds for the new copy
+    stale,
+    notice: stale && st.lastError ? st.lastError.message : "",
+  };
+  const have = typeof req.query.have === "string" && /^[0-9a-f]{16}$/.test(req.query.have) ? req.query.have : "";
+  if (have === copy.version) return res.json({ ...meta, same: true });
+
+  // the full list: put together from the prepared JSON (not re-encoded per
+  // visitor) and compressed for browsers that accept it (~28 KB -> ~9 KB)
+  const body = `${JSON.stringify(meta).slice(0, -1)},"repos":${copy.json}}`;
+  res.type("application/json");
+  if (body.length > 1024 && /\bgzip\b/.test(req.get("accept-encoding") || "")) {
+    try {
+      const packed = await gzip(body);
+      res.set("Content-Encoding", "gzip");
+      return res.send(packed);
+    } catch { /* fall through to the plain answer */ }
+  }
+  res.send(body);
 }));
 
 /* What the admin may store. Values are shown on public pages, so links must
@@ -573,14 +986,28 @@ app.put("/api/admin/content", requireAdmin, express.json({ limit: "1mb" }), asyn
   if (unknown.length) return res.status(400).json({ error: `Unknown section(s): ${unknown.join(", ")}` });
   const bad = checkContent(data);
   if (bad) return res.status(400).json({ error: bad });
+  // Develop map: how often the server checks GitHub - 10 minutes or more (empty = the default 10)
+  const every = data.develop?.checkEvery;
+  if (every !== undefined && every !== "" && !(Number.isInteger(every) && every >= GITHUB_EVERY_MIN_LOWEST && every <= GITHUB_EVERY_MIN_HIGHEST)) {
+    return res.status(400).json({ error: `develop: "Check GitHub every" must be a whole number of minutes from ${GITHUB_EVERY_MIN_LOWEST} to ${GITHUB_EVERY_MIN_HIGHEST}.` });
+  }
+  // quotes have their own, tighter rules (server/quotes.js): only text / author / date, with length limits
+  if ("quotes" in data) {
+    const quotes = cleanQuotes(data.quotes);
+    if (quotes.error) return res.status(400).json({ error: quotes.error });
+    data.quotes = quotes.value;
+  }
 
   try {
     const next = await serial(CONTENT_FILE, async () => {
       const merged = { ...(await readContent()), ...data };
       await writeAtomic(CONTENT_FILE, JSON.stringify(merged, null, 2));
       contentCache = null;
+      contentSaves++;
       return merged;
     });
+    // a new GitHub link or check interval takes effect now, not on the next minute's tick
+    if ("links" in data || "develop" in data) warmGithub();
     res.json({ data: next });
   } catch (err) {
     console.error("Could not save content:", err);
@@ -656,6 +1083,9 @@ app.use("/uploads", (req, res, next) => {
   next();
 }, express.static(UPLOAD_DIR, {
   fallthrough: false,
+  // every upload gets a new random name and is never rewritten, so a browser may keep it
+  maxAge: "30d",
+  immutable: true,
   setHeaders: (res) => res.set("X-Content-Type-Options", "nosniff"),
 }));
 
@@ -680,7 +1110,10 @@ const extOf = (name) => (name.includes(".") ? name.split(".").pop().toLowerCase(
 // characters no file system name may contain (the last range is the control characters)
 const BAD_CHARS = /[<>:"|?*\u0000-\u001f]/;   // eslint-disable-line no-control-regex
 // a name Windows can't store: its reserved device names, or a trailing dot / space
-const badOnWindows = (p) => /^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$/i.test(p) || /[. ]$/.test(p);
+// ...or a Windows short name ("UPLOAD~1.PAR"): Windows opens the long-named file
+// it stands for, so it would get round the rule that dotfiles (half-finished
+// uploads) are never served. Such names are refused everywhere instead.
+const badOnWindows = (p) => /^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$/i.test(p) || /[. ]$/.test(p) || /~\d/.test(p);
 
 // a relative path inside the library -> an absolute one, or null if it tries
 // to climb out (.., absolute paths, hidden files)
@@ -736,7 +1169,21 @@ async function listFolder(abs) {
    copied into data/notes by hand, and they show up on the next rebuild. */
 const INDEX_MS = 30 * 1000;
 let notesIndex = { at: 0, list: [], building: null };
-const forgetNotesIndex = () => { notesIndex.at = 0; };
+// a folder's listing is kept for a few seconds too, and visitors asking for the
+// same folder at the same moment share one read - a folder of thousands of files
+// otherwise costs a disk look-up per file for every single visitor
+const LIST_MS = 5 * 1000;
+const listings = new Map();   // folder -> { at, json: Promise<string> }
+const forgetNotesIndex = () => { notesIndex.at = 0; listings.clear(); };
+function cachedListing(abs) {
+  const hit = listings.get(abs);
+  if (hit && Date.now() - hit.at < LIST_MS) return hit.json;
+  if (listings.size > 500) listings.clear();
+  const json = listFolder(abs).then((list) => JSON.stringify({ path: relOf(abs), ...list }));
+  json.catch(() => listings.delete(abs));
+  listings.set(abs, { at: Date.now(), json });
+  return json;
+}
 async function buildNotesIndex() {
   const list = [];
   const walk = async (dir) => {
@@ -776,7 +1223,7 @@ app.get("/api/notes", notesLimiter, async (req, res) => {
     const st = await fs.stat(abs);
     if (!st.isDirectory()) return res.status(404).json({ error: "Not a folder." });
     res.set("Cache-Control", "no-cache");
-    res.json({ path: relOf(abs), ...(await listFolder(abs)) });
+    res.type("application/json").send(await cachedListing(abs));
   } catch (err) {
     if (err.code === "ENOENT") return res.status(404).json({ error: "That folder doesn't exist." });
     console.error("Notes list failed:", err);
@@ -801,7 +1248,8 @@ app.get("/api/notes/search", notesLimiter, async (req, res) => {
 // page can't show is always a download, and nothing is ever run as a page.
 app.use("/files/notes", (req, res, next) => {
   const file = decodePath(req.path);
-  if (file === null) return res.status(400).json({ error: "Bad path." });
+  // ":" would name an NTFS stream (ok.txt::$DATA) - never a file in the library
+  if (file === null || file.split("/").some((p) => BAD_CHARS.test(p) || badOnWindows(p))) return res.status(400).json({ error: "Bad path." });
   const ext = extOf(file);
   if (req.query.download === "1" || !VIEWABLE[ext]) {
     // saved, never shown: a strict sandbox so it can't run as a page
@@ -951,7 +1399,7 @@ app.post("/api/admin/models/upload", requireAdmin, async (req, res) => {
 
 app.use("/files/models", async (req, res, next) => {
   const decoded = decodePath(req.path);
-  if (decoded === null) return res.status(400).json({ error: "Bad path." });
+  if (decoded === null || decoded.split("/").some((p) => BAD_CHARS.test(p) || badOnWindows(p))) return res.status(400).json({ error: "Bad path." });
   const file = path.basename(decoded);
   res.set("Content-Security-Policy", "sandbox; default-src 'none'");
   if (req.query.download !== "1") return next();
@@ -973,6 +1421,9 @@ app.use("/files/models", async (req, res, next) => {
   setHeaders: (res) => res.set("X-Content-Type-Options", "nosniff"),
 }));
 
+// admin -> Backup: the whole site, or just its content, as one streamed zip (server/backup.js)
+registerBackup(app, { requireAdmin });
+
 // an /api address that doesn't exist answers in JSON like everything else
 app.use("/api", (_req, res) => res.status(404).json({ error: "Not found." }));
 
@@ -988,4 +1439,7 @@ app.use((err, _req, res, _next) => {
 
 // the folders exist before the first request, so the routes never have to make them
 await Promise.all([UPLOAD_DIR, NOTES_DIR, MODELS_DIR].map((d) => fs.mkdir(d, { recursive: true })));
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Node's 5-minute limit on a whole request is replaced by the sweep near the top
+// (BODY_MS / UPLOAD_STALL_MS); its 60 s limit on the headers still applies
+server.requestTimeout = 0;
