@@ -6,17 +6,31 @@ Built with React and Vite, with a self-hosted Express backend.
 ## Features
 
 - Portfolio pages: skills, development projects, art, literature, 3D models, certifications, music, games and learning roadmaps
-- Notes library with folders, search and in-page PDF viewing
+- Literature: poems plus a Quotes page with a quote of the day
+- Develop map of GitHub projects, fetched by the server on a schedule and cached, so visitors never run into GitHub's rate limit
+- Notes library with folders, search and in-page PDF, image and video viewing
 - 3D model viewer (VRM, GLB, FBX, OBJ)
 - JavaScript coding game running in a sandboxed frame
 - Contact form with server-side bot protection (no third-party services)
-- Admin portal with two-factor authentication, encrypted inbox and content editor
+- Admin portal with two-factor authentication, encrypted inbox, content editor and one-click backups (whole site or content only)
 - Separate layouts for desktop, mobile portrait and mobile landscape
+
+## Screenshots
+
+Every page on desktop:
+
+![Every page on desktop](Gui/00-overview-desktop.png)
+
+Every page on a phone:
+
+![Every page on a phone](Gui/00-overview-phone.png)
+
+Full-size pictures of each page are in [`Gui/`](Gui/).
 
 ## Tech Stack
 
 - **Frontend:** React 19, React Router 7, Vite 6, Three.js
-- **Backend:** Node.js, Express 4, Helmet, express-rate-limit
+- **Backend:** Node.js, Express 4, Helmet, express-rate-limit, archiver (backups)
 - **Storage:** Local files, messages and secrets encrypted with AES-256-GCM
 
 ## Setup
@@ -52,11 +66,13 @@ The site runs at `http://localhost:5000`.
 ## Deployment
 
 1. Run `npm run build`.
-2. Run `server.js` with `NODE_ENV=production`.
-3. Serve `dist/` through a reverse proxy over HTTPS, forwarding `/api`, `/uploads` and `/files` to the backend.
-4. Set `TRUST_PROXY_HOPS` to the number of proxies in front of the server.
+2. Copy `dist/`, `server.js`, the `server/` folder, `package.json` and `package-lock.json` to the server, then install with `npm ci --omit=dev`.
+3. Run `server.js` with `NODE_ENV=production`.
+4. Serve `dist/` through a reverse proxy over HTTPS, forwarding `/api`, `/uploads` and `/files` to the backend. Have the proxy add `Strict-Transport-Security`, `X-Content-Type-Options: nosniff` and a `frame-ancestors` policy to the pages, since the backend does not serve them.
+5. Set `TRUST_PROXY_HOPS` to the number of proxies in front of the server (usually 1). Wrong values either lock everyone out of the admin after a few failed logins or let visitors fake their address.
+6. Optional: add a `GITHUB_TOKEN` to raise GitHub's limit. How often the server checks GitHub is set in the admin under Develop map.
 
-Never commit `.env` or the `data/` directory.
+Never commit `.env` or the `data/` directory. `data/` (notes, uploads, 3D models, saved content and the inbox) lives only on the server: copy it there yourself, and keep it safe with the admin's Backup button.
 
 ## Security
 
