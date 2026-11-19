@@ -171,6 +171,8 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Ctrl+D (bookmark), Ctrl+F (find), Cmd+Z... belong to the browser
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       switch (e.key) {
         case 'ArrowLeft':
           handlePrevious();
@@ -238,6 +240,9 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
     <div
       ref={containerRef}
       className="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Image viewer"
     >
       <div className="lightbox-bar">
         <div className="lightbox-count">
@@ -247,25 +252,27 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
           <button
             className="lightbox-icon-button"
             onClick={() => setShowTimeline((prev) => !prev)}
+            aria-label={showTimeline ? "Hide thumbnails" : "Show thumbnails"}
           >
             {showTimeline ? <EyeOff size={22} /> : <Eye size={22} />}
           </button>
-          <button className="lightbox-icon-button" onClick={toggleZoom}>
+          <button className="lightbox-icon-button" onClick={toggleZoom} aria-label={isZoomed ? "Zoom out" : "Zoom in"}>
             {isZoomed ? <ZoomOut size={22} /> : <ZoomIn size={22} />}
           </button>
           <button
             className="lightbox-icon-button"
             onClick={toggleSlideshow}
+            aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
           >
             {isPlaying ? <Pause size={22} /> : <Play size={22} />}
           </button>
-          <button className="lightbox-icon-button" onClick={toggleFullscreen}>
+          <button className="lightbox-icon-button" onClick={toggleFullscreen} aria-label="Full screen">
             <Expand size={22} />
           </button>
-          <button className="lightbox-icon-button" onClick={handleDownload}>
+          <button className="lightbox-icon-button" onClick={handleDownload} aria-label="Download this image">
             <Download size={22} />
           </button>
-          <button className="lightbox-icon-button" onClick={onClose}>
+          <button className="lightbox-icon-button" onClick={onClose} aria-label="Close">
             <X size={24} />
           </button>
         </div>
@@ -275,6 +282,7 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
         <button
           className="lightbox-nav-button is-prev"
           onClick={handlePrevious}
+          aria-label="Previous image"
         >
           <ChevronLeft size={32} />
         </button>
@@ -303,6 +311,7 @@ const ImageLightbox = ({ images, initialImageIndex, onClose }) => {
         <button
           className="lightbox-nav-button is-next"
           onClick={handleNext}
+          aria-label="Next image"
         >
           <ChevronRight size={32} />
         </button>
@@ -369,7 +378,7 @@ const Art = () => {
             role="button"
             tabIndex={0}
             onKeyDown={(e) =>
-              e.key === 'Enter' && openLightbox(index)
+              (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openLightbox(index))
             }
           >
             <div className="gallery-image-container">

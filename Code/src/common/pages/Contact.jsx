@@ -121,6 +121,7 @@ const Contact = () => {
             name="name"
             placeholder="Your Name"
             className="contact-input"
+            maxLength={100}   /* the server's own limits: name 100, subject 200, message 5000 */
             required
             disabled={timeoutActive}
           />
@@ -141,6 +142,7 @@ const Contact = () => {
             name="subject"
             placeholder="Your Subject"
             className="contact-input"
+            maxLength={200}
             required
             disabled={timeoutActive}
           />
@@ -148,6 +150,7 @@ const Contact = () => {
             name="message"
             placeholder="Your Message"
             className="contact-message"
+            maxLength={5000}
             required
             disabled={timeoutActive}
           ></textarea>

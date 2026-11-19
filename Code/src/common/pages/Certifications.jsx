@@ -1,9 +1,15 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, ExternalLink, Eye, FileImage, FileText, X } from "lucide-react";
 import PageShell from "../components/PageShell";
 import { useContent } from "../content/ContentContext";
 import useModal from "../hooks/useModal";
 import ZoomImage from "./notes/ZoomImage";
+
+// phones and tablets: a PDF in an <iframe> can't be scrolled by touch (iPhone
+// shows page 1 only, Android nothing), so it is drawn page by page - the same
+// way the Notes viewer does it
+const PdfPages = lazy(() => import("./notes/PdfPages"));
+const isTouch = () => window.matchMedia("(pointer: coarse)").matches;
 
 /**
  * Certifications - one row per certificate; View opens the certificate
@@ -60,7 +66,9 @@ const Viewer = ({ items, index, onIndex, onClose }) => {
 
           <div className="cert-view">
             <div className={`nb-viewer-stage is-${kind}`}>
-              {kind === "pdf"
+              {kind === "pdf" && isTouch() ? (
+                <Suspense fallback={null}><PdfPages key={cert.file} src={cert.file} /></Suspense>
+              ) : kind === "pdf"
                 ? <iframe key={cert.file} src={cert.file} title={cert.name} />
                 : <ZoomImage key={cert.file} src={cert.file} alt={cert.name} />}
               {items.length > 1 ? (
@@ -85,7 +93,7 @@ const Viewer = ({ items, index, onIndex, onClose }) => {
               {cert.blurb ? <p className="cert-details-blurb">{cert.blurb}</p> : null}
               {tags.length ? (
                 <div className="pg-tags">
-                  {tags.map((t) => <span key={t} className="pg-tag">{t}</span>)}
+                  {tags.map((t, i) => <span key={`${t}-${i}`} className="pg-tag">{t}</span>)}
                 </div>
               ) : null}
               {cert.verify ? (

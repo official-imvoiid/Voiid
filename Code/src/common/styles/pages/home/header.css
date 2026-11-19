@@ -96,3 +96,8 @@
   box-shadow: 0 6px 20px rgba(255, 115, 0, 0.3);
 }
 .get-in-touch:hover::before { opacity: 0.85; }
+
+/* the halo stays, still, for visitors who asked for less motion */
+@media (prefers-reduced-motion: reduce) {
+  .get-in-touch::before { animation: none; }
+}

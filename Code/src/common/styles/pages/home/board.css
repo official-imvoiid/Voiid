@@ -122,3 +122,7 @@
   z-index: 3;
   bottom: calc(var(--icon-inset) * 1.2);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-link:hover span { animation: none; }
+}

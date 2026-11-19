@@ -257,3 +257,7 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .game-done-box { animation: none; }
+}

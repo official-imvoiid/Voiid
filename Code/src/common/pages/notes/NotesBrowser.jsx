@@ -92,12 +92,17 @@ const NotesBrowser = ({ path, onPath, admin = false }) => {
 
   const load = useCallback(async () => {
     const id = ++loadId.current;
-    setData((d) => ({ ...d, status: d.folders.length || d.files.length ? "ready" : "loading" }));
+    // re-reading the folder already on screen keeps its list (no flicker after an
+    // upload); a different folder starts empty - its rows must never be the last
+    // folder's, which would open or delete the wrong paths while it loads
+    setData((d) => (d.at === path && (d.folders.length || d.files.length)
+      ? { ...d, status: "ready" }
+      : { status: "loading", folders: [], files: [], error: "", at: path }));
     try {
       const body = await fetchFolder(path);
-      if (id === loadId.current) setData({ status: "ready", folders: body.folders, files: body.files, error: "" });
+      if (id === loadId.current) setData({ status: "ready", folders: body.folders || [], files: body.files || [], error: "", at: path });
     } catch (err) {
-      if (id === loadId.current) setData({ status: "error", folders: [], files: [], error: err.message });
+      if (id === loadId.current) setData({ status: "error", folders: [], files: [], error: err.message, at: path });
     }
   }, [path]);
 

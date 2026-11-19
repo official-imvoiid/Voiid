@@ -42,7 +42,7 @@ const SkillSet = () => {
     >
       <div className="pg-tools">
         <h2 className="skills-heading">Core skills</h2>
-        <span className="pg-count">{skills.length} skills</span>
+        <span className="pg-count">{skills.length} skill{skills.length === 1 ? "" : "s"}</span>
       </div>
 
       <ul className="skills-grid-list">

@@ -25,7 +25,7 @@ const Footer = ({ social }) => (
     <div className="quote">"Be the beginning of the change"</div>
 
     <div className="social-links">
-      {social.filter((s) => PLATFORMS[s.platform]).map((s, i) => {
+      {social.filter((s) => s && Object.hasOwn(PLATFORMS, s.platform)).map((s, i) => {
         const p = PLATFORMS[s.platform];
         if (p.page) {
           return (

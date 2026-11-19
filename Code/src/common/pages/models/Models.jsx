@@ -28,7 +28,15 @@ const Viewer = ({ model, onClose }) => {
 
   useEffect(() => {
     let alive = true;
-    const stage = createStage(canvasRef.current);
+    let stage;
+    try {
+      stage = createStage(canvasRef.current);
+    } catch {
+      // no WebGL (switched off, an old device, the graphics driver gave up):
+      // say so here instead of taking the whole page down
+      setState({ status: "error", progress: 0, error: "This browser can't show 3D here (WebGL is off or not available)." });
+      return undefined;
+    }
     stageRef.current = stage;
     loadModel(model.file, model.format || formatOf(model.file), (p) => alive && setState((s) => ({ ...s, progress: p })))
       .then((result) => {
@@ -43,8 +51,9 @@ const Viewer = ({ model, onClose }) => {
   // Blender's number-row views, plus F to frame (Esc to leave comes with useModal)
   const onKey = useCallback((e) => {
     const s = stageRef.current;
-    if (!s) return;
+    if (!s || e.metaKey || e.altKey) return;
     const k = e.key.toLowerCase();
+    if (e.ctrlKey && (k === "f" || k === "home")) return;   // Ctrl+F stays the browser's Find
     if (k === "1") s.view(e.ctrlKey ? "back" : "front");
     else if (k === "3") s.view(e.ctrlKey ? "left" : "right");
     else if (k === "7") s.view(e.ctrlKey ? "bottom" : "top");
@@ -52,7 +61,8 @@ const Viewer = ({ model, onClose }) => {
     else return;
     e.preventDefault();
   }, []);
-  useModal({ onClose, onKey });
+  const closeRef = useRef(null);
+  useModal({ onClose, onKey, focusRef: closeRef });
 
   const toggle = (setter, value, apply) => { setter(value); apply(value); };
 
@@ -85,7 +95,7 @@ const Viewer = ({ model, onClose }) => {
               <Download aria-hidden="true" /> Download
             </a>
           ) : null}
-          <button type="button" className="m3-close" onClick={onClose} aria-label="Close"><X aria-hidden="true" /></button>
+          <button type="button" ref={closeRef} className="m3-close" onClick={onClose} aria-label="Close"><X aria-hidden="true" /></button>
         </div>
       </header>
 
@@ -148,7 +158,7 @@ const Models = () => {
               <button type="button" className="m3-card" style={{ "--i": i }} onClick={() => setOpen(m)}>
                 <span className="m3-card-art">
                   {m.thumb ? <img src={m.thumb} alt="" loading="lazy" draggable={false} /> : <Box className="m3-card-placeholder" aria-hidden="true" />}
-                  <span className="m3-badge">{(m.format || formatOf(m.file)).toUpperCase()}</span>
+                  <span className="m3-badge">{String(m.format || formatOf(m.file)).toUpperCase()}</span>
                   {m.downloadable === "yes" ? <span className="m3-badge is-free">Free download</span> : null}
                 </span>
                 <span className="m3-card-info">
