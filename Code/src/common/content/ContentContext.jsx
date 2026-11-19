@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import defaults from "./defaults";
 import { asJson } from "./api";
+import { onPoems, shippedPoems } from "./shippedPoems";
 
 /**
  * ContentContext - the site's editable content.
@@ -14,6 +16,10 @@ import { asJson } from "./api";
  * shows the defaults.
  */
 const ContentCtx = createContext(null);
+
+/* the defaults, with the shipped poems once they have been fetched (they
+   come with the Literature and admin pages - see shippedPoems.js) */
+const baseline = (poems) => (poems ? { ...defaults, poems } : defaults);
 
 /* Overrides replace a section wholesale; a section whose shape doesn't match
    the defaults (e.g. left over from an older version) is ignored. */
@@ -30,6 +36,14 @@ const layer = (base, over) => {
 
 export const ContentProvider = ({ children }) => {
   const [overrides, setOverrides] = useState({});
+  const [poems, setPoems] = useState(shippedPoems);
+
+  // committed straight away, so a page that waited for the poems (App.jsx)
+  // never renders without them
+  useEffect(() => {
+    if (shippedPoems()) setPoems(shippedPoems());
+    return onPoems((p) => flushSync(() => setPoems(p)));
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -40,7 +54,7 @@ export const ContentProvider = ({ children }) => {
     return () => { alive = false; };
   }, []);
 
-  const content = useMemo(() => layer(defaults, overrides), [overrides]);
+  const content = useMemo(() => layer(baseline(poems), overrides), [poems, overrides]);
 
   /** Save sections to the server, e.g. save({ games: [...] }).
       Resolves to an error message, or null on success. */
@@ -64,7 +78,7 @@ export const ContentProvider = ({ children }) => {
 };
 
 /** Read the content. Safe outside the provider - falls back to defaults. */
-export const useContent = () => useContext(ContentCtx)?.content ?? defaults;
+export const useContent = () => useContext(ContentCtx)?.content ?? baseline(shippedPoems());
 
 /** Read + save, for the admin portal. */
 export const useContentAdmin = () => {

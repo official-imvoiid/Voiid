@@ -9,3 +9,8 @@
 
 .lit-reader { padding-top: 66px; }
 .lit-reader-bar { right: 10px; }
+
+/* a long title word ("Uncomfortable") shrinks to fit a narrow cover rather than breaking mid-word */
+.lit-book-title { font-size: clamp(0.72rem, 10.5cqi, 1.18rem); overflow-wrap: break-word; }
+
+/* Quotes (common/styles/pages/quotes.css): sized by screen size there, for every device - nothing device-specific here */
