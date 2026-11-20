@@ -1439,7 +1439,7 @@ app.use((err, _req, res, _next) => {
 
 // the folders exist before the first request, so the routes never have to make them
 await Promise.all([UPLOAD_DIR, NOTES_DIR, MODELS_DIR].map((d) => fs.mkdir(d, { recursive: true })));
-const server = app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+const server = app.listen(PORT, '127.0.0.1', () => console.log(`Server running on http://localhost:${PORT}`));
 // Node's 5-minute limit on a whole request is replaced by the sweep near the top
 // (BODY_MS / UPLOAD_STALL_MS); its 60 s limit on the headers still applies
 server.requestTimeout = 0;
