@@ -26,6 +26,13 @@ information in any pull request to the original repository.
 
 <!-- Add your entries below this line. -->
 
+## 2026-11-20 — PDFs open on phones
+**Author:** voiid
+**Fork:** original repository
+
+### Changed
+- `Code/src/common/pages/notes/PdfPages.jsx` — uses pdf.js's legacy build. The default build needs browser features most phones don't have yet, so PDFs in Notes and Certifications never opened there.
+
 ## 2026-11-19 — Quotes, backups, faster Develop map and security hardening
 **Author:** voiid
 **Fork:** original repository

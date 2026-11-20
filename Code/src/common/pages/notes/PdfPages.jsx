@@ -11,12 +11,16 @@ import { createContext, useContext } from "react";
  * back once they're far away again, so a 300-page PDF stays light.
  */
 
+// the legacy build, not the default one: the default build calls brand-new
+// browser features (Map.getOrInsertComputed, Promise.try, Math.sumPrecise)
+// that most phone browsers don't have yet, so every PDF failed to open there.
+// The legacy build carries its own copies of them.
 let pdfjs = null;
 const loadPdfjs = async () => {
   if (!pdfjs) {
     const [lib, worker] = await Promise.all([
-      import("pdfjs-dist"),
-      import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+      import("pdfjs-dist/legacy/build/pdf.mjs"),
+      import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url"),
     ]);
     lib.GlobalWorkerOptions.workerSrc = worker.default;
     pdfjs = lib;
