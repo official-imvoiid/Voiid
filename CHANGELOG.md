@@ -32,6 +32,7 @@ information in any pull request to the original repository.
 
 ### Changed
 - `Code/src/common/pages/notes/PdfPages.jsx` — uses pdf.js's legacy build. The default build needs browser features most phones don't have yet, so PDFs in Notes and Certifications never opened there.
+- `Code/vite.config.js` — the PDF reader's worker is saved as `.js` instead of `.mjs`. nginx sends `.mjs` files as a download, and browsers refuse to run them.
 
 ## 2026-11-19 — Quotes, backups, faster Develop map and security hardening
 **Author:** voiid

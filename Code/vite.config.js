@@ -55,6 +55,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        // the PDF reader's worker comes as .mjs, and nginx on the server sends
+        // .mjs as a download (application/octet-stream), which browsers refuse
+        // to run - so PDFs never opened on phones. Saved as .js it is sent as
+        // JavaScript, with no change needed on the server.
+        assetFileNames: (info) => ((info.names?.[0] ?? info.name ?? '').endsWith('.mjs')
+          ? 'assets/[name]-[hash].js'
+          : 'assets/[name]-[hash][extname]'),
         // libraries that change only on an upgrade get files of their own, so
         // a deploy that only changes the site's own code leaves them cached
         manualChunks(id) {
